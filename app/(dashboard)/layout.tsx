@@ -19,11 +19,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // 🌗 lazy init tématu – bezpečný vůči SSR
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "light";
-    return (localStorage.getItem("theme") as "light" | "dark") || "light";
-  });
+  // 🌗 Téma. Server vždy "light" (žádný přístup k localStorage).
+  // V useEffect doplníme uloženou hodnotu na klientovi → vyhneme se hydration mismatchi.
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+      if (saved) setTheme(saved);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

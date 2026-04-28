@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
-const ACCOUNT_NAME = "crtna";
-const API_KEY = "54hPakx1_GZRMWWhmCt3Fg";
+// 🔐 Credentials se čtou z .env.local (NEVER commit)
+const ACCOUNT_NAME = process.env.SUPERSAAS_USER;
+const API_KEY = process.env.SUPERSAAS_API_KEY;
 const BASE_URL = "https://www.supersaas.com/api";
-const SCHEDULE_ID = 268518; // UZ Vídeňská
+const SCHEDULE_ID = 268518; // UZ Vídeňská — TODO: vytáhnout do config (multi-pobočka)
 
 interface SuperSaaSBooking {
   id: number;
@@ -53,6 +54,16 @@ function toCzechISO(dateStr?: string): string {
 }
 
 export async function GET(req: Request) {
+  if (!ACCOUNT_NAME || !API_KEY) {
+    console.error(
+      "❌ Chybí SUPERSAAS_USER nebo SUPERSAAS_API_KEY v .env.local"
+    );
+    return NextResponse.json(
+      { error: "SuperSaaS credentials nejsou nakonfigurované" },
+      { status: 500 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const scheduleId = searchParams.get("schedule_id") ?? String(SCHEDULE_ID);
 

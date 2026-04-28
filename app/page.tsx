@@ -17,13 +17,10 @@ export default function Home() {
           >
             Přihlásit
           </Link>
-          <Link href="/(dashboard)/doctor" className="px-4 py-2 border rounded">
+          <Link href="/doctor" className="px-4 py-2 border rounded">
             Zkusit lékaře
           </Link>
-          <Link
-            href="/(dashboard)/reception"
-            className="px-4 py-2 border rounded"
-          >
+          <Link href="/reception" className="px-4 py-2 border rounded">
             Zkusit recepci
           </Link>
         </div>

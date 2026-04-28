@@ -31,10 +31,14 @@ coverage/
 next-env.d.ts
 
 # případné výpisy / dumps z databáze (NIKDY do gitu)
-*.sql
-*.dump
-*.csv
-patient*
-backup*
-env.local
-# starý název bez tečky
+# Pravidla matchují jen v rootu (vedoucí lomítko), aby složka app/.../patients/
+# nebyla nedopatřením ignorovaná.
+/*.sql
+/*.dump
+/*.csv
+/patient-data*
+/patient-export*
+/patients-dump*
+/backup*
+# starý název env (bez tečky) — pojistka pro případ, že se znovu objeví
+/env.local
