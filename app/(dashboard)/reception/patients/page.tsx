@@ -148,8 +148,12 @@ export default function PatientsListPage() {
                 </tr>
               )}
               {results.map((p) => {
+                // Backend někdy vrátí patientDataInfo === undefined (PID bez detailů)
                 const d = p.patientDataInfo;
                 const hasDraft = Boolean(drafts[p.pid]);
+                const lastName = d?.lastName?.trim();
+                const firstName = d?.firstName?.trim();
+                const isEmpty = !lastName && !firstName;
                 return (
                   <tr
                     key={p.id}
@@ -160,8 +164,14 @@ export default function PatientsListPage() {
                     }
                     className="border-t border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer"
                   >
-                    <td className="p-3 font-medium">{d?.lastName ?? "—"}</td>
-                    <td className="p-3">{d?.firstName ?? "—"}</td>
+                    <td className="p-3 font-medium">
+                      {lastName ?? (
+                        <span className="text-amber-600 italic">
+                          (bez údajů)
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3">{firstName ?? (isEmpty ? "" : "—")}</td>
                     <td className="p-3">{formatRc(p.pid)}</td>
                     <td className="p-3">{d?.birthDate ?? "—"}</td>
                     <td className="p-3 text-center">

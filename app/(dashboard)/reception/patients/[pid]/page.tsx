@@ -32,6 +32,7 @@ import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { usePatientDraft } from "@/components/hooks/usePatientDraft";
 import ExaminationsSection from "@/components/ExaminationsSection";
+import { parseRc } from "@/lib/rc";
 
 interface FormState {
   firstName: string;
@@ -92,6 +93,26 @@ export default function PatientDetailPage({
     saveDraftLocally,
   } = usePatientDraft<FormState>(pid, EMPTY);
 
+  // Pacient může v DB existovat jen jako PID bez "patientDataInfo" — to
+  // znamená, že byl založen e.g. při importu, ale nikdo zatím neuložil
+  // jméno/datum/atd. Pak chceme rovnou skočit do editace a auto-vyplnit z RČ.
+  const hasNoData =
+    loadState === "loaded" &&
+    patient !== null &&
+    !patient.patientDataInfo;
+
+  useEffect(() => {
+    if (!hasNoData) return;
+    if (draft) return; // už něco máme rozeditované
+    const rcInfo = parseRc(pid);
+    setDraft({
+      ...EMPTY,
+      birthDate: rcInfo.birthDate ?? "",
+      gender: rcInfo.gender ?? "",
+    });
+    setIsEditing(true);
+  }, [hasNoData, draft, pid, setDraft]);
+
   // ─── Načti pacienta z backendu (+ paralelně název pojišťovny) ───
   useEffect(() => {
     let cancelled = false;
@@ -137,11 +158,14 @@ export default function PatientDetailPage({
     };
   }, [pid]);
 
-  // Hodnota formuláře = draft (rozeditované) NEBO data z backendu
+  // Hodnota formuláře = draft (rozeditované) NEBO data z backendu.
+  // Pozor: backend může vrátit patientDataInfo === null/undefined,
+  // pokud pacient v DB existuje jen jako PID bez uložených dat.
   const formValue: FormState = useMemo(() => {
     if (draft) return draft;
     if (!patient) return EMPTY;
     const d = patient.patientDataInfo;
+    if (!d) return EMPTY;
     return {
       firstName: d.firstName ?? "",
       middleName: d.middleName ?? "",
@@ -298,6 +322,13 @@ export default function PatientDetailPage({
               </>
             )}
           </p>
+          {hasNoData && (
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              Pacient je v kartotéce, ale nemá uložené žádné údaje. Doplň
+              jméno, příjmení a další informace a uložením je vytvoř.
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           {isEditing ? (
