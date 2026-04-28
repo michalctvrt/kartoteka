@@ -26,6 +26,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
+import { InsuranceCompanyService } from "@/lib/api/generated/services/InsuranceCompanyService";
 import { StorePatientDataRequest } from "@/lib/api/generated/models/StorePatientDataRequest";
 import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
@@ -76,6 +77,9 @@ export default function PatientDetailPage({
   >("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Pojišťovna — paralelně dohledáme název podle ID (např. "111" → "VZP")
+  const [insuranceName, setInsuranceName] = useState<string>("");
+
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -88,17 +92,31 @@ export default function PatientDetailPage({
     saveDraftLocally,
   } = usePatientDraft<FormState>(pid, EMPTY);
 
-  // ─── Načti pacienta z backendu ───
+  // ─── Načti pacienta z backendu (+ paralelně název pojišťovny) ───
   useEffect(() => {
     let cancelled = false;
     setLoadState("loading");
     setLoadError(null);
+    setInsuranceName("");
 
     PatientService.findByPid(pid)
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return;
         setPatient(res);
         setLoadState("loaded");
+
+        // Pojišťovna — best-effort lookup, chybu ignorujeme (zobrazí jen kód)
+        const insId = res.patientDataInfo?.idInsuranceCompany;
+        if (insId) {
+          try {
+            const ins = await InsuranceCompanyService.findById(insId);
+            if (!cancelled) {
+              setInsuranceName(ins.description ?? ins.descriptionLong ?? "");
+            }
+          } catch {
+            /* nech prázdné — UI ukáže jen kód */
+          }
+        }
       })
       .catch((e: unknown) => {
         if (cancelled) return;
@@ -315,6 +333,14 @@ export default function PatientDetailPage({
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4">
           <Field
+            label="Rodné číslo"
+            value={formatRc(pid)}
+            editing={isEditing}
+            readOnly
+            onChange={() => {}}
+            hint="RČ je primary key, nelze měnit"
+          />
+          <Field
             label="Jméno"
             value={formValue.firstName}
             editing={isEditing}
@@ -381,6 +407,9 @@ export default function PatientDetailPage({
             onChange={(v) =>
               updateForm({ idInsuranceCompany: v.replace(/\D/g, "") })
             }
+            hint={
+              !isEditing && insuranceName ? insuranceName : undefined
+            }
           />
           <Field
             label="Telefon"
@@ -428,8 +457,8 @@ export default function PatientDetailPage({
         </div>
       )}
 
-      {/* SEKCE: Vyšetření (existuje statická komponenta) */}
-      <ExaminationsSection />
+      {/* SEKCE: Vyšetření — komponenta si studie tahá sama přes StudyService */}
+      <ExaminationsSection pid={pid} />
     </div>
   );
 }
@@ -455,19 +484,23 @@ function Field({
   editing,
   onChange,
   type = "text",
+  readOnly = false,
+  hint,
 }: {
   label: string;
   value: string;
   editing: boolean;
   onChange: (v: string) => void;
   type?: "text" | "email" | "date" | "number";
+  readOnly?: boolean;
+  hint?: string;
 }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
         {label}
       </span>
-      {editing ? (
+      {editing && !readOnly ? (
         <input
           type={type}
           value={value}
@@ -479,6 +512,7 @@ function Field({
           {value || "—"}
         </span>
       )}
+      {hint && <span className="text-xs text-gray-500">{hint}</span>}
     </div>
   );
 }
