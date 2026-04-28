@@ -1,0 +1,40 @@
+# dependencies
+node_modules
+.pnp
+.pnp.*
+
+# next.js build
+.next/
+out/
+
+# env (NIKDY do gitu — obsahuje API klíče)
+.env*
+!.env.local.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# logs
+*.log
+npm-debug.log*
+
+# testing
+coverage/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# případné výpisy / dumps z databáze (NIKDY do gitu)
+*.sql
+*.dump
+*.csv
+patient*
+backup*
+env.local
+# starý název bez tečky

@@ -1,0 +1,2040 @@
+{
+  "openapi": "3.0.1",
+  "servers": [
+    {
+      "url": "/CardFileWebWS/rest",
+      "variables": {}
+    }
+  ],
+  "paths": {
+    "/insurance-company/{id}": {
+      "get": {
+        "tags": [
+          "insurance-company"
+        ],
+        "summary": "Find Insurance Company by ID",
+        "operationId": "findById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCompanyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurance-company": {
+      "get": {
+        "tags": [
+          "insurance-company"
+        ],
+        "summary": "Lists all Insurance companies",
+        "operationId": "list",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InsuranceCompanyInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-diagnosis/{id}": {
+      "get": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Find Medical Diagnosis by ID",
+        "operationId": "findById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalDiagnosisInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-diagnosis/:search": {
+      "post": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Search medical diagnosis",
+        "operationId": "search",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequestMedicalDiagnosisSearchFilterMedicalDiagnosisBrowseFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponseMedicalDiagnosisInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-institution/{id}": {
+      "get": {
+        "tags": [
+          "medical-institution"
+        ],
+        "summary": "Find Medical Institution by ID",
+        "operationId": "findById_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalInstitutionInfo"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "medical-institution"
+        ],
+        "summary": "Search Medical Institutions by filters",
+        "operationId": "upsert",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalInstitutionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-institution/:search": {
+      "post": {
+        "tags": [
+          "medical-institution"
+        ],
+        "summary": "Search Medical Institution",
+        "operationId": "search_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequestMedicalInstitutionSearchFilterMedicalInstitutionBrowseFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponseMedicalInstitutionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-service-category/{id}": {
+      "get": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Find Medical Service Category by ID",
+        "operationId": "findById_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalServiceCategoryInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-service-category/:listLocal": {
+      "get": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Lists all Medical Service Categories",
+        "operationId": "list_1",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicalServiceCategoryInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-service/{id}": {
+      "get": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Find Medical Service by ID",
+        "operationId": "findById_4",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalServiceInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-service/:search": {
+      "post": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Search medical services",
+        "operationId": "search_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequestMedicalServiceSearchFilterMedicalServiceBrowseFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponseMedicalServiceInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medical-skill": {
+      "get": {
+        "tags": [
+          "medical-definitions"
+        ],
+        "summary": "Lists all medical skills",
+        "operationId": "list_2",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicalSkillInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patient/{pid}": {
+      "get": {
+        "tags": [
+          "patient"
+        ],
+        "summary": "Find patient by PID",
+        "description": "Returns PatientInfo",
+        "operationId": "findByPid",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "..",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientInfo"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "patient"
+        ],
+        "summary": "Stores new patient data.",
+        "description": "If patient by PID already exists, their current data is updatated. Otherwise patient with passed PID and data is created",
+        "operationId": "storeNewPatientData",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Patient's PID - without slash",
+              "example": "9901011241"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorePatientDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientDataInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patient/:search": {
+      "post": {
+        "tags": [
+          "patient"
+        ],
+        "summary": "Searches for patients based on params",
+        "description": "Returns List of PatientInfo",
+        "operationId": "search_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequestPatientSearchFilterPatientBrowseFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponsePatientInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/:cancelRemoteAccess": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Cancels patient's remote access to study",
+        "operationId": "cancelRemoteAccess",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/:createRemoteAccess": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Creates remote access to study",
+        "operationId": "createRemoteAccess",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyRemoteAccessInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/:createWorklist": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Creates worklist record from study",
+        "operationId": "createWorklist",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/:emailStudy": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Sends study PDF in email",
+        "operationId": "emailStudy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/:exportToMasterCardFile": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Exports study to master CardFile",
+        "operationId": "exportToMasterCardFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}": {
+      "get": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Find study by PID",
+        "description": "Returns StudyInfo",
+        "operationId": "findById_5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Finds study by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/documentData": {
+      "get": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Get Study document data",
+        "operationId": "getDocumentData",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDataInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{id}/documentData.pdf": {
+      "get": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Get Study document data PDF",
+        "operationId": "getDocumentDataPdf",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/pdf": {}
+            }
+          }
+        }
+      }
+    },
+    "/study/:search": {
+      "post": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Searches for studies based on params",
+        "description": "Returns List of StudyInfo",
+        "operationId": "search_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequestStudySearchFilterStudyBrowseFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponseStudyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workingplace/{id}": {
+      "get": {
+        "tags": [
+          "workingplace"
+        ],
+        "summary": "Find Workingplace by ID",
+        "operationId": "findById_6",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkingplaceInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workingplace": {
+      "get": {
+        "tags": [
+          "workingplace"
+        ],
+        "summary": "Lists all Workingplaces",
+        "operationId": "list_3",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkingplaceInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InsuranceCompanyInfo": {
+        "required": [
+          "description",
+          "descriptionLong",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptionLong": {
+            "type": "string"
+          }
+        }
+      },
+      "MedicalDiagnosisInfo": {
+        "required": [
+          "description",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchResponseMedicalDiagnosisInfo": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "description": "Total records that match the filters",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "description": "Returned records",
+            "items": {
+              "$ref": "#/components/schemas/MedicalDiagnosisInfo"
+            }
+          }
+        },
+        "description": "Results of search"
+      },
+      "BrowseStringFilter": {
+        "required": [
+          "comparator"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "EQ",
+              "NE",
+              "IS_NULL",
+              "IS_NOT_NULL",
+              "IN",
+              "NOT_IN",
+              "BETWEEN",
+              "GT",
+              "GE",
+              "LT",
+              "LE",
+              "LIKE",
+              "NOT_LIKE",
+              "BIN_MASK",
+              "EQ_OR_IS_NULL"
+            ]
+          }
+        }
+      },
+      "LimitFilter": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MedicalDiagnosisBrowseFilter": {
+        "required": [
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          }
+        }
+      },
+      "MedicalDiagnosisSearchFilter": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderByFilter": {
+        "required": [
+          "column"
+        ],
+        "type": "object",
+        "properties": {
+          "column": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SearchRequestMedicalDiagnosisSearchFilterMedicalDiagnosisBrowseFilter": {
+        "type": "object",
+        "properties": {
+          "searchFilter": {
+            "$ref": "#/components/schemas/MedicalDiagnosisSearchFilter"
+          },
+          "browseFilter": {
+            "$ref": "#/components/schemas/MedicalDiagnosisBrowseFilter"
+          },
+          "orderByFilter": {
+            "$ref": "#/components/schemas/OrderByFilter"
+          },
+          "limitFilter": {
+            "$ref": "#/components/schemas/LimitFilter"
+          }
+        }
+      },
+      "MedicalInstitutionInfo": {
+        "required": [
+          "cgmId",
+          "dateValidTill",
+          "description",
+          "descriptionLong",
+          "doctorEmail",
+          "doctorName",
+          "icz",
+          "id",
+          "idMedicalSkill",
+          "medicalSkillInfo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptionLong": {
+            "type": "string"
+          },
+          "doctorName": {
+            "type": "string"
+          },
+          "doctorEmail": {
+            "type": "string"
+          },
+          "idMedicalSkill": {
+            "type": "string"
+          },
+          "dateValidTill": {
+            "type": "string",
+            "format": "date"
+          },
+          "icz": {
+            "type": "string"
+          },
+          "cgmId": {
+            "type": "string"
+          },
+          "medicalSkillInfo": {
+            "$ref": "#/components/schemas/MedicalSkillInfo"
+          },
+          "idXmlExportDefinition": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MedicalSkillInfo": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchResponseMedicalInstitutionInfo": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "description": "Total records that match the filters",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "description": "Returned records",
+            "items": {
+              "$ref": "#/components/schemas/MedicalInstitutionInfo"
+            }
+          }
+        },
+        "description": "Results of search"
+      },
+      "MedicalInstitutionBrowseFilter": {
+        "required": [
+          "description",
+          "doctorEmail",
+          "doctorName"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "doctorName": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "doctorEmail": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          }
+        }
+      },
+      "MedicalInstitutionSearchFilter": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchRequestMedicalInstitutionSearchFilterMedicalInstitutionBrowseFilter": {
+        "type": "object",
+        "properties": {
+          "searchFilter": {
+            "$ref": "#/components/schemas/MedicalInstitutionSearchFilter"
+          },
+          "browseFilter": {
+            "$ref": "#/components/schemas/MedicalInstitutionBrowseFilter"
+          },
+          "orderByFilter": {
+            "$ref": "#/components/schemas/OrderByFilter"
+          },
+          "limitFilter": {
+            "$ref": "#/components/schemas/LimitFilter"
+          }
+        }
+      },
+      "UpsertRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "descriptionLong": {
+            "type": "string"
+          },
+          "doctorName": {
+            "type": "string"
+          },
+          "doctorEmail": {
+            "type": "string"
+          },
+          "idMedicalSkill": {
+            "type": "string"
+          },
+          "dateValidTill": {
+            "type": "string",
+            "format": "date"
+          },
+          "icz": {
+            "type": "string"
+          },
+          "cgmId": {
+            "type": "string"
+          },
+          "idXmlExportDefinition": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MedicalServiceCategoryInfo": {
+        "required": [
+          "description",
+          "id",
+          "mappedModality"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mappedModality": {
+            "type": "string"
+          }
+        }
+      },
+      "MedicalServiceInfo": {
+        "required": [
+          "description",
+          "descriptionLong",
+          "id",
+          "idMedicalServiceCategory",
+          "medicalServiceCategoryInfo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptionLong": {
+            "type": "string"
+          },
+          "idMedicalServiceCategory": {
+            "type": "string"
+          },
+          "medicalServiceCategoryInfo": {
+            "$ref": "#/components/schemas/MedicalServiceCategoryInfo"
+          }
+        },
+        "description": "Returned records"
+      },
+      "SearchResponseMedicalServiceInfo": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "description": "Total records that match the filters",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "description": "Returned records",
+            "items": {
+              "$ref": "#/components/schemas/MedicalServiceInfo"
+            }
+          }
+        },
+        "description": "Results of search"
+      },
+      "MedicalServiceBrowseFilter": {
+        "required": [
+          "description",
+          "descriptionLong",
+          "idMedicalServiceCategory"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "descriptionLong": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "idMedicalServiceCategory": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          }
+        }
+      },
+      "MedicalServiceSearchFilter": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchRequestMedicalServiceSearchFilterMedicalServiceBrowseFilter": {
+        "type": "object",
+        "properties": {
+          "searchFilter": {
+            "$ref": "#/components/schemas/MedicalServiceSearchFilter"
+          },
+          "browseFilter": {
+            "$ref": "#/components/schemas/MedicalServiceBrowseFilter"
+          },
+          "orderByFilter": {
+            "$ref": "#/components/schemas/OrderByFilter"
+          },
+          "limitFilter": {
+            "$ref": "#/components/schemas/LimitFilter"
+          }
+        }
+      },
+      "PatientDataInfo": {
+        "required": [
+          "birthDate",
+          "dateCr",
+          "dateEdit",
+          "email",
+          "firstName",
+          "gender",
+          "height",
+          "id",
+          "idInsuranceCompany",
+          "lastName",
+          "middleName",
+          "patientInfo",
+          "phone",
+          "title",
+          "weight",
+          "whoCr",
+          "whoEdit"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "patientInfo": {
+            "$ref": "#/components/schemas/PatientInfo"
+          },
+          "idInsuranceCompany": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "whoCr": {
+            "type": "string"
+          },
+          "dateCr": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whoEdit": {
+            "type": "string"
+          },
+          "dateEdit": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PatientInfo": {
+        "required": [
+          "id",
+          "patientDataInfo",
+          "pid"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pid": {
+            "type": "string"
+          },
+          "idPatientData": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "patientDataInfo": {
+            "$ref": "#/components/schemas/PatientDataInfo"
+          }
+        }
+      },
+      "SearchResponsePatientInfo": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "description": "Total records that match the filters",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "description": "Returned records",
+            "items": {
+              "$ref": "#/components/schemas/PatientInfo"
+            }
+          }
+        },
+        "description": "Results of search"
+      },
+      "BrowseDateFilter": {
+        "required": [
+          "comparator"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "EQ",
+              "NE",
+              "IS_NULL",
+              "IS_NOT_NULL",
+              "IN",
+              "NOT_IN",
+              "BETWEEN",
+              "GT",
+              "GE",
+              "LT",
+              "LE",
+              "LIKE",
+              "NOT_LIKE",
+              "BIN_MASK",
+              "EQ_OR_IS_NULL"
+            ]
+          }
+        }
+      },
+      "PatientBrowseFilter": {
+        "required": [
+          "birthDate",
+          "email",
+          "firstName",
+          "gender",
+          "lastName",
+          "middleName",
+          "phone",
+          "pid"
+        ],
+        "type": "object",
+        "properties": {
+          "pid": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "birthDate": {
+            "$ref": "#/components/schemas/BrowseDateFilter"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "firstName": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "middleName": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "lastName": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "email": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          }
+        }
+      },
+      "PatientSearchFilter": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchRequestPatientSearchFilterPatientBrowseFilter": {
+        "type": "object",
+        "properties": {
+          "searchFilter": {
+            "$ref": "#/components/schemas/PatientSearchFilter"
+          },
+          "browseFilter": {
+            "$ref": "#/components/schemas/PatientBrowseFilter"
+          },
+          "orderByFilter": {
+            "$ref": "#/components/schemas/OrderByFilter"
+          },
+          "limitFilter": {
+            "$ref": "#/components/schemas/LimitFilter"
+          }
+        }
+      },
+      "StorePatientDataRequest": {
+        "type": "object",
+        "properties": {
+          "idInsuranceCompany": {
+            "type": "string",
+            "description": "ID of patient's insurance company",
+            "nullable": true,
+            "example": "101"
+          },
+          "birthDate": {
+            "type": "string",
+            "description": "Patient's date of birth",
+            "format": "date",
+            "example": "1999-01-01"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Patient's gender",
+            "example": "MALE",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ]
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Patient's first name",
+            "example": "Jan"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Patient's middle name",
+            "nullable": true,
+            "example": "Maxmilian"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Patient's last name",
+            "example": "Novak"
+          },
+          "title": {
+            "type": "string",
+            "description": "Patient's title",
+            "nullable": true,
+            "example": "Ing."
+          },
+          "email": {
+            "type": "string",
+            "description": "Patient's email",
+            "nullable": true,
+            "example": "jan.maxmilian.novak@test.cz"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Patient's title",
+            "nullable": true,
+            "example": "+420800123456"
+          },
+          "weight": {
+            "type": "number",
+            "description": "Patient's weight in kg",
+            "nullable": true,
+            "example": 75
+          },
+          "height": {
+            "type": "number",
+            "description": "Patient's height in cm",
+            "nullable": true,
+            "example": 175
+          }
+        },
+        "description": "Request for patient's data insert"
+      },
+      "StudyRemoteAccessInfo": {
+        "required": [
+          "accessHash",
+          "dateValidTill"
+        ],
+        "type": "object",
+        "properties": {
+          "idStudy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accessHash": {
+            "type": "string"
+          },
+          "dateValidTill": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "DocumentDataInfo": {
+        "required": [
+          "catMimetypeName",
+          "dataBase64",
+          "dateCr",
+          "hashMd5",
+          "name",
+          "whoCr"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hashMd5": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "idCatMimetype": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "catMimetypeName": {
+            "type": "string"
+          },
+          "dataBase64": {
+            "type": "string"
+          },
+          "dateCr": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whoCr": {
+            "type": "string"
+          },
+          "dataLength": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StudyAttachmentInfo": {
+        "required": [
+          "documentDataInfo",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idStudy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "documentDataInfo": {
+            "$ref": "#/components/schemas/DocumentDataInfo"
+          }
+        }
+      },
+      "StudyInfo": {
+        "required": [
+          "correctionNumber",
+          "dateCr",
+          "dateDescriptionChanged",
+          "dateEdit",
+          "dateEmailed",
+          "description",
+          "dicomUid",
+          "id",
+          "idCatInsuranceType",
+          "idInsuranceCompany",
+          "idMedicalDiagnosisRequested",
+          "idMedicalInstitutionRequested",
+          "idMedicalServiceCategory",
+          "idWorkingplaceCreated",
+          "insuranceCompanyInfo",
+          "medicalDiagnosisRequestedInfo",
+          "medicalInstitutionRequestedInfo",
+          "nameDescriptionChanged",
+          "patientDataInfo",
+          "pid",
+          "remark",
+          "requestDate",
+          "rtgKap",
+          "rtgSeries",
+          "studyDate",
+          "uid",
+          "usernameDescriptionChanged",
+          "whoCr",
+          "whoEdit"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "dicomUid": {
+            "type": "string"
+          },
+          "pid": {
+            "type": "string"
+          },
+          "patientDataInfo": {
+            "$ref": "#/components/schemas/PatientDataInfo"
+          },
+          "idMedicalInstitutionRequested": {
+            "type": "string"
+          },
+          "medicalInstitutionRequestedInfo": {
+            "$ref": "#/components/schemas/MedicalInstitutionInfo"
+          },
+          "idMedicalDiagnosisRequested": {
+            "type": "string"
+          },
+          "medicalDiagnosisRequestedInfo": {
+            "$ref": "#/components/schemas/MedicalDiagnosisInfo"
+          },
+          "requestDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "flagSelfPay": {
+            "type": "boolean"
+          },
+          "idInsuranceCompany": {
+            "type": "string"
+          },
+          "insuranceCompanyInfo": {
+            "$ref": "#/components/schemas/InsuranceCompanyInfo"
+          },
+          "idCatInsuranceType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idMedicalServiceCategory": {
+            "type": "string"
+          },
+          "rtgKap": {
+            "type": "number"
+          },
+          "rtgSeries": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "studyDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateEmailed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "studyServiceInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudyServiceInfo"
+            }
+          },
+          "remark": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dateDescriptionChanged": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nameDescriptionChanged": {
+            "type": "string"
+          },
+          "usernameDescriptionChanged": {
+            "type": "string"
+          },
+          "correctionNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idWorkingplaceCreated": {
+            "type": "string"
+          },
+          "whoCr": {
+            "type": "string"
+          },
+          "dateCr": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whoEdit": {
+            "type": "string"
+          },
+          "dateEdit": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "flagUrgent": {
+            "type": "boolean"
+          },
+          "flagDeleted": {
+            "type": "boolean"
+          },
+          "flagCompleted": {
+            "type": "boolean"
+          },
+          "flagRemoteAccessAfterCompleted": {
+            "type": "boolean"
+          },
+          "studyAttachmentInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudyAttachmentInfo"
+            }
+          },
+          "studyRemoteAccessInfo": {
+            "$ref": "#/components/schemas/StudyRemoteAccessInfo"
+          }
+        },
+        "description": "Returned records"
+      },
+      "StudyServiceInfo": {
+        "required": [
+          "id",
+          "idMedicalService"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "serviceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idStudy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idMedicalService": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchResponseStudyInfo": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "description": "Total records that match the filters",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of records returned",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "description": "Returned records",
+            "items": {
+              "$ref": "#/components/schemas/StudyInfo"
+            }
+          }
+        },
+        "description": "Results of search"
+      },
+      "BrowseBooleanFilter": {
+        "required": [
+          "comparator"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "EQ",
+              "NE",
+              "IS_NULL",
+              "IS_NOT_NULL",
+              "IN",
+              "NOT_IN",
+              "BETWEEN",
+              "GT",
+              "GE",
+              "LT",
+              "LE",
+              "LIKE",
+              "NOT_LIKE",
+              "BIN_MASK",
+              "EQ_OR_IS_NULL"
+            ]
+          }
+        }
+      },
+      "BrowseLongFilter": {
+        "required": [
+          "comparator"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "EQ",
+              "NE",
+              "IS_NULL",
+              "IS_NOT_NULL",
+              "IN",
+              "NOT_IN",
+              "BETWEEN",
+              "GT",
+              "GE",
+              "LT",
+              "LE",
+              "LIKE",
+              "NOT_LIKE",
+              "BIN_MASK",
+              "EQ_OR_IS_NULL"
+            ]
+          }
+        }
+      },
+      "SearchRequestStudySearchFilterStudyBrowseFilter": {
+        "type": "object",
+        "properties": {
+          "searchFilter": {
+            "$ref": "#/components/schemas/StudySearchFilter"
+          },
+          "browseFilter": {
+            "$ref": "#/components/schemas/StudyBrowseFilter"
+          },
+          "orderByFilter": {
+            "$ref": "#/components/schemas/OrderByFilter"
+          },
+          "limitFilter": {
+            "$ref": "#/components/schemas/LimitFilter"
+          }
+        }
+      },
+      "StudyBrowseFilter": {
+        "required": [
+          "dateCr",
+          "flagCompleted",
+          "flagUrgent",
+          "id",
+          "idMedicalInstitutionRequested",
+          "idMedicalServiceCategory",
+          "idWorkingplaceCreated",
+          "pid",
+          "requestDate",
+          "studyDate",
+          "usernameDescriptionChanged"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BrowseLongFilter"
+          },
+          "pid": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "dateCr": {
+            "$ref": "#/components/schemas/BrowseDateFilter"
+          },
+          "studyDate": {
+            "$ref": "#/components/schemas/BrowseDateFilter"
+          },
+          "requestDate": {
+            "$ref": "#/components/schemas/BrowseDateFilter"
+          },
+          "flagUrgent": {
+            "$ref": "#/components/schemas/BrowseBooleanFilter"
+          },
+          "flagCompleted": {
+            "$ref": "#/components/schemas/BrowseBooleanFilter"
+          },
+          "idMedicalServiceCategory": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "idMedicalInstitutionRequested": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "usernameDescriptionChanged": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          },
+          "idWorkingplaceCreated": {
+            "$ref": "#/components/schemas/BrowseStringFilter"
+          }
+        }
+      },
+      "StudySearchFilter": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "pid": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkingplaceInfo": {
+        "required": [
+          "id",
+          "idMedicalInstitution",
+          "medicalFacilityId",
+          "medicalInstitutionInfo",
+          "regionalOffice",
+          "reportTag",
+          "shortId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "idMedicalInstitution": {
+            "type": "string"
+          },
+          "medicalInstitutionInfo": {
+            "$ref": "#/components/schemas/MedicalInstitutionInfo"
+          },
+          "medicalFacilityId": {
+            "type": "string"
+          },
+          "shortId": {
+            "type": "string"
+          },
+          "reportTag": {
+            "type": "string"
+          },
+          "regionalOffice": {
+            "type": "string"
+          },
+          "flagChildMedicalServicesEnabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "CardFile API",
+    "version": "1.0.0",
+    "description": "Autogenerated info block because backend does not provide one."
+  }
+}

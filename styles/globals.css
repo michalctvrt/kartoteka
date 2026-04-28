@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+body {
+  @apply bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-neutral-900 dark:text-gray-100;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 34 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+/* --- časové čáry mezi 20-min sloty --- */
+/* Trefíme elementy, které react-big-calendar vyrenderuje pro každý timeslot */
+.rbc-time-content .rbc-timeslot-group > div {
+  /* jemná čára mezi jednotlivými řádky */
+  border-top: 1px solid rgba(15, 23, 42, 0.06); /* tailwind gray-900 at 6% (very light) */
+}
+
+/* případně zesílit první čáru každé hodiny pro lepší čitelnost */
+.rbc-time-content .rbc-timeslot-group > div:nth-child(3n + 1) {
+  /* každá třetí řádka (pokud step=20 a timeslots=1 => 3 rows per hour) */
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+/* --- mezery mezi jednotlivými eventy (vertikální odstup) --- */
+.rbc-event {
+  margin: 3px 4px !important; /* svislá mezera = 3px */
+  padding: 6px 8px !important; /* pohodlnější padding uvnitř bloku */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  line-height: 1.05;
+}
+
+/* Pokud chceš, aby se eventy nepřekrývaly tak rychle, dovolíme menší max-height */
+.rbc-event .rbc-event-label,
+.rbc-event .rbc-event-content {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- drobné vylepšení časové osy (řádky v gutteru) --- */
+.rbc-time-gutter .rbc-timeslot-group > div {
+  border-top: 1px solid rgba(15, 23, 42, 0.03);
+}
+
+/* Mobile / small screens: zmenšit padding a mezery */
+@media (max-width: 640px) {
+  .rbc-event {
+    margin: 2px 2px !important;
+    padding: 4px 6px !important;
+    font-size: 0.85rem;
+  }
+}
+/* 🎯 Každý řádek kalendáře (20min slot) */
+.rbc-time-content .rbc-timeslot-group {
+  position: relative;
+}
+
+/* 🩶 Základní barva řádku při hoveru */
+.rbc-time-content .rbc-timeslot-group:hover {
+  background-color: rgba(59, 130, 246, 0.06); /* světle modrý pruh */
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* 🔴 Samotný event reaguje i s efektem zvýraznění */
+.rbc-event:hover {
+  transform: scale(1.02) translateY(2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+/* ✨ Bonus: zvýrazní i časovou osu vlevo */
+.rbc-time-gutter .rbc-timeslot-group:hover {
+  background-color: rgba(59, 130, 246, 0.06);
+}
+/* Každý časový řádek (20 min) musí být relativní */
+.rbc-time-content .rbc-timeslot-group {
+  position: relative;
+}
+
+/* Přidáme highlight pozadí, když myší najedeš na event v daném řádku */
+.rbc-time-content .rbc-timeslot-group:hover,
+.rbc-time-gutter .rbc-timeslot-group:hover {
+  background-color: rgba(59, 130, 246, 0.08); /* světle modré pozadí */
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Událost sama se taky jemně zvýrazní */
+.rbc-event:hover {
+  transform: scale(1.03) translateY(1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+/* Aby se zvýraznila časová osa vlevo zároveň s eventy ve stejném řádku */
+.rbc-time-gutter .rbc-timeslot-group:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+/* Mírně zvýraznit aktuální časové řádky */
+.rbc-time-gutter .rbc-timeslot-group:hover .rbc-time-slot {
+  color: #1d4ed8; /* Tailwind blue-700 */
+  font-weight: 600;
+}
+.rbc-event:hover::before {
+  content: "";
+  position: absolute;
+  left: -9999px;
+  right: -9999px;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(59, 130, 246, 0.08);
+  z-index: -1;
+}
