@@ -20,8 +20,11 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-    // use relative base so Next.js can proxy the requests and avoid CORS
-    BASE: '/CardFileWebWS/rest',
+    // Volá se přes Next.js proxy v /api/cardfile/* (app/api/cardfile/[...path]/route.ts).
+    // Proxy přidává JSESSIONID(SSO) cookie z .env.local pro dev běh.
+    // V produkci přejdeme na same-origin /CardFileWebWS/michalovo/ (Václavův plán)
+    // — pak se BASE přepíše zpět na '/CardFileWebWS/rest'.
+    BASE: '/api/cardfile/rest',
 
     VERSION: '1.0.0',
     WITH_CREDENTIALS: false,
