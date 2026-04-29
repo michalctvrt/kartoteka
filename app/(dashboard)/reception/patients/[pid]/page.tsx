@@ -32,6 +32,7 @@ import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { usePatientDraft } from "@/components/hooks/usePatientDraft";
 import ExaminationsSection from "@/components/ExaminationsSection";
+import EzadankyList from "@/components/ezadanka/EzadankyList";
 import { parseRc } from "@/lib/rc";
 
 interface FormState {
@@ -487,6 +488,9 @@ export default function PatientDetailPage({
           <span>{saveError}</span>
         </div>
       )}
+
+      {/* SEKCE: Aktivní eŽádanky pacienta */}
+      <EzadankyList rid={pid} />
 
       {/* SEKCE: Vyšetření — komponenta si studie tahá sama přes StudyService */}
       <ExaminationsSection pid={pid} />

@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import { StorePatientDataRequest } from "@/lib/api/generated/models/StorePatientDataRequest";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
+import EzadankyList from "@/components/ezadanka/EzadankyList";
+import type { ZadankaDetail } from "@/lib/ezadanka/types";
 import { parseRc } from "@/lib/rc";
 
 interface FormState {
@@ -112,6 +114,26 @@ export default function NewPatientPage() {
       cancelled = true;
     };
   }, [ezadankaId]);
+
+  // ─── Import dat z eŽádanky → předvyplnit formulář ───
+  // Volá se z EzadankyList → EzadankaDetail po kliknutí "Použít data pro novou kartu".
+  const handleImportFromEzadanka = (z: ZadankaDetail) => {
+    setForm((prev) => ({
+      ...prev,
+      firstName: prev.firstName || z.pacient.jmeno,
+      lastName: prev.lastName || z.pacient.prijmeni,
+      birthDate: prev.birthDate || z.pacient.datumNarozeni || "",
+      gender:
+        prev.gender ||
+        (z.pacient.pohlavi === "MALE" || z.pacient.pohlavi === "FEMALE"
+          ? z.pacient.pohlavi
+          : ""),
+      idInsuranceCompany:
+        prev.idInsuranceCompany || z.pacient.pojistovnaKod || "",
+      phone: prev.phone || z.pacient.telefon || "",
+      email: prev.email || z.pacient.email || "",
+    }));
+  };
 
   // ─── Submit ───
   const canSubmit =
@@ -221,6 +243,12 @@ export default function NewPatientPage() {
       {loadingEzadanka && (
         <p className="text-xs text-gray-500">Načítám data z e-žádanky…</p>
       )}
+
+      {/* SEKCE: eŽádanky pacienta — recepční může importovat data do formuláře */}
+      <EzadankyList
+        rid={rcInfo.normalized}
+        onImport={handleImportFromEzadanka}
+      />
 
       {/* SEKCE: Identifikace */}
       <Card>
