@@ -11,7 +11,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, FileDown, UserRound } from "lucide-react";
+import { ArrowLeft, Check, ExternalLink, FileDown, Pencil, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { OpenAPI } from "@/lib/api/generated/core/OpenAPI";
@@ -19,7 +19,7 @@ import { StudyService } from "@/lib/api/generated/services/StudyService";
 import { MedicalDefinitionsService } from "@/lib/api/generated/services/MedicalDefinitionsService";
 import { WorkingplaceService } from "@/lib/api/generated/services/WorkingplaceService";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
-import { legacyStudyEditUrl } from "@/lib/legacy";
+import { STUDY_EDIT_VIA_API, legacyStudyEditUrl } from "@/lib/legacy";
 import { writeLastStudyId } from "@/lib/lastStudy";
 import {
   MODALITY_NAME,
@@ -30,6 +30,7 @@ import {
   patientName,
 } from "@/lib/studies";
 import { Flag, ModalityTag } from "@/components/study/StudyBits";
+import StudyEditForm from "@/components/study/StudyEditForm";
 
 type Load =
   | { state: "loading" }
@@ -43,6 +44,8 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
   const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
   const [workplace, setWorkplace] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
   const id = Number(sid);
   const valid = /^\d+$/.test(sid);
@@ -64,15 +67,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
         writeLastStudyId(study.id);
 
         // Názvy výkonů a pracoviště – jen doplněk, chyba nevadí
-        const codes = [...new Set((study.studyServiceInfo ?? []).map((s) => s.idMedicalService))];
-        Promise.allSettled(codes.map((c) => MedicalDefinitionsService.findById5(c))).then((res) => {
-          if (cancelled) return;
-          const names: Record<string, string> = {};
-          res.forEach((r, i) => {
-            if (r.status === "fulfilled") names[codes[i]] = r.value.description;
-          });
-          setServiceNames(names);
-        });
+        loadServiceNames(study).then((names) => !cancelled && setServiceNames(names));
         if (study.idWorkingplaceCreated) {
           WorkingplaceService.findById7(study.idWorkingplaceCreated)
             .then((w) => !cancelled && setWorkplace(w.medicalInstitutionInfo?.description ?? null))
@@ -113,6 +108,13 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
   }
 
   const s = load.study;
+
+  const onSaved = (saved: StudyInfo) => {
+    setResult({ key, load: { state: "ok", study: saved } });
+    setEditing(false);
+    setSavedAt(new Date().toLocaleTimeString("cs-CZ", { hour: "numeric", minute: "2-digit" }));
+    loadServiceNames(saved).then(setServiceNames);
+  };
   const p = s.patientDataInfo;
   const done = hasReport(s);
   const services = s.studyServiceInfo ?? [];
@@ -139,30 +141,58 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
             {formatDateTime(s.studyDate)}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/reception/patients/${encodeURIComponent(s.pid)}`}>
-              <UserRound /> Karta pacienta
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <a href={legacyStudyEditUrl(s.id, s.pid)} target="_blank" rel="noreferrer">
-              <ExternalLink /> Upravit ve staré kartotéce
-            </a>
-          </Button>
-          <Button asChild>
-            <a href={pdfUrl} target="_blank" rel="noreferrer">
-              <FileDown /> Zpráva PDF
-            </a>
-          </Button>
-        </div>
+        {!editing && (
+          <div className="flex flex-wrap items-center gap-2">
+            {savedAt && (
+              <span className="mr-1 inline-flex items-center gap-1 text-[13px] text-ui-muted" role="status">
+                <Check className="h-4 w-4 text-emerald-600" /> Uloženo {savedAt}
+              </span>
+            )}
+            <Button variant="outline" asChild>
+              <Link href={`/reception/patients/${encodeURIComponent(s.pid)}`}>
+                <UserRound /> Karta pacienta
+              </Link>
+            </Button>
+            {STUDY_EDIT_VIA_API ? (
+              <Button variant="outline" onClick={() => setEditing(true)}>
+                <Pencil /> Upravit
+              </Button>
+            ) : (
+              // backend zatím PUT /study neumí → úprava ve staré kartotéce (viz lib/legacy.ts)
+              <Button variant="outline" asChild>
+                <a href={legacyStudyEditUrl(s.id, s.pid)} target="_blank" rel="noreferrer">
+                  <Pencil /> Upravit
+                </a>
+              </Button>
+            )}
+            <Button asChild>
+              <a href={pdfUrl} target="_blank" rel="noreferrer">
+                <FileDown /> Zpráva PDF
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+      {editing ? (
+        <StudyEditForm study={s} onCancel={() => setEditing(false)} onSaved={onSaved} />
+      ) : (
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         {/* POPIS – hlavní blok */}
         <section className="rounded-lg border border-ui-line" aria-labelledby="popis">
           <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ui-rule px-5 py-3">
-            <h2 id="popis" className="text-base font-semibold">Popis</h2>
+            <h2 id="popis" className="flex items-center gap-3 text-base font-semibold">
+              Popis
+              <a
+                href={legacyStudyEditUrl(s.id, s.pid)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[13px] font-normal text-ui-primary hover:underline"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Upravit ve staré kartotéce
+              </a>
+            </h2>
             {done ? (
               <p className="text-[13px] text-ui-muted">
                 <span className="text-ui-ink">{s.nameDescriptionChanged ?? s.usernameDescriptionChanged ?? "—"}</span>
@@ -281,6 +311,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
           </Panel>
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -349,4 +380,15 @@ function StudySkeleton() {
       </div>
     </div>
   );
+}
+
+/** Názvy výkonů podle kódů (89131 → RTG HRUDNÍKU); chybějící se vynechají. */
+async function loadServiceNames(study: StudyInfo): Promise<Record<string, string>> {
+  const codes = [...new Set((study.studyServiceInfo ?? []).map((v) => v.idMedicalService))];
+  const res = await Promise.allSettled(codes.map((c) => MedicalDefinitionsService.findById5(c)));
+  const names: Record<string, string> = {};
+  res.forEach((r, i) => {
+    if (r.status === "fulfilled") names[codes[i]] = r.value.description;
+  });
+  return names;
 }

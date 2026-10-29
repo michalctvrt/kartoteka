@@ -65,6 +65,9 @@ Podrobně `CALL250V.md`. Shrnutí:
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).
 - `reception/studies/search` (vyhledávání), `reception/studies/[sid]` (karta studie, jen čtení; popis = `description`,
   PDF = `/study/{id}/documentData.pdf`, úpravy zatím ve staré kartotéce). Menu „Karta studie“ = naposledy otevřená.
+- Úprava studie: `components/study/StudyEditForm.tsx` (PUT /study/{id}), zapíná se `NEXT_PUBLIC_STUDY_EDIT_VIA_API=1`.
+  Zatím vypnuto: backend vrací 422 „Error deserializing object from entity stream“ na jakékoli tělo (i `{}`).
+  Popis (`description`) v StudySaveBasicInfo není → přes API nejde upravit vůbec (čeká na Václava).
 
 ## Jak pracovat
 - Michal chce věcné odpovědi a hotové, ověřené výsledky. Po změnách UI ověřit v prohlížeči

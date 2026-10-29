@@ -65,10 +65,10 @@ export default function ServicesEditor({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-ui-muted">Výkony</label>
+      <label className="block text-sm font-medium">Výkony</label>
 
       {Object.keys(value).length > 0 && (
-        <ul className="border rounded-md divide-y dark:divide-neutral-700">
+        <ul className="divide-y divide-ui-rule rounded-lg border border-ui-line">
           {Object.entries(value).map(([id, n]) => (
             <li key={id} className="flex items-center gap-2 px-3 py-1.5 text-sm">
               <code className="text-xs w-14 shrink-0">{id}</code>
@@ -89,7 +89,7 @@ export default function ServicesEditor({
       )}
 
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-2.5 top-2.5 text-ui-faint" />
+        <Search className="w-4 h-4 absolute left-2.5 top-3 text-ui-faint" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -97,10 +97,10 @@ export default function ServicesEditor({
           placeholder={
             !category ? "Nejdřív vyberte modalitu" : loading ? "Načítám výkony…" : "Kód nebo název výkonu"
           }
-          className="w-full pl-8 pr-3 py-2 border rounded-md text-sm bg-ui-sheet disabled:opacity-60"
+          className="h-10 w-full rounded-lg border border-ui-control bg-ui-sheet pl-8 pr-3 text-sm disabled:opacity-60"
         />
         {matches.length > 0 && (
-          <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded-md bg-ui-sheet shadow-lg text-sm">
+          <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-lg border border-ui-line bg-ui-sheet shadow-lg text-sm">
             {matches.map((o) => (
               <li key={o.id}>
                 <button

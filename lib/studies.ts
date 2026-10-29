@@ -159,3 +159,23 @@ export function reportPreview(s: StudyInfo, max = 90): string {
   const line = (s.description ?? "").trim().split(/\n+/)[0] ?? "";
   return line.length > max ? `${line.slice(0, max)}…` : line;
 }
+
+// ─── Formulář (datetime-local ↔ ISO) ───
+
+/** ISO → "YYYY-MM-DDTHH:mm" v místním čase (pro <input type="datetime-local">). */
+export function toLocalInput(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** "YYYY-MM-DDTHH:mm" (místní) → ISO s časovou zónou, např. 2026-10-19T00:00:00+02:00. */
+export function fromLocalInput(v: string): string {
+  const d = new Date(v);
+  const off = -d.getTimezoneOffset();
+  const sign = off >= 0 ? "+" : "-";
+  const p = (n: number) => String(Math.floor(Math.abs(n))).padStart(2, "0");
+  return `${v.length === 16 ? `${v}:00` : v}${sign}${p(off / 60)}:${p(off % 60)}`;
+}

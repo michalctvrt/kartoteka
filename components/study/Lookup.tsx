@@ -44,28 +44,28 @@ export default function Lookup({
 
   return (
     <div className="space-y-1">
-      <label className="text-xs font-medium text-ui-muted">{label}</label>
+      <label className="block text-sm font-medium">{label}</label>
       {value ? (
-        <div className="flex items-center justify-between gap-2 px-3 py-2 border rounded-md bg-brand-50 dark:bg-brand-950/40 text-sm">
+        <div className="flex min-h-10 items-center justify-between gap-2 rounded-lg border border-ui-line bg-ui-raised px-3 py-1.5 text-sm">
           <div className="min-w-0">
             <div className="font-medium truncate">{value.label}</div>
             {value.sub && <div className="text-xs text-ui-faint truncate">{value.sub}</div>}
           </div>
-          <button type="button" onClick={() => onChange(null)} aria-label="Zrušit výběr">
+          <button type="button" onClick={() => onChange(null)} aria-label="Zrušit výběr" className="rounded p-1 text-ui-muted hover:bg-ui-active hover:text-ui-ink">
             <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-2.5 top-2.5 text-ui-faint" />
+          <Search className="w-4 h-4 absolute left-2.5 top-3 text-ui-faint" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={placeholder}
-            className="w-full pl-8 pr-3 py-2 border rounded-md text-sm bg-ui-sheet"
+            className="h-10 w-full rounded-lg border border-ui-control bg-ui-sheet pl-8 pr-3 text-sm"
           />
           {showResults && (
-            <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded-md bg-ui-sheet shadow-lg text-sm">
+            <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-lg border border-ui-line bg-ui-sheet shadow-lg text-sm">
               {loading && <li className="px-3 py-2 text-ui-faint">Hledám…</li>}
               {!loading && results.length === 0 && (
                 <li className="px-3 py-2 text-ui-faint">Nic nenalezeno.</li>

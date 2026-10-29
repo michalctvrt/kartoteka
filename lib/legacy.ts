@@ -35,3 +35,11 @@ export const legacyNewStudyUrl = (pid: string) =>
  * Až to Václav uvolní, stačí v .env.local NEXT_PUBLIC_STUDY_VIA_API=1.
  */
 export const STUDY_VIA_API = process.env.NEXT_PUBLIC_STUDY_VIA_API === "1";
+
+/**
+ * Upravovat studii přes náš formulář (PUT /study/{id})?
+ * Zatím vypnuto: backend na PUT /study/{id} vrací 422 „Error deserializing
+ * object from entity stream“ na jakékoli tělo (i na {}), ověřeno 2026-10-29.
+ * Až to Václav opraví: NEXT_PUBLIC_STUDY_EDIT_VIA_API=1 v .env.local.
+ */
+export const STUDY_EDIT_VIA_API = process.env.NEXT_PUBLIC_STUDY_EDIT_VIA_API === "1";
