@@ -22,7 +22,7 @@ import { useSession } from "@/components/auth/SessionProvider";
 import { useWorkstation } from "@/components/queue/useWorkstation";
 import { RECEPTION_COUNTERS } from "@/lib/call250v/config";
 import { listWorkingplaces, type Option } from "@/lib/study/lookups";
-import { usePrefs, type MotionPref, type ThemePref } from "@/lib/prefs";
+import { usePrefs, type MotionPref, type ReportSize, type ThemePref } from "@/lib/prefs";
 import { CAPABILITIES, CAPABILITY_GROUPS, ROLE_HOME, ROLE_NAME, type Role } from "@/lib/auth/roles";
 import { employeeName } from "@/lib/auth/types";
 
@@ -202,6 +202,21 @@ function AppearanceTile({ index }: { index: number }) {
             ]}
           />
           <p className="mt-1.5 text-[12px] text-ui-faint">Omezené = bez pohybu oken a přechodů.</p>
+        </div>
+        <div>
+          <div className="mb-1.5 text-[13px] text-ui-muted">Písmo ve zprávách</div>
+          <Segmented<ReportSize>
+            size="sm"
+            label="Písmo ve zprávách"
+            value={prefs.reportSize}
+            onChange={(reportSize) => update({ reportSize })}
+            options={[
+              { value: "s", label: "Menší" },
+              { value: "m", label: "Střední" },
+              { value: "l", label: "Větší" },
+            ]}
+          />
+          <p className="mt-1.5 text-[12px] text-ui-faint">Čtení i psaní popisu studie.</p>
         </div>
       </div>
     </BentoTile>

@@ -4,6 +4,7 @@
  * Osobní nastavení vzhledu v tomto prohlížeči (Nastavení → Vzhled):
  *   theme  – světlý / tmavý / podle systému
  *   motion – plné animace / omezené (bez pohybu a přechodů)
+ *   reportSize – písmo ve zprávách (S / M / L), aby se popis dobře četl i psal
  * Sdílené mezi komponentami i záložkami (useSyncExternalStore).
  */
 
@@ -11,11 +12,13 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 
 export type ThemePref = "light" | "dark" | "system";
 export type MotionPref = "full" | "reduced";
-export type Prefs = { theme: ThemePref; motion: MotionPref };
+/** velikost písma ve zprávách (čtení i psaní popisu) */
+export type ReportSize = "s" | "m" | "l";
+export type Prefs = { theme: ThemePref; motion: MotionPref; reportSize: ReportSize };
 
 const KEY = "kartoteka_prefs_v1";
 const EVENT = "kartoteka-prefs";
-const DEFAULTS: Prefs = { theme: "light", motion: "full" };
+const DEFAULTS: Prefs = { theme: "light", motion: "full", reportSize: "m" };
 
 function read(): string {
   try {
@@ -73,3 +76,10 @@ export function usePrefs() {
   const dark = prefs.theme === "dark" || (prefs.theme === "system" && systemDark);
   return { prefs, update, dark };
 }
+
+/** Velikost písma zprávy → třídy (řádek ~ 72 znaků, řádkování 1,75). */
+export const REPORT_TEXT: Record<ReportSize, string> = {
+  s: "text-[15px] leading-[1.75]",
+  m: "text-[17px] leading-[1.75]",
+  l: "text-[19px] leading-[1.8]",
+};

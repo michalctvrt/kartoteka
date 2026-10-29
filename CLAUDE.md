@@ -113,6 +113,9 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Úprava studie: `components/study/StudyEditForm.tsx` (PUT /study/{id}), zapíná se `NEXT_PUBLIC_STUDY_EDIT_VIA_API=1`.
   Zatím vypnuto: backend vrací 422 „Error deserializing object from entity stream“ na jakékoli tělo (i `{}`).
   Popis (`description`) v StudySaveBasicInfo není → přes API nejde upravit vůbec (čeká na Václava).
+- Psaní popisu: `components/study/ReportEditor.tsx` (karta studie → „Popsat / Upravit popis“): papír `.ui-paper`
+  (plný kontrast `--ui-paper-ink`, řádek max 72 znaků, řádkování 1,75), písmo S/M/L v `lib/prefs.ts` (`reportSize`,
+  i v Nastavení → Vzhled), koncept v localStorage `report-draft:<id>`. Uložení zatím „Zkopírovat a otevřít ve staré kartotéce“.
 
 ## Jak pracovat
 - Michal chce věcné odpovědi a hotové, ověřené výsledky. Po změnách UI ověřit v prohlížeči

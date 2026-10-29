@@ -35,6 +35,7 @@ import {
   StudyCardSkeleton,
 } from "@/components/study/StudyTiles";
 import StudyEditForm from "@/components/study/StudyEditForm";
+import ReportEditor from "@/components/study/ReportEditor";
 import { useSession } from "@/components/auth/SessionProvider";
 
 type Load =
@@ -50,6 +51,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
   const [workplace, setWorkplace] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(false);
+  const [writing, setWriting] = useState(false); // psací plocha popisu
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const canEditStudy = useSession().can("study.edit");
 
@@ -149,7 +151,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
             </Link>
           </p>
         </div>
-        {!editing && (
+        {!editing && !writing && (
           <div className="flex flex-wrap items-center gap-2">
             {savedAt && (
               <span className="mr-1 inline-flex items-center gap-1 text-[13px] text-ui-muted" role="status">
@@ -182,11 +184,13 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
         )}
       </motion.header>
 
-      {editing ? (
+      {writing ? (
+        <ReportEditor study={s} serviceNames={serviceNames} onClose={() => setWriting(false)} />
+      ) : editing ? (
         <StudyEditForm study={s} onCancel={() => setEditing(false)} onSaved={onSaved} />
       ) : (
         <Bento className="xl:grid-flow-row-dense">
-          <ReportTile study={s} index={0} />
+          <ReportTile study={s} index={0} onWrite={() => setWriting(true)} />
           <PatientTile study={s} index={1} />
           <RequestTile study={s} index={2} />
           <ServicesTile study={s} names={serviceNames} index={3} />

@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { ExternalLink, Loader2, PenLine, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { extendRemoteAccess } from "@/lib/ops";
@@ -17,6 +17,7 @@ import { BentoTile, DataRow, Metric } from "@/components/ui/bento";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { legacyStudyEditUrl } from "@/lib/legacy";
 import { useSession } from "@/components/auth/SessionProvider";
+import { REPORT_TEXT, usePrefs } from "@/lib/prefs";
 import { ageYears } from "@/lib/study/card-check";
 import { formatDate, formatDateTime, formatRc, hasReport, patientName } from "@/lib/studies";
 
@@ -35,9 +36,11 @@ function Rows({ rows, empty }: { rows: [string, React.ReactNode][]; empty: strin
   );
 }
 
-export function ReportTile({ study: s, index }: { study: StudyInfo; index: number }) {
+/** onWrite = otevřít psací plochu (ReportEditor); bez něj odkaz do staré kartotéky. */
+export function ReportTile({ study: s, index, onWrite }: { study: StudyInfo; index: number; onWrite?: () => void }) {
   const done = hasReport(s);
   const canWrite = useSession().can("report.write"); // popisuje lékař (a admin)
+  const { prefs } = usePrefs();
   return (
     <BentoTile
       span={2}
@@ -58,7 +61,12 @@ export function ReportTile({ study: s, index }: { study: StudyInfo; index: numbe
         )
       }
       action={
-        canWrite && (
+        canWrite &&
+        (onWrite ? (
+          <button type="button" onClick={onWrite} className="inline-flex items-center gap-1 text-[13px] text-ui-primary hover:underline">
+            <PenLine className="h-3.5 w-3.5" /> {done ? "Upravit popis" : "Popsat"}
+          </button>
+        ) : (
         <a
           href={legacyStudyEditUrl(s.id, s.pid)}
           target="_blank"
@@ -67,11 +75,12 @@ export function ReportTile({ study: s, index }: { study: StudyInfo; index: numbe
         >
           <ExternalLink className="h-3.5 w-3.5" /> {done ? "Upravit popis" : "Popsat"}
         </a>
-        )
+        ))
       }
     >
       {done ? (
-        <p className="max-w-[72ch] whitespace-pre-wrap text-[15px] leading-7">{s.description}</p>
+        // čtení: plný kontrast, řádek max ~72 znaků, velikost písma podle Nastavení (S/M/L)
+        <p className={cn("max-w-[72ch] whitespace-pre-wrap text-[color:var(--ui-paper-ink)]", REPORT_TEXT[prefs.reportSize])}>{s.description}</p>
       ) : (
         <Ghost label="Studie zatím není popsaná" className="pt-1" />
       )}

@@ -129,10 +129,16 @@ body {
  *  - tlačítka: světlá horní hrana, při stisku se zamáčknou o 1px
  */
 :root {
+  --ui-paper-ink: #111c20;               /* téměř černá – ve světlém režimu nejlepší čitelnost */
+  --ui-paper-select: rgba(18, 108, 139, 0.18);
+  --ui-paper-ring: rgba(18, 108, 139, 0.12);
   --ui-bevel: rgba(255, 255, 255, 0.9);
   --ui-recess: rgba(15, 42, 51, 0.07);
 }
 .dark {
+  --ui-paper-ink: #e6ecee;                /* ne čistě bílá – méně oslňuje na tmavém */
+  --ui-paper-select: rgba(89, 169, 182, 0.3);
+  --ui-paper-ring: rgba(89, 169, 182, 0.18);
   --ui-bevel: rgba(255, 255, 255, 0.04);
   --ui-recess: rgba(0, 0, 0, 0.35);
 }
@@ -156,6 +162,32 @@ html[data-motion="reduced"] *::after {
   }
   .ui-input:focus {
     @apply border-ui-primary bg-ui-sheet outline-none;
+  }
+  /*
+   * Papír pro zprávy (čtení i psaní popisu): plná bílá / tmavá plocha, plný kontrast,
+   * žádný šedý „vmáčknutý“ podklad – v něm se dlouhý text čte špatně.
+   */
+  .ui-paper {
+    @apply rounded-lg border border-ui-line bg-ui-sheet text-ui-ink;
+    color: var(--ui-paper-ink);
+    font-feature-settings: "kern", "liga";
+  }
+  .ui-paper::selection,
+  .ui-paper *::selection {
+    background: var(--ui-paper-select);
+  }
+  .ui-paper {
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  /* při psaní se zvýrazní celý papír (ne vnitřní rámeček pole) */
+  .ui-paper:focus-within {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 3px var(--ui-paper-ring);
+  }
+  .ui-paper-text {
+    @apply block w-full resize-none border-0 bg-transparent p-0 outline-none;
+    color: var(--ui-paper-ink);
+    caret-color: var(--ui-primary);
   }
   .ui-press {
     box-shadow: inset 0 1px 0 var(--ui-bevel);
