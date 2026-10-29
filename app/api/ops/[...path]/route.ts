@@ -24,7 +24,26 @@ const ALLOW: [string, RegExp][] = [
   ["POST", /^extend-validity$/], // prodloužení online přístupu (ZÁPIS do DB kartotéky)
   ["POST", /^vzp$/], // ověření pojištění → samostatná služba (lib/ops/vzp.ts)
   ["GET", /^medical_institution$/], // připojení lékaři (CGM / E-zpráva / LIVEcom)
+  // spotřební materiál – čtení (nic nezakládá)
+  ["GET", /^spotreba\/(branches|items|summary|periods|admin-check)$/],
+  // spotřební materiál – ZÁPISY (i GET /order, protože objednávku založí); viz SPOTREBA_WRITE níže
+  ["GET", /^spotreba\/order$/],
+  ["PUT", /^spotreba\/order\/\d+$/],
+  ["POST", /^spotreba\/order\/\d+\/(lock|unlock)$/],
+  ["POST", /^spotreba\/items$/],
+  ["PUT", /^spotreba\/items\/\d+$/],
+  ["DELETE", /^spotreba\/items\/\d+$/],
 ];
+
+/**
+ * OCHRANA OSTRÝCH DAT spotřebního materiálu: tyto cesty mění data (GET /order objednávku založí).
+ * Na ostrém backendu projdou JEN když je v .env.local výslovně SPOTREBA_WRITE=1 (výchozí: vypnuto).
+ * V demo režimu jdou vždy do smyšlených dat.
+ */
+const isSpotrebaWrite = (method: string, path: string) =>
+  /^spotreba\/order(\/|$)/.test(path) || // i GET /order (založí objednávku)
+  (/^spotreba\/items(\/|$)/.test(path) && method !== "GET"); // katalog jen ke čtení
+const SPOTREBA_WRITE_ENABLED = process.env.SPOTREBA_WRITE === "1";
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
@@ -41,7 +60,16 @@ async function forward(req: NextRequest, ctx: Ctx) {
   const url = new URL(req.url);
   const text = ["GET", "DELETE"].includes(req.method) ? undefined : await req.text();
 
-  if (DEMO_MODE) return demoOps(req.method, path, url.searchParams, text);
+  if (DEMO_MODE) return demoOps(req.method, path, url.searchParams, text, req.headers.get("x-admin-pin"));
+
+  if (isSpotrebaWrite(req.method, path) && !SPOTREBA_WRITE_ENABLED) {
+    return json(423, {
+      error:
+        "Zápis do spotřebního materiálu je v Kartotéce zatím vypnutý – objednávky se dál dělají v původní aplikaci. " +
+        "(Zapíná se SPOTREBA_WRITE=1 v .env.local.)",
+      locked: true,
+    });
+  }
 
   if (path === "vzp") {
     const r = await callVzp(text ?? "{}");
@@ -51,9 +79,13 @@ async function forward(req: NextRequest, ctx: Ctx) {
 
   let res: Response;
   try {
+    const headers: Record<string, string> = {};
+    if (text !== undefined) headers["content-type"] = "application/json";
+    const pin = req.headers.get("x-admin-pin"); // správa katalogu / odemčení (spotřeba)
+    if (pin) headers["x-admin-pin"] = pin;
     res = await fetch(`${BASE}/${path}${url.search}`, {
       method: req.method,
-      headers: text !== undefined ? { "content-type": "application/json" } : undefined,
+      headers,
       body: text,
       cache: "no-store",
       signal: AbortSignal.timeout(60_000), // sloučené PDF za celý den může chvíli trvat

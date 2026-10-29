@@ -101,7 +101,9 @@ Podrobně `CALL250V.md`. Shrnutí:
   demo odpovědi `lib/demo/ops.ts`. Zápisy do jeho dat (prodloužení přístupu, objednávky) netestovat bez souhlasu.
 - Hotovo: hromadný tisk `/reception/print` (`print.batch`); ověření pojištění v dlaždici Pojišťovna
   (`insurance.check`, `lib/ops/vzp.ts`, VZP_API_URL + VZP_CONNECT_HOST, chybějící mezilehlý cert v `certs/`); online přístup ke zprávě na kartě studie (`remoteAccess.extend`).
-  Připojení lékaři `/reception/doctors` (`doctors.view`). Zbývá: spotřební materiál (zapisuje do jeho SQLite!).
+  Připojení lékaři `/reception/doctors` (`doctors.view`). Spotřební materiál `/supplies` (`supplies.order|summary|catalog`):
+  na ostrých datech JEN ČTENÍ – zápis i GET /order (zakládá objednávku) blokuje brána (423), dokud není SPOTREBA_WRITE=1.
+  NIKDY nezapínat bez souhlasu Michala (konec měsíce = potvrzování objednávek poboček).
 
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.

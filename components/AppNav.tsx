@@ -19,6 +19,7 @@ import {
   ListChecks,
   LogOut,
   Moon,
+  Package,
   Printer,
   Stethoscope,
   Settings,
@@ -183,6 +184,19 @@ export default function AppNav({
                 Hromadný tisk
               </NavItem>
             )}
+          </NavGroup>
+        )}
+
+        {can("supplies.order") && (
+          <NavGroup label="Provoz">
+            <NavItem
+              href="/supplies"
+              icon={<Package />}
+              active={pathname.startsWith("/supplies")}
+              onNavigate={onNavigate}
+            >
+              Spotřební materiál
+            </NavItem>
           </NavGroup>
         )}
 

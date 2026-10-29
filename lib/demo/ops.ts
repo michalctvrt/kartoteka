@@ -5,6 +5,7 @@
 
 import { demoDb } from "./backend";
 import { INSTITUTIONS, INSURANCE, demoPdf } from "./data";
+import { demoSpotreba } from "./spotreba";
 
 const WORKPLACES: Record<string, string> = { BRDO: "Dobrák", BRLE: "Lesná" };
 const json = (data: unknown, status = 200) =>
@@ -16,7 +17,14 @@ const localDay = (iso: string) => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
 
-export async function demoOps(method: string, path: string, q: URLSearchParams, body?: string): Promise<Response> {
+export async function demoOps(
+  method: string,
+  path: string,
+  q: URLSearchParams,
+  body?: string,
+  pin?: string | null
+): Promise<Response> {
+  if (path.startsWith("spotreba/")) return demoSpotreba(method, path.slice("spotreba/".length), q, body, pin ?? null);
   const { studies } = demoDb();
 
   if (path === "tisk-studies") {

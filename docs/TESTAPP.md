@@ -19,7 +19,7 @@ Kartotéka jeho funkce přebírá postupně: UI je naše (bento), data bere **p�
 | Pacient – pojištění | stav pojištění k datu + pojišťovna | VZP služba `POST {cisloPojistence, datum}` → `{stav: pojisten\|nepojisten, kodPojistovny, nazevPojistovny}` | **hotovo** – dlaždice Pojišťovna na kartě pacienta (ověří k dnešku, jiný den, upozornění na rozdíl s kartou + „Přepsat“) |
 | Pacient – online přístup | platnost odkazu na zprávu, prodloužení o 3 dny (ZÁPIS do DB) | `GET /check-study?uid=`, `POST /extend-validity {uid, days}` | **hotovo** – dlaždice „Online přístup ke zprávě“ na kartě studie (platnost z REST, prodloužení přes testapp) |
 | Připojení lékaři | lékaři s CGM / E-zpráva / LIVEcom, filtr, export PDF | `GET /medical_institution?limit=10000` | **hotovo** – `/reception/doctors` (lékař jednou se štítky systémů, dlaždice = filtr, CSV, tisk/PDF) |
-| Spotřební materiál | měsíční objednávky poboček (Makro / Sklad Vídeňská / Objednat online), katalog (PIN), souhrn + tisk + CSV | `/spotreba/*` (viz níže) | 4. krok |
+| Spotřební materiál | měsíční objednávky poboček (Makro / Sklad Vídeňská / Objednat online), katalog (PIN), souhrn + tisk + CSV | `/spotreba/*` (viz níže) | **hotovo** – `/supplies` (objednávka), `/supplies/summary`, `/supplies/catalog`; na ostrých datech **jen čtení**, zápis až s `SPOTREBA_WRITE=1` |
 | E-žádanka | rozpracovaný formulář bez uložení | `CFPublicWebWS e-zprava/vyhledat` | nepřebírá se – Kartotéka má vlastní e-žádanky |
 
 Pracoviště pro tisk a IČP lékařů jsou natvrdo v `server.js` (`TISK_CONFIG`: BRDO „Dobrák“ 11 IČP, BRLE „Lesná“ 20 IČP).
@@ -36,3 +36,11 @@ Pracoviště pro tisk a IČP lékařů jsou natvrdo v `server.js` (`TISK_CONFIG`
   Všechny POST/PUT musí mít `Content-Type: application/json` (jinak 415).
 - Souhrn: řádky sečtené na kusy (pack × pack_size), po pobočkách; MAKRO a OBJEDNAT jako matice, SKLAD po pobočkách;
   tisk a CSV (středník, BOM). Pozor na známou chybu originálu: skrytá položka katalogu zmizí z objednávky při dalším uložení.
+
+### Ochrana ostrých dat spotřeby v Kartotéce
+- Brána pouští na ostrý backend jen čtení: `branches`, `items`, `summary`, `periods`, `admin-check`.
+- `GET /order` (založí objednávku!), `PUT/POST /order…`, `POST/PUT/DELETE /items` → **423**, dokud v `.env.local`
+  není `SPOTREBA_WRITE=1`. Obrazovka objednávky pak ukáže, že se objednávky dělají v původní aplikaci.
+- Vývoj a testy jen v demo režimu (`lib/demo/spotreba.ts`, PIN v demu 1234).
+- Oprava proti originálu: řádky s položkou skrytou z katalogu se při uložení objednávky neztratí.
+

@@ -79,6 +79,11 @@ export const CAPABILITIES = {
   // Spolupráce
   "doctors.view": { group: "Spolupráce", label: "Připojení lékaři (CGM, E-zpráva, LIVEcom)", roles: ALL },
 
+  // Spotřební materiál (převzato z provozní aplikace)
+  "supplies.order": { group: "Spotřební materiál", label: "Vyplnit a uzavřít objednávku pobočky", roles: ALL },
+  "supplies.summary": { group: "Spotřební materiál", label: "Souhrn objednávek, tisk a CSV", roles: ["admin", "reception"] },
+  "supplies.catalog": { group: "Spotřební materiál", label: "Spravovat katalog (s PINem)", roles: ["admin"] },
+
   // Objednávky
   "calendar.view": { group: "Objednávky", label: "Kalendář objednávek", roles: ["admin", "reception"] },
 
@@ -141,6 +146,9 @@ const ROUTE_CAPS: [RegExp, Capability][] = [
   [/^\/reception\/patients/, "patient.view"],
   [/^\/reception\/print/, "print.batch"],
   [/^\/reception\/doctors/, "doctors.view"],
+  [/^\/supplies\/summary/, "supplies.summary"],
+  [/^\/supplies\/catalog/, "supplies.catalog"],
+  [/^\/supplies/, "supplies.order"],
   [/^\/reception\/studies/, "study.view"],
   [/^\/reception\/calendar/, "calendar.view"],
   [/^\/(lab|doctor)\/worklist/, "worklist.view"],
