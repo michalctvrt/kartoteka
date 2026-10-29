@@ -25,6 +25,10 @@ import { ApiError } from "@/lib/api/generated/core/ApiError";
 import EzadankyList from "@/components/ezadanka/EzadankyList";
 import type { ZadankaDetail } from "@/lib/ezadanka/types";
 import { parseRc } from "@/lib/rc";
+import {
+  insuranceOptions,
+  useInsuranceCompanies,
+} from "@/components/hooks/useInsuranceCompanies";
 
 interface FormState {
   firstName: string;
@@ -65,6 +69,7 @@ export default function NewPatientPage() {
   const rcInfo = useMemo(() => parseRc(rcParam), [rcParam]);
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const insuranceCompanies = useInsuranceCompanies();
   const [loading, setLoading] = useState(false); // submit
   const [loadingEzadanka, setLoadingEzadanka] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -313,13 +318,11 @@ export default function NewPatientPage() {
           <CardTitle>Pojišťovna a kontakt</CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Field
-            label="Pojišťovna (kód)"
+          <SelectField
+            label="Pojišťovna"
             value={form.idInsuranceCompany}
-            onChange={(v) =>
-              setForm({ ...form, idInsuranceCompany: v.replace(/\D/g, "") })
-            }
-            placeholder="111, 207, 211, 213, 201, 205, 209"
+            onChange={(v) => setForm({ ...form, idInsuranceCompany: v })}
+            options={insuranceOptions(insuranceCompanies, form.idInsuranceCompany)}
           />
           <Field
             label="Telefon"

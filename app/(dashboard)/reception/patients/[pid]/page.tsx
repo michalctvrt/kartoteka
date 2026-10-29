@@ -37,6 +37,10 @@ import EzadankyList from "@/components/ezadanka/EzadankyList";
 import { parseRc } from "@/lib/rc";
 import PatientQueueBox from "@/components/queue/PatientQueueBox";
 import NewStudyDialog from "@/components/study/NewStudyDialog";
+import {
+  insuranceOptions,
+  useInsuranceCompanies,
+} from "@/components/hooks/useInsuranceCompanies";
 import { missingForStudy } from "@/lib/study/card-check";
 import {
   legacyNewStudyUrl,
@@ -95,6 +99,7 @@ export default function PatientDetailPage({
 
   const [isEditing, setIsEditing] = useState(false);
   const [newStudyOpen, setNewStudyOpen] = useState(false);
+  const insuranceCompanies = useInsuranceCompanies();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -497,15 +502,16 @@ export default function PatientDetailPage({
           <CardTitle>Pojišťovna a kontakt</CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Field
-            label="Pojišťovna (kód)"
+          <SelectField
+            label="Pojišťovna"
             value={formValue.idInsuranceCompany}
             editing={isEditing}
-            onChange={(v) =>
-              updateForm({ idInsuranceCompany: v.replace(/\D/g, "") })
-            }
-            hint={
-              !isEditing && insuranceName ? insuranceName : undefined
+            onChange={(v) => updateForm({ idInsuranceCompany: v })}
+            options={insuranceOptions(insuranceCompanies, formValue.idInsuranceCompany)}
+            displayValue={
+              formValue.idInsuranceCompany
+                ? [formValue.idInsuranceCompany, insuranceName].filter(Boolean).join(" – ")
+                : ""
             }
           />
           <Field
