@@ -12,7 +12,7 @@ export type Booking = {
   title: string; // jméno pacienta
   start: Date;
   end: Date;
-  exam: string; // vyšetření
+  exam: string; // popis vyšetření z objednávky (např. „UZ břicha“, „dopler DK“)
   details: Record<string, string>;
 };
 
@@ -41,7 +41,8 @@ export function useBookings() {
               title: e.title,
               start: new Date(e.start),
               end: new Date(e.end),
-              exam: details["Vyšetření"] || details["Typ služby"] || "",
+              // jen to, co pacient vyplnil (typ služby je u všech stejný – „UZ Videnska“)
+              exam: (details["Vyšetření"] ?? "").trim(),
               details,
             };
           })

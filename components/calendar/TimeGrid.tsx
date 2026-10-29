@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { type Booking, hm, sameDay } from "./useBookings";
 
-const PPM = 1.6; // pixelů na minutu → 20 min = 32 px
+const PPM = 2.3; // pixelů na minutu → 20 min = 46 px (vejde se jméno + popis vyšetření)
 
 /** Rozdělí souběžné objednávky do „pruhů“ vedle sebe. */
 function lanes(list: Booking[]) {
@@ -136,7 +136,20 @@ export default function TimeGrid({
                       <span className="mr-1 font-normal text-ui-muted">{block ? `${hm(b.start)}–${hm(b.end)}` : hm(b.start)}</span>
                       {block ? `Blokace · ${b.title}` : b.title}
                     </span>
-                    {h >= 44 && b.exam && <span className="block w-full truncate text-ui-muted">{b.exam}</span>}
+                    {/* popis vyšetření z objednávky (např. „UZ břicha“, „dopler“) – vždy, když není blokace */}
+                    {!block && b.exam && (
+                      // delší objednávka má místo → popis na víc řádků (zbytek „…“)
+                      <span
+                        className={cn("block w-full text-ui-muted", h < 60 ? "truncate" : "overflow-hidden")}
+                        style={
+                          h < 60
+                            ? undefined
+                            : { display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: Math.max(1, Math.floor((h - 22) / 15)) }
+                        }
+                      >
+                        {b.exam}
+                      </span>
+                    )}
                   </motion.button>
                 );
               })}
