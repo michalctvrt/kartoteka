@@ -4,7 +4,7 @@
 
 | Kde | Co dělá | Volání Call250V |
 |---|---|---|
-| Kiosk u vstupu | pacient zvolí RTG/UZ/MRI, vytiskne se lístek s QR | (kiosk sám) |
+| Kiosk u vstupu | pacient zvolí jen „Na vyšetření“ (A1) nebo „Objednat se“ (A2) – modalitu NE (Michal 2026-10-29), vytiskne se lístek s QR | (kiosk sám) |
 | Recepce – Domů | „Vyvolat dalšího“, zadat RČ → otevře/založí kartu | `call` |
 | Karta pacienta | „Čekárna RTG/UZ/MRI“ → lístek se propojí s RČ a přeřadí | `PATCH serviceId + externalIdentifier` |
 | Laborant / Lékař – Domů i Worklist | tři sloupce RTG / UZ / MRI: vyvolat k dveřím 1/2, po vyšetření „Hotovo →“ na další modalitu nebo recepci; lišta nahoře ukazuje počty čekajících všude | `call`, `PATCH serviceId` |
@@ -33,7 +33,7 @@ CALL250V_API_KEY=<číslo licence>
 CALL250V_DEFAULT_OPERATOR_ID=<ID operátora>
 ```
 
-Bez `CALL250V_BASE_URL` běží simulace: na recepci jsou tlačítka „Vytisknout lístek“ místo kiosku.
+Bez `CALL250V_BASE_URL` běží simulace: na recepci jsou tlačítka „Lístek – Na vyšetření / Objednat se“ místo kiosku.
 
 Pult recepce, modalita a ID operátora se nastavují na každém počítači zvlášť (ukládá se v prohlížeči).
 

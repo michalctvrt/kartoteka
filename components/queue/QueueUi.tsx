@@ -3,7 +3,7 @@
 import { AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { queueApi, waitingMinutes } from "@/lib/call250v/browser";
-import { ARRIVAL_SERVICES, MODALITIES } from "@/lib/call250v/config";
+import { ARRIVAL_KINDS, ARRIVAL_LABEL, ARRIVAL_SERVICES, type ArrivalKind } from "@/lib/call250v/config";
 
 /** Číslo lístku tak, jak ho vidí pacient na tabuli. */
 export function TicketNo({ no, big }: { no?: string | null; big?: boolean }) {
@@ -23,7 +23,7 @@ export function WaitTime({ created }: { created?: string | null }) {
   const m = waitingMinutes(created);
   if (m === null) return null;
   return (
-    <span className={cn("text-xs", m >= 30 ? "text-red-600 font-semibold" : "text-ui-faint")}>
+    <span className={cn("whitespace-nowrap text-xs", m >= 30 ? "text-red-600 font-semibold" : "text-ui-faint")}>
       čeká {m} min
     </span>
   );
@@ -79,24 +79,24 @@ export function QueueButton({
   );
 }
 
-/** Jen v simulaci: nahrazuje kiosk u vstupu (tisk lístku). */
+/** Jen v simulaci: nahrazuje kiosk u vstupu (tisk lístku – jen „na vyšetření“ / „objednat se“, bez modality). */
 export function MockKiosk({ onDone, compact = false }: { onDone: () => void; compact?: boolean }) {
-  const add = async (m: (typeof MODALITIES)[number]) => {
-    await queueApi.add(ARRIVAL_SERVICES[m]);
+  const add = async (k: ArrivalKind) => {
+    await queueApi.add(ARRIVAL_SERVICES[k]);
     onDone();
   };
   if (compact) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-300">
         <span className="font-semibold">Simulace kiosku:</span>
-        {MODALITIES.map((m) => (
+        {ARRIVAL_KINDS.map((k) => (
           <button
-            key={m}
+            key={k}
             type="button"
-            onClick={() => add(m)}
+            onClick={() => add(k)}
             className="px-2 py-0.5 rounded border border-dashed border-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100"
           >
-            + {m}
+            + {ARRIVAL_LABEL[k]}
           </button>
         ))}
       </div>
@@ -108,9 +108,9 @@ export function MockKiosk({ onDone, compact = false }: { onDone: () => void; com
         SIMULACE – Call250V není připojený. Kiosk u vstupu:
       </div>
       <div className="flex gap-2 flex-wrap">
-        {MODALITIES.map((m) => (
-          <QueueButton key={m} onClick={() => add(m)}>
-            Vytisknout lístek {m}
+        {ARRIVAL_KINDS.map((k) => (
+          <QueueButton key={k} onClick={() => add(k)}>
+            Lístek – {ARRIVAL_LABEL[k]}
           </QueueButton>
         ))}
       </div>

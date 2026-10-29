@@ -10,11 +10,24 @@
 
 export type Modality = "RTG" | "UZ" | "MRI";
 
-/** Fronty, které obsluhuje recepce — výběr na kiosku u vstupu. */
-export const ARRIVAL_SERVICES: Record<Modality, string> = {
-  RTG: "A1",
-  UZ: "A2",
-  MRI: "A3",
+/**
+ * Výběr na kiosku u vstupu – modalitu pacient NEVOLÍ (rozhodnutí Michala 2026-10-29), jen proč přišel:
+ *   exam    = přišel na vyšetření (objednaný / se žádankou na teď)
+ *   booking = chce se jen objednat (často přijde se žádankou a chce termín např. na UZ)
+ * Modalitu určí recepce založením vyšetření (→ čekárna RTG/UZ/MRI).
+ */
+export type ArrivalKind = "exam" | "booking";
+
+export const ARRIVAL_SERVICES: Record<ArrivalKind, string> = {
+  exam: "A1",
+  booking: "A2",
+};
+
+export const ARRIVAL_KINDS: ArrivalKind[] = ["exam", "booking"];
+
+export const ARRIVAL_LABEL: Record<ArrivalKind, string> = {
+  exam: "Na vyšetření",
+  booking: "Objednat se",
 };
 
 /** Čekárny za zamčenými dveřmi — sem pacienta přeřadí recepce. */
@@ -59,9 +72,8 @@ export const MODALITY_COUNTERS: Record<Modality, CounterDef[]> = {
 export const MODALITIES: Modality[] = ["RTG", "UZ", "MRI"];
 
 const SERVICE_LABELS: Record<string, string> = {
-  [ARRIVAL_SERVICES.RTG]: "Příchod – RTG",
-  [ARRIVAL_SERVICES.UZ]: "Příchod – UZ",
-  [ARRIVAL_SERVICES.MRI]: "Příchod – MRI",
+  [ARRIVAL_SERVICES.exam]: ARRIVAL_LABEL.exam, // krátce – v seznamu na recepci musí být vidět celé
+  [ARRIVAL_SERVICES.booking]: ARRIVAL_LABEL.booking,
   [WAITING_SERVICES.RTG]: "Čekárna RTG",
   [WAITING_SERVICES.UZ]: "Čekárna UZ",
   [WAITING_SERVICES.MRI]: "Čekárna MRI",
@@ -83,11 +95,12 @@ export function counterLabel(counterId?: string | null): string {
 }
 
 export function modalityOfService(serviceId?: string | null): Modality | null {
-  for (const m of MODALITIES) {
-    if (ARRIVAL_SERVICES[m] === serviceId || WAITING_SERVICES[m] === serviceId)
-      return m;
-  }
-  return null;
+  return MODALITIES.find((m) => WAITING_SERVICES[m] === serviceId) ?? null;
+}
+
+/** Proč pacient přišel (podle lístku z kiosku); null = lístek už není na příchodu. */
+export function arrivalKindOf(serviceId?: string | null): ArrivalKind | null {
+  return ARRIVAL_KINDS.find((k) => ARRIVAL_SERVICES[k] === serviceId) ?? null;
 }
 
 /**

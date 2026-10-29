@@ -33,7 +33,7 @@ JSF kartotéky. Komunikace s uživatelem (Michal) **česky**; Michal zná JS, ba
 
 ## Vyvolávací systém Call250V (Kadlec elektronika) – pobočka Olomoucká
 Podrobně `CALL250V.md`. Shrnutí:
-- Kiosk → lístek s QR → recepce vyvolá → karta + vyšetření → čekárna RTG/UZ/MRI → laborant vyvolá
+- Kiosk (jen „Na vyšetření“ / „Objednat se“, bez modality) → lístek s QR → recepce vyvolá → karta + vyšetření → čekárna RTG/UZ/MRI → laborant vyvolá
   k dveřím → „Hotovo →“ další modalita / recepce (zpráva) → `complete` až na konci návštěvy.
 - `lib/call250v/` (server klient s Api-Key jen na serveru, simulátor `mock.ts` když chybí `CALL250V_BASE_URL`,
   `config.ts` = ID činností A1–A7 a pultů P1–P7 – **odhad, přepsat podle Kadlece**)

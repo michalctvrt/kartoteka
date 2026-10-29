@@ -20,10 +20,9 @@ import {
   REPORT_SERVICE,
   WAITING_SERVICES,
   counterLabel,
-  modalityOfService,
+  arrivalKindOf,
   serviceLabel,
 } from "@/lib/call250v/config";
-import { cn } from "@/lib/utils";
 import { useQueue } from "./useQueue";
 import { useWorkstation } from "./useWorkstation";
 import { useSession } from "@/components/auth/SessionProvider";
@@ -84,7 +83,7 @@ export default function PatientQueueBox({
   if (!linked && !unlinked && !error) return <>{fallback}</>;
 
   const item = linked || unlinked || null;
-  const kioskChoice = unlinked ? modalityOfService(unlinked.serviceId) : null;
+  const kioskChoice = unlinked ? arrivalKindOf(unlinked.serviceId) : null;
 
   const sendTo = (serviceId: string) =>
     item &&
@@ -113,7 +112,7 @@ export default function PatientQueueBox({
               </div>
               <div className="mt-1 text-[13px] text-ui-muted">
                 {item.status === "called" ? `Vyvolán k ${counterLabel(item.counter)}` : "Čeká na vyvolání"}
-                {kioskChoice && ` · na kiosku zvolil ${kioskChoice}`}
+                {kioskChoice && ` · na kiosku: ${kioskChoice === "booking" ? "chce se objednat" : "přišel na vyšetření"}`}
               </div>
             </div>
           </div>
@@ -128,15 +127,9 @@ export default function PatientQueueBox({
                 const target = WAITING_SERVICES[m];
                 const current = linked && item.serviceId === target;
                 return (
-                  <span key={m} className={cn(m === kioskChoice && "rounded-md ring-2 ring-brand-400")}>
-                    <QueueButton
-                      variant={m === kioskChoice ? "primary" : "default"}
-                      disabled={busy || !!current}
-                      onClick={() => sendTo(target)}
-                    >
-                      Čekárna {m}
-                    </QueueButton>
-                  </span>
+                  <QueueButton key={m} disabled={busy || !!current} onClick={() => sendTo(target)}>
+                    Čekárna {m}
+                  </QueueButton>
                 );
               })}
               {linked && (

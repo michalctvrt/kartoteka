@@ -150,11 +150,14 @@ export default function ReceptionQueuePanel({
             <li key={it.queueItemId} className="flex items-center justify-between px-3 py-2 gap-2">
               <div className="flex items-center gap-3 min-w-0">
                 <TicketNo no={it.orderNumber} />
-                <span className="text-sm truncate">
-                  {serviceLabel(it.serviceId)}
-                  {it.priority && <span className="ml-2 text-xs text-red-600 font-semibold">PRIORITA</span>}
+                {/* důvod příchodu nad dobou čekání – v úzkém okně musí být vidět celý */}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">
+                    {serviceLabel(it.serviceId)}
+                    {it.priority && <span className="ml-2 text-xs text-red-600 font-semibold">PRIORITA</span>}
+                  </span>
+                  <WaitTime created={it.createdDate} />
                 </span>
-                <WaitTime created={it.createdDate} />
               </div>
               <QueueButton disabled={busy} onClick={() => run(() => queueApi.call(it.queueItemId, counter))}>
                 Vyvolat
