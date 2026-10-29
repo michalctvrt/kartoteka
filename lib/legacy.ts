@@ -24,3 +24,14 @@ export const legacyStudyEditUrl = (studyId: number, pid: string) =>
   `${legacyBase}/secured/study/edit.xhtml?sid=${studyId}&prev=${encodeURIComponent(
     legacyStudyListUrl(pid)
   )}`;
+
+/** Formulář nového vyšetření ve staré kartotéce s předvyplněným pacientem. */
+export const legacyNewStudyUrl = (pid: string) =>
+  `${legacyBase}/secured/study/edit.xhtml?pid=${encodeURIComponent(pid)}`;
+
+/**
+ * Zakládat vyšetření přes náš formulář (POST /study)?
+ * Zatím vypnuto: backend vyžaduje ezadankaId i u vyšetření bez e-žádanky.
+ * Až to Václav uvolní, stačí v .env.local NEXT_PUBLIC_STUDY_VIA_API=1.
+ */
+export const STUDY_VIA_API = process.env.NEXT_PUBLIC_STUDY_VIA_API === "1";

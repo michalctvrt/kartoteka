@@ -38,7 +38,11 @@ import { parseRc } from "@/lib/rc";
 import PatientQueueBox from "@/components/queue/PatientQueueBox";
 import NewStudyDialog from "@/components/study/NewStudyDialog";
 import { missingForStudy } from "@/lib/study/card-check";
-import { legacyStudyListUrl } from "@/lib/legacy";
+import {
+  legacyNewStudyUrl,
+  legacyStudyListUrl,
+  STUDY_VIA_API,
+} from "@/lib/legacy";
 
 interface FormState {
   firstName: string;
@@ -368,20 +372,31 @@ export default function PatientDetailPage({
               <Button variant="outline" asChild>
                 <a href={legacyStudyListUrl(pid)}>Vyšetření pacienta</a>
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setNewStudyOpen(true)}
-                disabled={studyMissing.length > 0}
-                title={
-                  studyMissing.length
-                    ? `Na kartě chybí: ${studyMissing.join(", ")}`
-                    : "Založit nové vyšetření"
-                }
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Nové vyšetření
-              </Button>
+              {STUDY_VIA_API || studyMissing.length > 0 ? (
+                <Button
+                  variant="outline"
+                  onClick={() => setNewStudyOpen(true)}
+                  disabled={studyMissing.length > 0}
+                  title={
+                    studyMissing.length
+                      ? `Na kartě chybí: ${studyMissing.join(", ")}`
+                      : "Založit nové vyšetření"
+                  }
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Nové vyšetření
+                </Button>
+              ) : (
+                // Dočasně: formulář nového vyšetření ve staré kartotéce
+                // (POST /study zatím vyžaduje ezadankaId — viz lib/legacy.ts)
+                <Button variant="outline" asChild className="gap-2">
+                  <a href={legacyNewStudyUrl(pid)} title="Otevře formulář ve staré kartotéce">
+                    <Plus className="w-4 h-4" />
+                    Nové vyšetření
+                  </a>
+                </Button>
+              )}
               <Button onClick={() => setIsEditing(true)}>Editovat</Button>
             </>
           )}
@@ -395,7 +410,7 @@ export default function PatientDetailPage({
         </p>
       )}
 
-      {patient?.patientDataInfo && (
+      {STUDY_VIA_API && patient?.patientDataInfo && (
         <NewStudyDialog
           open={newStudyOpen}
           onOpenChange={setNewStudyOpen}
