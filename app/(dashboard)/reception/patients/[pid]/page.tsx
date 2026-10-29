@@ -34,6 +34,7 @@ import { InsuranceCompanyService } from "@/lib/api/generated/services/InsuranceC
 import { PatientDataSaveInfo } from "@/lib/api/generated/models/PatientDataSaveInfo";
 import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
+import { apiErrorText } from "@/lib/study/lookups";
 import { usePatientDraft } from "@/components/hooks/usePatientDraft";
 import ExaminationsSection from "@/components/ExaminationsSection";
 import EzadankyList from "@/components/ezadanka/EzadankyList";
@@ -161,8 +162,8 @@ export default function PatientDetailPage({
         setLoadState("error");
         setLoadError(
           e instanceof ApiError
-            ? `Backend (${e.status}): ${e.message}`
-            : (e as Error).message ?? "Chyba při načítání pacienta."
+          ? apiErrorText(e)
+          : (e as Error).message ?? "Chyba při načítání pacienta."
         );
       });
 
@@ -231,7 +232,7 @@ export default function PatientDetailPage({
     } catch (e: unknown) {
       const msg =
         e instanceof ApiError
-          ? `Backend (${e.status}): ${e.message}`
+          ? apiErrorText(e)
           : (e as Error).message ?? "Chyba při ukládání.";
       setSaveError(msg);
     } finally {

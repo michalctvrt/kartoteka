@@ -18,12 +18,14 @@ objednávky, správa zaměstnanců. Úpravy se ukládají do paměti a po restar
    cd kartoteka
    git checkout call250v
    npm install
-   echo DEMO_MODE=1> .env.local
+   echo DEMO_MODE=1 > .env.local
+   type .env.local
    ```
 
    Při `git clone` se otevře okno přihlášení ke GitHubu → přihlásit se jako `michalctvrt`
    (jde to i bez tokenu, přes prohlížeč).
-   Pozor: v řádku `echo DEMO_MODE=1> .env.local` nesmí být mezera před `>`.
+   Poslední příkaz musí vypsat `DEMO_MODE=1`. Mezera před `>` je důležitá – bez ní si příkazový
+   řádek vezme `1>` jako přesměrování a jednička se do souboru nezapíše.
 
 ## Pokaždé: spuštění
 
@@ -61,7 +63,8 @@ npm run dev
 |---|---|
 | `'node' is not recognized` | Node.js není nainstalovaný, nebo zavřít a znovu otevřít příkazový řádek |
 | `'git' is not recognized` | Git není nainstalovaný (krok 2), znovu otevřít příkazový řádek |
-| Stránka hlásí „BACKEND_DEV_COOKIE chybí“ | chybí `.env.local` s `DEMO_MODE=1` (poslední příkaz instalace), pak restart `npm run dev` |
+| Stránka hlásí „Demo režim není zapnutý“ (nebo „Backend (500)“) | hláška říká, co server vidí. V souboru `.env.local` musí být `DEMO_MODE=1`; opravit příkazem `echo DEMO_MODE=1 > .env.local`, ověřit `type .env.local`, pak Ctrl + C a znovu `npm run dev` |
+| `type .env.local` napíše „nelze nalézt“ | soubor chybí nebo se jmenuje `.env.local.txt` (Poznámkový blok) – vytvořit znovu příkazem výše |
 | `Port 4001 is in use` | kartotéka už běží v jiném okně; zavřít ho, nebo otevřít rovnou http://localhost:4001 |
 | Chci začít s čistými daty | restartovat `npm run dev`; zaměstnance resetuje smazání složky `.data` |
 

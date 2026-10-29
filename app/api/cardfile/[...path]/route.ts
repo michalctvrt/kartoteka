@@ -18,8 +18,7 @@
 
 import { NextRequest } from "next/server";
 import { demoBackend } from "@/lib/demo/backend";
-
-const DEMO = process.env.DEMO_MODE === "1";
+import { DEMO_MODE as DEMO, demoDiagnosis } from "@/lib/demo/mode";
 
 const BACKEND_BASE = process.env.BACKEND_BASE_URL ?? "http://localhost:8080";
 const BACKEND_PREFIX = "/CardFileWebWS";
@@ -58,7 +57,8 @@ async function forward(req: NextRequest, ctx: Ctx) {
   if (!DEV_COOKIE) {
     return jsonError(
       500,
-      "BACKEND_DEV_COOKIE chybí v .env.local. Přihlas se do staré kartotéky a zkopíruj cookie z DevTools."
+      `Demo režim není zapnutý a BACKEND_DEV_COOKIE chybí. ${demoDiagnosis()} ` +
+        "(Ve firmě: přihlas se do staré kartotéky a zkopíruj cookie z DevTools do .env.local.)"
     );
   }
 

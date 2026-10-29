@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import { PatientDataSaveInfo } from "@/lib/api/generated/models/PatientDataSaveInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
+import { apiErrorText } from "@/lib/study/lookups";
 import EzadankyList from "@/components/ezadanka/EzadankyList";
 import type { ZadankaDetail } from "@/lib/ezadanka/types";
 import { parseRc } from "@/lib/rc";
@@ -175,7 +176,7 @@ export default function NewPatientPage() {
     } catch (e) {
       const msg =
         e instanceof ApiError
-          ? `Backend (${e.status}): ${e.message}`
+          ? apiErrorText(e)
           : (e as Error).message ?? "Chyba při ukládání pacienta.";
       setError(msg);
       setLoading(false);

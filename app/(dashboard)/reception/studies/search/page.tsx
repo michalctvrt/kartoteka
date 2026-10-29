@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
+import { apiErrorText } from "@/lib/study/lookups";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { Bento, BentoTile, Metric } from "@/components/ui/bento";
 import { Segmented } from "@/components/ui/segmented";
@@ -74,7 +75,7 @@ export default function StudiesSearchPage() {
           e instanceof ApiError
             ? e.status === 401
               ? "Přihlášení k backendu vypršelo (401)."
-              : `Backend odpověděl chybou ${e.status}.`
+              : apiErrorText(e)
             : "Studie se nepodařilo načíst."
         );
       } finally {

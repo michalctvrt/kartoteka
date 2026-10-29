@@ -24,9 +24,11 @@ const like = (v: string) => ({ comparator: "LIKE", values: [`%${v}%`] });
 /** Čitelná chybová hláška z ApiError (včetně těla odpovědi backendu). */
 export function apiErrorText(e: unknown): string {
   if (e instanceof ApiError) {
-    const body =
-      typeof e.body === "string" ? e.body : e.body ? JSON.stringify(e.body) : "";
-    return `Backend (${e.status}): ${body || e.message}`.slice(0, 400);
+    // přednostně čitelný text z těla odpovědi ({ error } z dev proxy, { errorMessage } z backendu)
+    const b = e.body as { error?: string; errorMessage?: string } | string | undefined;
+    const text =
+      typeof b === "string" ? b : b?.error ?? b?.errorMessage ?? (b ? JSON.stringify(b) : "");
+    return `Backend (${e.status}): ${text || e.message}`.slice(0, 400);
   }
   return (e as Error)?.message ?? "Neznámá chyba";
 }

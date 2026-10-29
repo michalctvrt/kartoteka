@@ -24,6 +24,7 @@ import { formatDate } from "@/lib/studies";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
+import { apiErrorText } from "@/lib/study/lookups";
 import useDrafts from "@/components/hooks/useDrafts";
 
 export default function PatientsListPage() {
@@ -72,7 +73,7 @@ export default function PatientsListPage() {
     } catch (e: unknown) {
       const msg =
         e instanceof ApiError
-          ? `Backend (${e.status}): ${e.message}`
+          ? apiErrorText(e)
           : (e as Error).message ?? "Chyba při vyhledávání.";
       setError(msg);
       setResults([]);

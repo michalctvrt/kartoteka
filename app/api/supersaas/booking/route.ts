@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { demoBookings } from "@/lib/demo/bookings";
+import { DEMO_MODE } from "@/lib/demo/mode";
 
 // 🔐 Credentials se čtou z .env.local (NEVER commit)
 const ACCOUNT_NAME = process.env.SUPERSAAS_USER;
@@ -56,7 +57,7 @@ function toCzechISO(dateStr?: string): string {
 
 export async function GET(req: Request) {
   // Demo režim (doma / bez klíčů): smyšlené objednávky, SuperSaaS se nevolá
-  if (process.env.DEMO_MODE === "1") return NextResponse.json(demoBookings());
+  if (DEMO_MODE) return NextResponse.json(demoBookings());
   if (!ACCOUNT_NAME || !API_KEY) {
     console.error(
       "❌ Chybí SUPERSAAS_USER nebo SUPERSAAS_API_KEY v .env.local"
