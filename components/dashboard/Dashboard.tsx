@@ -4,21 +4,26 @@
  * Přizpůsobitelná plocha: okna jde zapínat/vypínat, přesouvat a zvětšovat.
  *
  * - „Upravit plochu“ zapne režim úprav: okna se tahají za záhlaví,
- *   velikost se mění za pravý dolní roh, vlevo nahoře je seznam oken
- *   k zaškrtnutí.
+ *   velikost se mění za kterýkoli okraj/roh, nahoře je seznam oken.
+ * - Okna mají jen pár povolených velikostí (grid.ts) a do sebe zapadají.
+ *   Přetažené okno se samo zmenší, aby se vešlo do mezery; když se nevejde
+ *   ani nejmenší, vrátí se na původní místo. Okna se navzájem neodsouvají.
  * - Rozložení se ukládá do prohlížeče zvlášť pro každou roli (recepce /
  *   laborant / lékař). Až bude přihlašování, může se ukládat k uživateli.
  */
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import GridLayout, { WidthProvider, type Layout } from "react-grid-layout";
 import { Check, GripVertical, LayoutDashboard, RotateCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_LAYOUTS, WIDGETS, type DashboardRole } from "./widgets";
+import { COLS, collides, findSpot, fitAt, makeRoom, normalize, snapSize } from "./grid";
 
 const Grid = WidthProvider(GridLayout);
 const storageKey = (role: DashboardRole) => `kartoteka_dashboard_v1_${role}`;
+const mins = (i: string) => ({ minW: WIDGETS[i]?.minW, minH: WIDGETS[i]?.minH });
+const ALL_HANDLES = ["s", "w", "e", "n", "sw", "nw", "se", "ne"] as const;
 
 /** Načte uložené rozložení; neznámá okna zahodí, doplní min. rozměry. */
 function loadLayout(role: DashboardRole): Layout[] {
@@ -29,7 +34,7 @@ function loadLayout(role: DashboardRole): Layout[] {
   } catch {
     /* ignore */
   }
-  return withLimits((saved ?? DEFAULT_LAYOUTS[role]).filter((l) => WIDGETS[l.i]));
+  return withLimits(normalize((saved ?? DEFAULT_LAYOUTS[role]).filter((l) => WIDGETS[l.i]), mins));
 }
 
 function withLimits(layout: Layout[]): Layout[] {
@@ -72,9 +77,70 @@ function DashboardInner({ role }: { role: DashboardRole }) {
       update(layout.filter((l) => l.i !== id));
     } else {
       const d = WIDGETS[id];
-      // y: Infinity = zařadit na konec plochy
-      update([...layout, { i: id, x: 0, y: Infinity, w: d.w, h: d.h }]);
+      update([...layout, { i: id, ...findSpot(layout, d.w, d.h), w: d.w, h: d.h }]);
     }
+  };
+
+  // ── Přesun ──
+  // 1) vejde se do mezery (případně zmenšené) → tam
+  // 2) jinak okna v řadě udělají místo (rozdělí se na ½ / ⅓ / ¼)
+  // 3) jinak po puštění zpět na původní místo
+  // Během tažení se to ukazuje živě; ostatní okna se pokaždé počítají
+  // z rozložení na začátku tažení.
+  const dragStart = useRef<Layout[]>([]);
+
+  const resolveDrop = (item: Layout, oldItem: Layout): Layout[] | null => {
+    const others = dragStart.current.filter((o) => o.i !== item.i);
+    const fit = fitAt(others, item.x, item.y, oldItem.w, oldItem.h, mins(item.i));
+    if (fit) return [...others, { ...item, ...fit }];
+    return makeRoom(
+      others,
+      { i: item.i, x: item.x, y: item.y, prefW: oldItem.w, prefH: oldItem.h },
+      mins
+    );
+  };
+
+  const onDragStart = (l: Layout[]) => {
+    dragStart.current = l.map((o) => ({ ...o }));
+  };
+  const onDrag = (l: Layout[], oldItem: Layout, item: Layout, ph: Layout) => {
+    const res = resolveDrop(item, oldItem) ?? [
+      ...dragStart.current.filter((o) => o.i !== item.i),
+      { ...item, w: oldItem.w, h: oldItem.h },
+    ];
+    // promítnout do živého rozložení (knihovna ho po callbacku vykreslí)
+    for (const o of l) {
+      const r = res.find((x) => x.i === o.i);
+      if (r) Object.assign(o, { x: r.x, y: r.y, w: r.w, h: r.h });
+    }
+    const me = res.find((x) => x.i === item.i)!;
+    Object.assign(ph, { x: me.x, y: me.y, w: me.w, h: me.h });
+  };
+  const onDragStop = (_l: Layout[], oldItem: Layout, item: Layout) => {
+    update(resolveDrop(item, oldItem) ?? dragStart.current);
+  };
+
+  // ── Změna velikosti: skáče po povolených velikostech, ze všech stran ──
+  const onResize = (_l: Layout[], oldItem: Layout, item: Layout, ph: Layout) => {
+    const s = snapSize(item.w, item.h, mins(item.i));
+    // tah za levý/horní okraj → pravý/dolní okraj zůstává na místě
+    const fromLeft = item.x !== oldItem.x;
+    const fromTop = item.y !== oldItem.y;
+    let x = fromLeft ? oldItem.x + oldItem.w - s.w : item.x;
+    let y = fromTop ? oldItem.y + oldItem.h - s.h : item.y;
+    x = Math.max(0, Math.min(x, COLS - s.w));
+    y = Math.max(0, y);
+    Object.assign(item, { x, y, ...s });
+    Object.assign(ph, { x, y, ...s });
+  };
+  const onResizeStop = (l: Layout[], oldItem: Layout, item: Layout) => {
+    const others = l.filter((o) => o.i !== item.i);
+    let final: Layout = { ...item };
+    if (collides(final, others)) {
+      const fit = fitAt(others, item.x, item.y, item.w, item.h, mins(item.i));
+      final = fit ? { ...item, ...fit } : { ...oldItem };
+    }
+    update([...others, final]);
   };
 
   return (
@@ -115,7 +181,9 @@ function DashboardInner({ role }: { role: DashboardRole }) {
             ))}
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Okna přesunete tažením za záhlaví, velikost změníte tažením za pravý dolní roh.
+            Okna přesunete tažením za záhlaví, velikost změníte tažením za kterýkoli okraj nebo roh
+            (okno skáče po pevných velikostech). Do menší mezery se okno samo zmenší, mezi dvě
+            okna vedle sebe se vmáčkne a ta mu udělají místo.
             Rozložení se ukládá v tomto prohlížeči.
           </p>
         </div>
@@ -135,9 +203,16 @@ function DashboardInner({ role }: { role: DashboardRole }) {
           containerPadding={[8, 8]}
           isDraggable={editing}
           isResizable={editing}
+          resizeHandles={[...ALL_HANDLES]}
           draggableHandle=".widget-drag"
-          compactType="vertical"
-          onLayoutChange={(l) => editing && update(l)}
+          // okna se neodsouvají a mezery zůstávají; kolize řešíme sami (grid.ts)
+          compactType={null}
+          allowOverlap
+          onDragStart={onDragStart}
+          onDrag={onDrag}
+          onDragStop={onDragStop}
+          onResize={onResize}
+          onResizeStop={onResizeStop}
         >
           {layout.map((l) => {
             const d = WIDGETS[l.i];

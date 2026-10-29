@@ -4,7 +4,8 @@
  * Okna (widgety), ze kterých si každý skládá svou plochu.
  * Nové okno = nový záznam v WIDGETS (+ případně do výchozí plochy role).
  *
- * Rozměry jsou v mřížce: 12 sloupců na šířku, výška v řádcích po ~30 px.
+ * Rozměry jsou v mřížce: 12 sloupců na šířku, výška v řádcích po ~46 px.
+ * Používat jen povolené velikosti z grid.ts (WIDTHS / HEIGHTS).
  */
 
 import type { ReactNode } from "react";
@@ -33,22 +34,22 @@ export const WIDGETS: Record<string, WidgetDef> = {
   "waiting-RTG": {
     title: "Čekárna RTG",
     render: () => <ModalityColumn m="RTG" className="h-full" />,
-    w: 4, h: 12, minW: 3, minH: 6, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
   },
   "waiting-UZ": {
     title: "Čekárna UZ",
     render: () => <ModalityColumn m="UZ" className="h-full" />,
-    w: 4, h: 12, minW: 3, minH: 6, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
   },
   "waiting-MRI": {
     title: "Čekárna MRI",
     render: () => <ModalityColumn m="MRI" className="h-full" />,
-    w: 4, h: 12, minW: 3, minH: 6, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
   },
   "queue-reception": {
     title: "Vyvolávací systém – recepce",
     render: () => <ReceptionQueuePanel embedded />,
-    w: 6, h: 12, minW: 4, minH: 6,
+    w: 6, h: 13, minW: 4, minH: 6,
   },
   "today-orders": {
     title: "Dnešní objednávky",
@@ -63,7 +64,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
   messages: {
     title: "Aktuality a provozní zprávy",
     render: () => <ReceptionMessagesBlock />,
-    w: 6, h: 10, minW: 3, minH: 5,
+    w: 6, h: 9, minW: 3, minH: 6,
   },
 };
 
@@ -78,10 +79,10 @@ const at = (i: string, x: number, y: number, w?: number, h?: number): Layout => 
 /** Výchozí plocha podle role (tlačítko „Obnovit výchozí“ se vrátí sem). */
 export const DEFAULT_LAYOUTS: Record<DashboardRole, Layout[]> = {
   reception: [
-    at("queue-reception", 0, 0, 6, 12),
+    at("queue-reception", 0, 0, 6, 13),
     at("today-orders", 6, 0, 6, 18),
-    at("new-patient", 0, 12, 6, 4),
-    at("messages", 0, 16, 6, 10),
+    at("new-patient", 0, 13, 6, 4),
+    at("messages", 0, 17, 6, 9),
   ],
   lab: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
   doctor: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
