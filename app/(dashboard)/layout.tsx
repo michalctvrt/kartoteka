@@ -8,16 +8,29 @@
  */
 
 import QueueStatusBar from "@/components/queue/QueueStatusBar";
-import AppNav, { ROLE_LABEL, roleFromPath } from "@/components/AppNav";
+import AppNav from "@/components/AppNav";
+import { useSession } from "@/components/auth/SessionProvider";
+import { ROLE_HOME, ROLE_NAME, workspaceOf } from "@/lib/auth/roles";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { ShieldOff } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig } from "framer-motion";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const role = roleFromPath(pathname);
+  const router = useRouter();
+  const { ready, user, roles, canVisit, home } = useSession();
+  const fromPath = workspaceOf(pathname);
+  const ws = fromPath && canVisit(ROLE_HOME[fromPath]) ? fromPath : roles[0];
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // nepřihlášený → přihlášení
+  useEffect(() => {
+    if (ready && !user) router.replace("/login");
+  }, [ready, user, router]);
 
   // 🌗 Téma. Server vždy "light" (žádný přístup k localStorage).
   // V useEffect doplníme uloženou hodnotu na klientovi → vyhneme se hydration mismatchi.
@@ -44,8 +57,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     } catch {}
   };
 
-  const boardHref =
-    role === "reception" ? "/reception" : role === "doctor" ? "/doctor" : "/lab";
+  const boardHref = ws === "doctor" ? "/doctor" : ws === "lab" ? "/lab" : "/reception";
+  const allowed = canVisit(pathname);
 
   return (
     // reducedMotion="user": kdo má v systému vypnuté animace, uvidí jen prolnutí bez pohybu
@@ -82,7 +95,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="text-sm font-medium text-ui-ink lg:hidden">{ROLE_LABEL[role]}</span>
+          <span className="text-sm font-medium text-ui-ink lg:hidden">{ws ? ROLE_NAME[ws] : ""}</span>
           {/* Vyvolávací systém: kolik kde čeká — vidět na každé stránce */}
           <div className="ml-auto">
             <QueueStatusBar boardHref={boardHref} />
@@ -91,10 +104,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* LIST */}
         <main className="mx-2 mb-2 min-w-0 flex-1 rounded-2xl border border-ui-line bg-ui-sheet p-4 sm:p-6 lg:ml-0">
-          {children}
+          {!ready || !user ? (
+            <div className="space-y-3" aria-busy="true">
+              <Skeleton className="h-7 w-56" />
+              <Skeleton className="h-40 w-full" />
+            </div>
+          ) : allowed ? (
+            children
+          ) : (
+            <Forbidden home={home} />
+          )}
         </main>
       </div>
     </div>
     </MotionConfig>
+  );
+}
+
+/** Stránka, na kterou role nesmí (např. laborant → nový pacient). */
+function Forbidden({ home }: { home: string }) {
+  return (
+    <div className="ui-tile mx-auto mt-10 max-w-md p-6 text-center">
+      <ShieldOff className="mx-auto h-6 w-6 text-ui-faint" />
+      <h1 className="mt-3 text-lg font-semibold">Sem nemáte přístup</h1>
+      <p className="mt-1 text-sm text-ui-muted">Vaše role tuto část kartotéky nepoužívá. Pokud ji potřebujete, požádejte administrátora.</p>
+      <Link href={home} className="mt-4 inline-block text-sm text-ui-primary hover:underline">
+        Zpět na moji plochu
+      </Link>
+    </div>
   );
 }

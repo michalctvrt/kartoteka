@@ -17,6 +17,8 @@ import ReceptionTodayList from "@/components/ReceptionTodayList";
 import NewPatientBox from "@/components/NewPatientBox";
 import ReceptionMessagesBlock from "@/components/ReceptionMessagesBlock";
 
+import type { Capability } from "@/lib/auth/roles";
+
 export type DashboardRole = "reception" | "lab" | "doctor";
 
 export interface WidgetDef {
@@ -30,43 +32,45 @@ export interface WidgetDef {
   minH: number;
   /** Okno má vlastní záhlaví (čekárny) → bez rámečku s nadpisem */
   frameless?: boolean;
+  /** Oprávnění potřebné k oknu (lib/auth/roles.ts); bez něj se nenabízí ani nezobrazí */
+  cap?: Capability;
 }
 
 export const WIDGETS: Record<string, WidgetDef> = {
   "waiting-RTG": {
     title: "Čekárna RTG",
     render: (sz) => <ModalityColumn m="RTG" className="h-full" size={sz} />,
-    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true, cap: "widget.waiting",
   },
   "waiting-UZ": {
     title: "Čekárna UZ",
     render: (sz) => <ModalityColumn m="UZ" className="h-full" size={sz} />,
-    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true, cap: "widget.waiting",
   },
   "waiting-MRI": {
     title: "Čekárna MRI",
     render: (sz) => <ModalityColumn m="MRI" className="h-full" size={sz} />,
-    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true, cap: "widget.waiting",
   },
   "queue-reception": {
     title: "Vyvolávací systém – recepce",
     render: (sz) => <ReceptionQueuePanel embedded size={sz} />,
-    w: 6, h: 13, minW: 3, minH: 4,
+    w: 6, h: 13, minW: 3, minH: 4, cap: "queue.reception",
   },
   "today-orders": {
     title: "Dnešní objednávky",
     render: (sz) => <ReceptionTodayList size={sz} />,
-    w: 6, h: 18, minW: 3, minH: 4,
+    w: 6, h: 18, minW: 3, minH: 4, cap: "widget.todayOrders",
   },
   "new-patient": {
     title: "Nový pacient",
     render: () => <NewPatientBox />,
-    w: 6, h: 4, minW: 3, minH: 4,
+    w: 6, h: 4, minW: 3, minH: 4, cap: "widget.newPatient",
   },
   messages: {
     title: "Aktuality a provozní zprávy",
     render: (sz) => <ReceptionMessagesBlock size={sz} />,
-    w: 6, h: 9, minW: 3, minH: 4,
+    w: 6, h: 9, minW: 3, minH: 4, cap: "widget.messages",
   },
 };
 

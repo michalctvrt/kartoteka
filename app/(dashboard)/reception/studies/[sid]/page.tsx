@@ -34,6 +34,7 @@ import {
   StudyCardSkeleton,
 } from "@/components/study/StudyTiles";
 import StudyEditForm from "@/components/study/StudyEditForm";
+import { useSession } from "@/components/auth/SessionProvider";
 
 type Load =
   | { state: "loading" }
@@ -49,6 +50,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
   const [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const canEditStudy = useSession().can("study.edit");
 
   const id = Number(sid);
   const valid = /^\d+$/.test(sid);
@@ -158,7 +160,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
                 <UserRound /> Karta pacienta
               </Link>
             </Button>
-            {STUDY_EDIT_VIA_API ? (
+            {!canEditStudy ? null : STUDY_EDIT_VIA_API ? (
               <Button variant="outline" onClick={() => setEditing(true)}>
                 <Pencil /> Upravit
               </Button>

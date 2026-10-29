@@ -12,6 +12,7 @@ import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { BentoTile, DataRow, Metric } from "@/components/ui/bento";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { legacyStudyEditUrl } from "@/lib/legacy";
+import { useSession } from "@/components/auth/SessionProvider";
 import { ageYears } from "@/lib/study/card-check";
 import { formatDate, formatDateTime, formatRc, hasReport, patientName } from "@/lib/studies";
 
@@ -32,6 +33,7 @@ function Rows({ rows, empty }: { rows: [string, React.ReactNode][]; empty: strin
 
 export function ReportTile({ study: s, index }: { study: StudyInfo; index: number }) {
   const done = hasReport(s);
+  const canWrite = useSession().can("report.write"); // popisuje lékař (a admin)
   return (
     <BentoTile
       span={2}
@@ -52,14 +54,16 @@ export function ReportTile({ study: s, index }: { study: StudyInfo; index: numbe
         )
       }
       action={
+        canWrite && (
         <a
           href={legacyStudyEditUrl(s.id, s.pid)}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-[13px] text-ui-primary hover:underline"
         >
-          <ExternalLink className="h-3.5 w-3.5" /> Upravit popis
+          <ExternalLink className="h-3.5 w-3.5" /> {done ? "Upravit popis" : "Popsat"}
         </a>
+        )
       }
     >
       {done ? (

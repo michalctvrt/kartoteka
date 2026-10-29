@@ -44,3 +44,5 @@ next-env.d.ts
 /env.local
 # pracovní soubory skillu design-taste-frontend
 /.taste-skill/
+# simulace dat (zaměstnanci apod.) – jen vývoj
+/.data/

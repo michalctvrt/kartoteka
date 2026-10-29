@@ -53,6 +53,7 @@ import {
   StudiesCountTile,
 } from "@/components/patient/PatientTiles";
 import { ageYears } from "@/lib/study/card-check";
+import { useSession } from "@/components/auth/SessionProvider";
 import { missingForStudy } from "@/lib/study/card-check";
 import {
   legacyNewStudyUrl,
@@ -84,6 +85,9 @@ export default function PatientDetailPage({
   const [isEditing, setIsEditing] = useState(false);
   const [newStudyOpen, setNewStudyOpen] = useState(false);
   const insuranceCompanies = useInsuranceCompanies();
+  const { can } = useSession();
+  const canEdit = can("patient.edit");
+  const canCreateStudy = can("study.create");
   const { studies, loading: studiesLoading, error: studiesError } = usePatientStudies(pid);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -105,7 +109,7 @@ export default function PatientDetailPage({
     !patient.patientDataInfo;
 
   useEffect(() => {
-    if (!hasNoData) return;
+    if (!hasNoData || !canEdit) return; // bez oprávnění k úpravám nic nepředvyplňovat
     if (draft) return; // už něco máme rozeditované
     const rcInfo = parseRc(pid);
     setDraft({
@@ -114,7 +118,7 @@ export default function PatientDetailPage({
       gender: rcInfo.gender ?? "",
     });
     setIsEditing(true);
-  }, [hasNoData, draft, pid, setDraft]);
+  }, [hasNoData, draft, pid, setDraft, canEdit]);
 
   // Pacient v kartotéce není → případný draft pro toto RČ je k ničemu
   // (jinak by v menu navždy svítil puntík „rozpracovaná karta“)
@@ -335,10 +339,12 @@ export default function PatientDetailPage({
                   <ExternalLink /> Stará kartotéka
                 </a>
               </Button>
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
-                <Pencil /> Upravit
-              </Button>
-              {STUDY_VIA_API || studyMissing.length > 0 ? (
+              {canEdit && (
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  <Pencil /> Upravit
+                </Button>
+              )}
+              {!canCreateStudy ? null : STUDY_VIA_API || studyMissing.length > 0 ? (
                 <Button
                   onClick={() => setNewStudyOpen(true)}
                   disabled={studyMissing.length > 0}
@@ -361,9 +367,11 @@ export default function PatientDetailPage({
       </motion.header>
 
       {hasNoData && (
-        <Notice>Pacient je v kartotéce bez údajů. Doplňte jméno a další údaje a uložte.</Notice>
+        <Notice>
+          Pacient je v kartotéce bez údajů.{canEdit ? " Doplňte jméno a další údaje a uložte." : " Údaje doplní recepce."}
+        </Notice>
       )}
-      {!isEditing && !hasNoData && studyMissing.length > 0 && (
+      {!isEditing && !hasNoData && canCreateStudy && studyMissing.length > 0 && (
         <Notice>Pro založení vyšetření doplňte: {studyMissing.join(", ")}.</Notice>
       )}
       {saveError && <Notice tone="error">{saveError}</Notice>}

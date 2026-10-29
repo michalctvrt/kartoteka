@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Hlavní menu aplikace (levý rám). Skupiny Pacienti / Studie jsou vždy
- * rozbalené – žádné podmenu na kliknutí, vše vidět najednou.
- * Aktivní položka = světlý brand podklad, ostatní šedé (styl „rám a list“).
+ * Hlavní menu aplikace (levý rám). Položky podle oprávnění přihlášeného
+ * (lib/auth/roles.ts). Skupiny jsou vždy rozbalené – vše vidět najednou.
+ * Aktivní položka má podklad, který při přechodu přejede (layoutId).
  */
 
 import Link from "next/link";
@@ -15,12 +15,14 @@ import {
   FileSearch,
   FileText,
   Home,
+  LayoutGrid,
   ListChecks,
   LogOut,
   Moon,
   Settings,
   Sun,
   UserSearch,
+  UsersRound,
 } from "lucide-react";
 import { LayoutGroup, motion } from "framer-motion";
 import { useId } from "react";
@@ -28,24 +30,9 @@ import { cn } from "@/lib/utils";
 import useDrafts from "@/components/hooks/useDrafts";
 import MenuPatientsBadge from "@/components/MenuPatientsBadge";
 import { readLastStudyId } from "@/lib/lastStudy";
-
-export type Role = "reception" | "lab" | "doctor" | "admin" | "other";
-
-export const ROLE_LABEL: Record<Role, string> = {
-  reception: "Recepce",
-  lab: "Laborant",
-  doctor: "Lékař",
-  admin: "Administrátor",
-  other: "Uživatel",
-};
-
-export function roleFromPath(pathname: string): Role {
-  if (pathname.includes("/doctor")) return "doctor";
-  if (pathname.includes("/lab")) return "lab";
-  if (pathname.includes("/reception")) return "reception";
-  if (pathname.includes("/admin")) return "admin";
-  return "other";
-}
+import { useSession } from "@/components/auth/SessionProvider";
+import { ROLES, ROLE_HOME, ROLE_NAME, workspaceOf, type Role } from "@/lib/auth/roles";
+import { employeeName } from "@/lib/auth/types";
 
 export default function AppNav({
   theme,
@@ -59,11 +46,15 @@ export default function AppNav({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const role = roleFromPath(pathname);
+  const { user, roles, can, canVisit, signOut } = useSession();
   const { latestId } = useDrafts();
 
-  const home =
-    role === "other" ? "/" : role === "admin" ? "/admin" : `/${role}`;
+  // pracovní plocha: podle adresy (smí-li tam), jinak první role uživatele
+  const fromPath = workspaceOf(pathname);
+  const ws: Role = fromPath && canVisit(ROLE_HOME[fromPath]) ? fromPath : roles[0] ?? "reception";
+  const home = ROLE_HOME[ws];
+  const workspaces = ROLES.filter((r) => canVisit(ROLE_HOME[r]));
+  const worklist = `/${ws === "doctor" ? "doctor" : "lab"}/worklist`;
 
   const go = (href: string) => {
     router.push(href);
@@ -96,17 +87,25 @@ export default function AppNav({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Logo + kde jsem */}
-      <div className="px-5 pt-5 pb-4">
+      {/* Logo + kdo jsem */}
+      <div className="px-5 pt-5 pb-3">
         <Link href={home} onClick={onNavigate} className="block w-[168px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="DC Flipper Radiodiagnostika" className="h-auto w-full dark:hidden" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-dark.svg" alt="DC Flipper Radiodiagnostika" className="hidden h-auto w-full dark:block" />
         </Link>
-        <p className="mt-3 text-[13px] text-ui-muted">
-          Kartotéka · <span className="font-medium text-ui-ink">{ROLE_LABEL[role]}</span>
-        </p>
+        {user && (
+          <div className="mt-4 flex items-center gap-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ui-line bg-ui-sheet text-[12px] font-medium">
+              {(user.firstName[0] ?? "") + (user.lastName[0] ?? "")}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] font-medium">{employeeName(user)}</span>
+              <span className="block truncate text-[12px] text-ui-muted">{roles.map((r) => ROLE_NAME[r]).join(", ")}</span>
+            </span>
+          </div>
+        )}
       </div>
 
       <LayoutGroup id={navId}>
@@ -115,58 +114,85 @@ export default function AppNav({
           Domů
         </NavItem>
 
-        {(role === "lab" || role === "doctor") && (
-          <NavItem
-            href={`/${role}/worklist`}
-            icon={<ListChecks />}
-            active={pathname === `/${role}/worklist`}
-            onNavigate={onNavigate}
-          >
+        {can("worklist.view") && (
+          <NavItem href={worklist} icon={<ListChecks />} active={pathname === worklist} onNavigate={onNavigate}>
             Worklist
           </NavItem>
         )}
 
-        {role === "reception" && (
-          <>
-            <NavItem
-              href="/reception/calendar"
-              icon={<CalendarDays />}
-              active={pathname === "/reception/calendar"}
-              onNavigate={onNavigate}
-            >
-              Kalendář objednávek
-            </NavItem>
-
-            <NavGroup label="Pacienti">
-              <NavItem
-                href="/reception/patients"
-                icon={<UserSearch />}
-                active={pathname === "/reception/patients"}
-                onNavigate={onNavigate}
-              >
-                Vyhledat pacienta
-              </NavItem>
-              <NavButton icon={<ClipboardList />} active={isPatientCard} onClick={openPatientCard}>
-                Karta pacienta
-                <MenuPatientsBadge />
-              </NavButton>
-            </NavGroup>
-          </>
-        )}
-
-        <NavGroup label="Studie">
+        {can("calendar.view") && (
           <NavItem
-            href="/reception/studies/search"
-            icon={<FileSearch />}
-            active={pathname === "/reception/studies/search"}
+            href="/reception/calendar"
+            icon={<CalendarDays />}
+            active={pathname === "/reception/calendar"}
             onNavigate={onNavigate}
           >
-            Vyhledat studii
+            Kalendář objednávek
           </NavItem>
-          <NavButton icon={<FileText />} active={isStudyCard} onClick={openStudyCard}>
-            Karta studie
-          </NavButton>
-        </NavGroup>
+        )}
+
+        {can("patient.view") && (
+          <NavGroup label="Pacienti">
+            <NavItem
+              href="/reception/patients"
+              icon={<UserSearch />}
+              active={pathname === "/reception/patients"}
+              onNavigate={onNavigate}
+            >
+              Vyhledat pacienta
+            </NavItem>
+            <NavButton icon={<ClipboardList />} active={isPatientCard} onClick={openPatientCard}>
+              Karta pacienta
+              {can("patient.edit") && <MenuPatientsBadge />}
+            </NavButton>
+          </NavGroup>
+        )}
+
+        {can("study.view") && (
+          <NavGroup label="Studie">
+            <NavItem
+              href="/reception/studies/search"
+              icon={<FileSearch />}
+              active={pathname === "/reception/studies/search"}
+              onNavigate={onNavigate}
+            >
+              Vyhledat studii
+            </NavItem>
+            <NavButton icon={<FileText />} active={isStudyCard} onClick={openStudyCard}>
+              Karta studie
+            </NavButton>
+          </NavGroup>
+        )}
+
+        {can("staff.manage") && (
+          <NavGroup label="Administrace">
+            <NavItem
+              href="/admin/staff"
+              icon={<UsersRound />}
+              active={pathname.startsWith("/admin/staff")}
+              onNavigate={onNavigate}
+            >
+              Zaměstnanci a role
+            </NavItem>
+          </NavGroup>
+        )}
+
+        {/* víc pracovních ploch (admin, nebo víc rolí) → přepínač */}
+        {workspaces.length > 1 && (
+          <NavGroup label="Pracovní plocha">
+            {workspaces.map((r) => (
+              <NavItem
+                key={r}
+                href={ROLE_HOME[r]}
+                icon={<LayoutGrid />}
+                onNavigate={onNavigate}
+              >
+                {ROLE_NAME[r]}
+                {ws === r && <span className="text-[12px] font-normal text-ui-faint">· teď</span>}
+              </NavItem>
+            ))}
+          </NavGroup>
+        )}
       </nav>
       </LayoutGroup>
 
@@ -178,7 +204,13 @@ export default function AppNav({
         <NavButton icon={theme === "light" ? <Moon /> : <Sun />} onClick={onToggleTheme}>
           {theme === "light" ? "Tmavý režim" : "Světlý režim"}
         </NavButton>
-        <NavButton icon={<LogOut />} onClick={() => go("/login")}>
+        <NavButton
+          icon={<LogOut />}
+          onClick={() => {
+            signOut();
+            go("/login");
+          }}
+        >
           Odhlásit se
         </NavButton>
       </div>

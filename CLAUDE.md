@@ -70,6 +70,14 @@ Podrobně `CALL250V.md`. Shrnutí:
   výběrem), `components/study/StudyList.tsx` (řádky studií – karta pacienta i vyhledávání), `components/study/StudyTiles.tsx`
   (karta studie: popis 2×2, pacient, žádanka, výkony, záznam, přílohy jen když jsou).
 
+## Role a oprávnění (2026-10-29)
+- Role admin / reception (backend „administrativa“) / lab (v backendu chybí) / doctor = PŘEDVOLBY. Oprávnění JEN v
+  `lib/auth/roles.ts` (`CAPABILITIES` – id, skupina, popis, výchozí role; i okna plochy `widget.*`). Admin u zaměstnance
+  přidá/odebere jednotlivá oprávnění (`grants`/`denies`, ukládají se jen odchylky); skutečná = `effectiveCaps()`. V UI `useSession().can("…")` / `<Can cap>` z `components/auth/SessionProvider.tsx`.
+- Přihlášení je ZATÍM SIMULACE: `/login` = výběr zaměstnance, seznam v `app/api/staff` (soubor `.data/staff.json`, mimo git).
+  Správa: `/admin/staff`. Zadání pro Václava: `docs/ROLE-BACKEND.md` (GET /me, /staff, kontrola oprávnění na backendu).
+- Frontend jen schovává – skutečná ochrana musí být na backendu.
+
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).

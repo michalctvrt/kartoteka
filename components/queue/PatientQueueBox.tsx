@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useQueue } from "./useQueue";
 import { useWorkstation } from "./useWorkstation";
+import { useSession } from "@/components/auth/SessionProvider";
 import { QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
 
 const ARRIVALS = Object.values(ARRIVAL_SERVICES);
@@ -46,6 +47,8 @@ export default function PatientQueueBox({
   index?: number;
 }) {
   const { ws } = useWorkstation();
+  // přiřazovat lístek a rozřazovat do čekáren smí recepce (a admin); ostatní jen vidí, kde pacient je
+  const canRoute = useSession().can("queue.reception");
   const { items, error, clearError, busy, run, loading } = useQueue([], 4000);
 
   const linked = items.find((i) => i.externalIdentifier === pid);
@@ -115,6 +118,7 @@ export default function PatientQueueBox({
             </div>
           </div>
 
+          {canRoute && (
           <div className="mt-4">
             <div className="mb-2 text-[13px] text-ui-muted">
               {linked ? "Přeřadit do" : "Po založení vyšetření se pošle sám, nebo ručně do"}
@@ -145,6 +149,7 @@ export default function PatientQueueBox({
               )}
             </div>
           </div>
+          )}
         </>
       )}
     </BentoTile>

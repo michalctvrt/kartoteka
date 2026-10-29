@@ -16,6 +16,7 @@ import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import GridLayout, { WidthProvider, type Layout } from "react-grid-layout";
 import { Check, GripVertical, LayoutDashboard, RotateCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/components/auth/SessionProvider";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_LAYOUTS, WIDGETS, type DashboardRole } from "./widgets";
 import { classify } from "./size";
@@ -63,7 +64,10 @@ export default function Dashboard({ role }: { role: DashboardRole }) {
 }
 
 function DashboardInner({ role }: { role: DashboardRole }) {
-  const [layout, setLayout] = useState<Layout[]>(() => loadLayout(role));
+  // okna, na která uživatel nemá oprávnění (např. laborant → „Nový pacient“), vůbec nenabízet
+  const { can } = useSession();
+  const allowed = (id: string) => !WIDGETS[id]?.cap || can(WIDGETS[id].cap!);
+  const [layout, setLayout] = useState<Layout[]>(() => loadLayout(role).filter((l) => allowed(l.i)));
   const [editing, setEditing] = useState(false);
 
   const visible = useMemo(() => new Set(layout.map((l) => l.i)), [layout]);
@@ -194,7 +198,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
             Zobrazená okna
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {Object.entries(WIDGETS).map(([id, d]) => (
+            {Object.entries(WIDGETS).filter(([id]) => allowed(id)).map(([id, d]) => (
               <label key={id} className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"

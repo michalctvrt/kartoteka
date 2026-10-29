@@ -2,6 +2,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "../styles/globals.css";
 import type { Metadata } from "next";
+import { SessionProvider } from "@/components/auth/SessionProvider";
 
 export const metadata: Metadata = {
   title: "Kartotéka – DC Flipper",
@@ -25,7 +26,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         />
       </head>
-      <body>{children}
+      <body>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

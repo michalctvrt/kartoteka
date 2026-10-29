@@ -31,6 +31,7 @@ import { usePatientNames } from "./usePatientNames";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import { useElementSize } from "@/components/dashboard/useElementSize";
 import { OperatorInput, QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
+import { useSession } from "@/components/auth/SessionProvider";
 
 /** Barvy modalit — stejné jako u vyšetření na kartě pacienta. */
 export const MODALITY_STYLE: Record<
@@ -391,6 +392,8 @@ function Row({
   children: React.ReactNode;
 }) {
   const pid = item.externalIdentifier ?? "";
+  // vyvolávat k ordinaci a posílat dál smí jen laborant / lékař / admin (lib/auth/roles.ts)
+  const { can } = useSession();
   return (
     <div
       className={cn(
@@ -416,7 +419,7 @@ function Row({
           {item.priority && <span className="text-red-600 font-semibold">PRIORITA</span>}
         </div>
       </div>
-      <div className="flex gap-1 shrink-0">{children}</div>
+      {can("queue.call") && <div className="flex gap-1 shrink-0">{children}</div>}
     </div>
   );
 }
