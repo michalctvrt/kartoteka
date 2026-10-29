@@ -12,9 +12,14 @@
  * Konfigurace v .env.local:
  *   BACKEND_BASE_URL=http://localhost:8080
  *   BACKEND_DEV_COOKIE=JSESSIONIDSSO=...; JSESSIONID=...
+ *   DEMO_MODE=1   → backend se nevolá vůbec, odpovídá lib/demo/backend.ts
+ *                   se smyšlenými daty (běh doma / bez firemní sítě)
  */
 
 import { NextRequest } from "next/server";
+import { demoBackend } from "@/lib/demo/backend";
+
+const DEMO = process.env.DEMO_MODE === "1";
 
 const BACKEND_BASE = process.env.BACKEND_BASE_URL ?? "http://localhost:8080";
 const BACKEND_PREFIX = "/CardFileWebWS";
@@ -39,6 +44,17 @@ export async function DELETE(req: NextRequest, ctx: Ctx) {
 }
 
 async function forward(req: NextRequest, ctx: Ctx) {
+  if (DEMO) {
+    const { path } = await ctx.params;
+    const text = ["GET", "HEAD", "DELETE"].includes(req.method) ? "" : await req.text();
+    let body: unknown = undefined;
+    try {
+      body = text ? JSON.parse(text) : undefined;
+    } catch {
+      /* ne-JSON tělo demo neřeší */
+    }
+    return demoBackend(req.method, path, body);
+  }
   if (!DEV_COOKIE) {
     return jsonError(
       500,

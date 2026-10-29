@@ -26,6 +26,11 @@ JSF kartotéky. Komunikace s uživatelem (Michal) **česky**; Michal zná JS, ba
 - Produkce: rozcestník `cftest.dc-flipper.cz`, Apache; nové UI má být pod `/CFLocalSyncWeb/m` nebo v EARu.
   Václav preferuje statické HTML+JS → Next API routes by v produkci nebyly. Nerozhodnuto.
 
+## Demo režim (doma, bez firemní sítě)
+- `DEMO_MODE=1` v `.env.local` → `app/api/cardfile/[...path]` odpovídá z `lib/demo/backend.ts` (smyšlení pacienti
+  a studie v paměti, filtry jako backend), SuperSaaS z `lib/demo/bookings.ts`. Návod pro domácí PC: `docs/DOMA.md`.
+  Nový endpoint, který frontend začne volat, je potřeba doplnit i do demo backendu.
+
 ## Vyvolávací systém Call250V (Kadlec elektronika) – pobočka Olomoucká
 Podrobně `CALL250V.md`. Shrnutí:
 - Kiosk → lístek s QR → recepce vyvolá → karta + vyšetření → čekárna RTG/UZ/MRI → laborant vyvolá
@@ -37,7 +42,7 @@ Podrobně `CALL250V.md`. Shrnutí:
   sloupec s číslem lístku ve `study` (Michal o něj žádá Václava).
 
 ## Plocha (dashboard) – `components/dashboard/`
-- react-grid-layout 1.5.3, 12 sloupců; povolené šířky/výšky v `grid.ts` (WIDTHS/HEIGHTS)
+- react-grid-layout 1.5.4 (1.5.3 obsahoval cizí soubory vč. binárky ip_fetcher), 12 sloupců; povolené šířky/výšky v `grid.ts` (WIDTHS/HEIGHTS)
 - Žádné odsouvání (`compactType=null`, `allowOverlap`), kolize řešíme sami: přizpůsobení mezeře (`fitAt`),
   vmáčknutí mezi okna (`makeRoom`), návrat když se nevejde; po každé změně `normalize` (žádné překryvy).
 - Mřížka si drží vlastní kopii layoutu → předáváme layout s `_v` (verze), NE remount (`key`) – remount
