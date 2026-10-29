@@ -211,11 +211,11 @@ export default function ReceptionTodayList() {
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex flex-col min-w-0">
                 <span className="flex items-center gap-1 text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
-                  <User className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                  <User className="w-3.5 h-3.5 text-brand-500 flex-shrink-0" />
                   <span className="truncate">{ev.title}</span>
                 </span>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                  <Clock className="w-3.5 h-3.5 text-blue-400" />
+                  <Clock className="w-3.5 h-3.5 text-brand-400" />
                   <span className="font-medium">{timeLabel}</span>
                   <span className="hidden sm:inline">•</span>
                   <span className="hidden sm:inline">

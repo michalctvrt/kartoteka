@@ -187,7 +187,7 @@ export function DateRangePicker({ from, to, onChange }: Props) {
               </button>
               <button
                 onClick={applyRange}
-                className="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                className="px-3 py-1 text-sm rounded-md bg-brand-600 text-white hover:bg-brand-700"
               >
                 Použít
               </button>

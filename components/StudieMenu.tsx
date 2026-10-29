@@ -36,7 +36,7 @@ export default function StudieMenu() {
         className={cn(
           "flex items-center justify-between w-full text-left px-5 py-2.5 rounded-md transition hover:bg-gray-100 dark:hover:bg-neutral-800",
           isOpen &&
-            "bg-gray-100 dark:bg-neutral-800 font-semibold text-blue-600"
+            "bg-gray-100 dark:bg-neutral-800 font-semibold text-brand-600"
         )}
       >
         <span className="flex items-center gap-2">
@@ -61,8 +61,8 @@ export default function StudieMenu() {
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors",
               isSearchPage
-                ? "text-blue-600 font-semibold bg-blue-50 dark:bg-neutral-800 border-l-2 border-blue-600 shadow-inner"
-                : "text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                ? "text-brand-600 font-semibold bg-brand-50 dark:bg-neutral-800 border-l-2 border-brand-600 shadow-inner"
+                : "text-gray-600 dark:text-gray-400 hover:text-brand-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
             )}
           >
             <Search className="w-3 h-3" />
@@ -75,8 +75,8 @@ export default function StudieMenu() {
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors",
               isStudyCard
-                ? "text-blue-600 font-semibold bg-blue-50 dark:bg-neutral-800 border-l-2 border-blue-600 shadow-inner"
-                : "text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                ? "text-brand-600 font-semibold bg-brand-50 dark:bg-neutral-800 border-l-2 border-brand-600 shadow-inner"
+                : "text-gray-600 dark:text-gray-400 hover:text-brand-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
             )}
           >
             <FileText className="w-3 h-3" />

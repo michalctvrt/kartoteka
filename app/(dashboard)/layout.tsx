@@ -115,12 +115,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen">
-      <div className="flex">
+    <div className="min-h-[calc(100vh-3rem)] flex flex-col">
+      <div className="flex flex-1">
         {/* SIDEBAR */}
-        <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 shadow-lg flex flex-col">
-          <div className="p-6 font-semibold text-lg border-b border-gray-200 dark:border-neutral-700 text-center">
-            Kartotéka 2.0
+        <aside className="w-64 shrink-0 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 shadow-sm flex flex-col">
+          {/* Logo DC Flipper (v tmavém režimu varianta s bílým textem) */}
+          <div className="px-5 py-5 border-b border-gray-200 dark:border-neutral-700">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="DC Flipper Radiodiagnostika" className="w-full h-auto dark:hidden" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-dark.svg" alt="DC Flipper Radiodiagnostika" className="w-full h-auto hidden dark:block" />
+            <div className="mt-1 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-600 dark:text-brand-300">
+              Kartotéka
+            </div>
           </div>
 
           {/* NAV */}
@@ -136,7 +143,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   onClick={() => router.push(item.href!)}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
                     pathname === item.href
-                      ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400"
+                      ? "bg-brand-600 text-white shadow-sm dark:bg-brand-700"
                       : "hover:bg-gray-100 dark:hover:bg-neutral-700"
                   }`}
                 >
@@ -161,8 +168,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* MAIN */}
         <div className="flex-1 flex flex-col">
-          <header className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-sm transition-colors">
-            <h1 className="text-lg font-semibold">{role} – Dashboard</h1>
+          <header className="flex items-center justify-between gap-4 px-6 py-3 border-b-4 border-brand-600 bg-white dark:bg-neutral-800 shadow-sm transition-colors">
+            <h1 className="text-lg font-bold text-brand-900 dark:text-brand-100">{role}</h1>
             {/* Vyvolávací systém: kolik kde čeká — vidět na každé stránce */}
             <div className="flex-1 flex justify-center">
               <QueueStatusBar
@@ -188,7 +195,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </button>
           </header>
 
-          <main className="flex-1 p-6 bg-gray-50 dark:bg-neutral-900 dark:text-gray-100 transition-colors duration-300">
+          <main className="flex-1 p-6 bg-[#f4f7f8] dark:bg-neutral-900 dark:text-gray-100 transition-colors duration-300">
             <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-md p-6 transition-colors">
               {children}
             </div>

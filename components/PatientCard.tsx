@@ -254,7 +254,7 @@ export default function PatientCard({ id }: { id: string }) {
         </p>
         <button
           onClick={() => router.back()}
-          className="mt-3 inline-block text-sm text-blue-600 hover:underline"
+          className="mt-3 inline-block text-sm text-brand-600 hover:underline"
         >
           Zpět
         </button>
@@ -295,7 +295,7 @@ export default function PatientCard({ id }: { id: string }) {
               setEditing(true);
               if (!hasDraft) setDraft({ ...patient });
             }}
-            className="px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="px-3 py-2 rounded-lg text-sm bg-brand-600 text-white hover:bg-brand-700"
           >
             Upravit údaje
           </button>

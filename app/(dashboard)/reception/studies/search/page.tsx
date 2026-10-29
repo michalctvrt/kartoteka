@@ -17,7 +17,7 @@ interface StudyRow {
 }
 
 const MODALITY_CLASSES: Record<string, string> = {
-  UZ: "bg-blue-100 text-blue-800",
+  UZ: "bg-brand-100 text-brand-800",
   RTG: "bg-orange-100 text-orange-800",
   MRI: "bg-purple-100 text-purple-800",
   CT: "bg-red-100 text-red-800",
@@ -220,7 +220,7 @@ export default function StudiesSearchPage() {
       <div className="flex gap-2 items-center">
         <button
           onClick={() => search()}
-          className="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+          className="px-3 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700"
         >
           Hledat
         </button>

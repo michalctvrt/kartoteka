@@ -85,7 +85,7 @@ export default function NewPatientBox() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-blue-600 text-white text-sm px-4 py-2 rounded-md disabled:opacity-60"
+          className="bg-brand-600 text-white text-sm px-4 py-2 rounded-md disabled:opacity-60"
         >
           {loading ? "Kontroluji…" : "Vyhledat"}
         </button>

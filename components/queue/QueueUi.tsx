@@ -10,7 +10,7 @@ export function TicketNo({ no, big }: { no?: string | null; big?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-md font-mono font-bold bg-blue-600 text-white",
+        "inline-flex items-center justify-center rounded-md font-mono font-bold bg-brand-600 text-white",
         big ? "text-3xl px-4 py-2 min-w-[5.5rem]" : "text-sm px-2 py-0.5 min-w-[3.5rem]"
       )}
     >
@@ -59,7 +59,7 @@ export function QueueButton({
 }) {
   const styles = {
     default: "bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600",
-    primary: "bg-blue-600 hover:bg-blue-700 text-white",
+    primary: "bg-brand-600 hover:bg-brand-700 text-white",
     danger: "bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
     success: "bg-green-600 hover:bg-green-700 text-white",
   }[variant];

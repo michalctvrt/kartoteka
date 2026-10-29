@@ -576,7 +576,7 @@ function BackButton() {
   return (
     <button
       onClick={() => router.push("/reception/patients")}
-      className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600"
+      className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600"
     >
       <ArrowLeft className="w-4 h-4" />
       Zpět na seznam pacientů

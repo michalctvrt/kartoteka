@@ -100,7 +100,7 @@ export default function ReceptionMessagesBlock() {
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           rows={3}
-          className="w-full border rounded-lg p-2 text-sm focus:ring focus:ring-blue-100"
+          className="w-full border rounded-lg p-2 text-sm focus:ring focus:ring-brand-100"
           placeholder="Např. 'Dnes jsme nestihli uklidit na RTG, prosím, udělejte to hned ráno.'"
         />
 
@@ -109,7 +109,7 @@ export default function ReceptionMessagesBlock() {
         <div className="flex justify-end mt-2">
           <button
             onClick={addNote}
-            className="bg-blue-600 text-white text-xs px-3 py-1 rounded-md hover:bg-blue-700 transition"
+            className="bg-brand-600 text-white text-xs px-3 py-1 rounded-md hover:bg-brand-700 transition"
           >
             Přidat vzkaz
           </button>

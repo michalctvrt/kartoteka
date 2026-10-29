@@ -170,7 +170,7 @@ function CalledHere({
   const cleanRc = rc.replace(/\D/g, "");
 
   return (
-    <div className="rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-950/40 p-3 space-y-3">
+    <div className="rounded-lg border-2 border-brand-500 bg-brand-50 dark:bg-brand-950/40 p-3 space-y-3">
       <div className="flex items-center gap-3">
         <TicketNo no={item.orderNumber} big />
         <div className="text-sm">
@@ -211,7 +211,7 @@ function CalledHere({
             <button
               type="submit"
               disabled={cleanRc.length < 9}
-              className="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-brand-600 text-white disabled:opacity-50"
             >
               Otevřít / založit kartu
             </button>

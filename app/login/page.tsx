@@ -42,7 +42,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded">
+        <button className="w-full bg-brand-600 text-white py-2 rounded">
           Přihlásit se
         </button>
 

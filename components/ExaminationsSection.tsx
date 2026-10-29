@@ -16,7 +16,7 @@ interface StudyRow {
 }
 
 const MODALITY_CLASSES: Record<string, string> = {
-  UZ: "bg-blue-100 text-blue-800",
+  UZ: "bg-sky-100 text-sky-800",
   RTG: "bg-orange-100 text-orange-800",
   MRI: "bg-purple-100 text-purple-800",
   CT: "bg-red-100 text-red-800",
@@ -210,7 +210,7 @@ export default function ExaminationsSection({ pid }: { pid: string }) {
                       </a>
                       <button
                         onClick={() => window.open(`/reception/studies/${s.id}`, "_blank")}
-                        className="inline-block px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
+                        className="inline-block px-3 py-1 text-xs rounded bg-brand-600 text-white hover:bg-brand-700"
                       >
                         Otevřít
                       </button>

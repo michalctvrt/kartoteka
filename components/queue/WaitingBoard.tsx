@@ -211,7 +211,7 @@ function TicketRow({
             )}
           </div>
           <div className="text-xs flex gap-2">
-            {status && <span className="font-semibold text-blue-700 dark:text-blue-300">{status}</span>}
+            {status && <span className="font-semibold text-brand-700 dark:text-brand-300">{status}</span>}
             <WaitTime created={item.createdDate} />
             {item.priority && <span className="text-red-600 font-semibold">PRIORITA</span>}
           </div>

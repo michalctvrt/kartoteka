@@ -46,7 +46,7 @@ export default function Lookup({
     <div className="space-y-1">
       <label className="text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>
       {value ? (
-        <div className="flex items-center justify-between gap-2 px-3 py-2 border rounded-md bg-blue-50 dark:bg-blue-950/40 text-sm">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border rounded-md bg-brand-50 dark:bg-brand-950/40 text-sm">
           <div className="min-w-0">
             <div className="font-medium truncate">{value.label}</div>
             {value.sub && <div className="text-xs text-gray-500 truncate">{value.sub}</div>}

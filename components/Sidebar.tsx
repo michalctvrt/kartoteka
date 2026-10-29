@@ -73,7 +73,7 @@ export default function SidebarMenu() {
           className={cn(
             "flex items-center justify-between w-full text-left px-5 py-2.5 rounded-md transition hover:bg-gray-100 dark:hover:bg-neutral-800",
             isPacientiOpen &&
-              "bg-gray-100 dark:bg-neutral-800 font-semibold text-blue-600"
+              "bg-gray-100 dark:bg-neutral-800 font-semibold text-brand-600"
           )}
         >
           <span className="flex items-center gap-2">
@@ -104,12 +104,12 @@ export default function SidebarMenu() {
               className={cn(
                 "relative flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left",
                 isCardActive
-                  ? "text-blue-700 font-semibold bg-blue-100 dark:bg-neutral-800 border-l-2 border-blue-600 shadow-inner"
-                  : "text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                  ? "text-brand-700 font-semibold bg-brand-100 dark:bg-neutral-800 border-l-2 border-brand-600 shadow-inner"
+                  : "text-gray-600 dark:text-gray-400 hover:text-brand-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
               )}
             >
               {isCardActive && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-brand-600 rounded-r-md"></span>
               )}
               <ClipboardList className="w-3 h-3" />
               <span className="flex items-center gap-1.5">
@@ -142,7 +142,7 @@ function SidebarItem({
       className={cn(
         "flex items-center gap-2 px-5 py-2.5 rounded-md transition hover:bg-gray-100 dark:hover:bg-neutral-800",
         isActive &&
-          "bg-gray-100 dark:bg-neutral-800 font-semibold text-blue-600"
+          "bg-gray-100 dark:bg-neutral-800 font-semibold text-brand-600"
       )}
     >
       {icon}
@@ -168,12 +168,12 @@ function SidebarSubItem({
       className={cn(
         "relative flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors",
         active
-          ? "text-blue-600 font-semibold bg-blue-50 dark:bg-neutral-800 border-l-2 border-blue-600 shadow-inner"
-          : "text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
+          ? "text-brand-600 font-semibold bg-brand-50 dark:bg-neutral-800 border-l-2 border-brand-600 shadow-inner"
+          : "text-gray-600 dark:text-gray-400 hover:text-brand-600 hover:bg-gray-50 dark:hover:bg-neutral-800"
       )}
     >
       {active && (
-        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+        <span className="absolute left-0 top-0 bottom-0 w-1 bg-brand-600 rounded-r-md"></span>
       )}
       {icon}
       {children}

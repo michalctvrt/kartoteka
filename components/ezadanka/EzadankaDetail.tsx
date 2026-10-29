@@ -292,7 +292,7 @@ function Badge({
       ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
       : variant === "danger"
       ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-      : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      : "bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300";
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${cls}`}

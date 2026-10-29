@@ -34,8 +34,8 @@ interface Props {
 
 const MODALITA_BARVY: Record<Modalita, string> = {
   RTG: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  UZ: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  SONO: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  UZ: "bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300",
+  SONO: "bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300",
   MR: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   MRI: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   CT: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",

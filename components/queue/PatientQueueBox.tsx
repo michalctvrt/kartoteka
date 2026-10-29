@@ -73,7 +73,7 @@ export default function PatientQueueBox({
     );
 
   return (
-    <Card className="border-blue-300 dark:border-blue-800">
+    <Card className="border-brand-300 dark:border-brand-800">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Ticket className="w-5 h-5" /> Vyvolávací systém
@@ -113,7 +113,7 @@ export default function PatientQueueBox({
                   const target = WAITING_SERVICES[m];
                   const current = linked && item.serviceId === target;
                   return (
-                    <span key={m} className={cn(m === kioskChoice && "ring-2 ring-blue-400 rounded-md")}>
+                    <span key={m} className={cn(m === kioskChoice && "ring-2 ring-brand-400 rounded-md")}>
                       <QueueButton
                         variant={m === kioskChoice ? "primary" : "default"}
                         disabled={busy || !!current}

@@ -9,7 +9,24 @@ module.exports = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		fontFamily: {
+  			sans: ['Montserrat', 'system-ui', 'sans-serif'],
+  		},
   		colors: {
+  			// DC Flipper brand (barvy z loga)
+  			brand: {
+  				50: '#eef7f8',
+  				100: '#dceff1',
+  				200: '#b7dcdc',
+  				300: '#8cc4cb',
+  				400: '#59a9b6',
+  				500: '#2f8ea3',
+  				600: '#1d7890',
+  				700: '#126c8b',
+  				800: '#124b5b',
+  				900: '#0c364b',
+  				950: '#082636',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
