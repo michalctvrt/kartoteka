@@ -34,7 +34,8 @@ import {
   WaitTime,
 } from "./QueueUi";
 
-export default function ReceptionQueuePanel() {
+/** `embedded` = bez vlastního rámečku a nadpisu (okno na ploše má svůj). */
+export default function ReceptionQueuePanel({ embedded = false }: { embedded?: boolean } = {}) {
   const router = useRouter();
   const { ws, update } = useWorkstation();
   const mock = useQueueMock();
@@ -53,13 +54,19 @@ export default function ReceptionQueuePanel() {
     if (first) run(() => queueApi.call(first.queueItemId, counter));
   };
 
+  const Outer = embedded ? "div" : Card;
+  const Header = embedded ? "div" : CardHeader;
+  const Content = embedded ? "div" : CardContent;
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Outer>
+      <Header className={embedded ? "pb-3" : "pb-3"}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <CardTitle className="flex items-center gap-2">
-            <Megaphone className="w-5 h-5" /> Vyvolávací systém
-          </CardTitle>
+          {!embedded && (
+            <CardTitle className="flex items-center gap-2">
+              <Megaphone className="w-5 h-5" /> Vyvolávací systém
+            </CardTitle>
+          )}
           <div className="flex items-center gap-3">
             <select
               value={counter}
@@ -75,9 +82,9 @@ export default function ReceptionQueuePanel() {
             <OperatorInput value={ws.operatorId} onChange={(v) => update({ operatorId: v })} />
           </div>
         </div>
-      </CardHeader>
+      </Header>
 
-      <CardContent className="space-y-4">
+      <Content className="space-y-4">
         {mock && <MockKiosk onDone={refresh} />}
         <QueueError error={error} onClose={clearError} />
 
@@ -146,8 +153,8 @@ export default function ReceptionQueuePanel() {
             Na zprávu: <b>{items.filter((i) => i.serviceId === REPORT_SERVICE).length}</b>
           </span>
         </div>
-      </CardContent>
-    </Card>
+      </Content>
+    </Outer>
   );
 }
 

@@ -180,3 +180,16 @@ body {
   background-color: rgba(59, 130, 246, 0.08);
   z-index: -1;
 }
+
+/* Přizpůsobitelná plocha (react-grid-layout) – barvy brandu */
+.react-grid-item.react-grid-placeholder {
+  background: #59a9b6;
+  opacity: 0.25;
+  border-radius: 0.75rem;
+}
+.react-grid-item > .react-resizable-handle {
+  z-index: 10;
+}
+.dark .react-grid-item > .react-resizable-handle::after {
+  border-color: rgba(255, 255, 255, 0.6);
+}

@@ -1,6 +1,6 @@
-import WaitingBoard from "@/components/queue/WaitingBoard";
+import Dashboard from "@/components/dashboard/Dashboard";
 
-/** Laborant i lékař: na prvním místě čekající pacienti (RTG / UZ / MRI). */
+/** Plocha s okny — každý si ji upraví přes „Upravit plochu“. */
 export default function Page() {
-  return <WaitingBoard />;
+  return <Dashboard role="doctor" />;
 }

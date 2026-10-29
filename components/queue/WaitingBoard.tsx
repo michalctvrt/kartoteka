@@ -62,11 +62,6 @@ const WAITING_IDS = MODALITIES.map((m) => WAITING_SERVICES[m]);
 export default function WaitingBoard() {
   const { ws, update } = useWorkstation();
   const mock = useQueueMock();
-  const { items, error, clearError, busy, run, loading } = useQueue(WAITING_IDS, 2000);
-  const names = usePatientNames(items.map((i) => i.externalIdentifier ?? "").filter(Boolean));
-
-  const call = (id: string, counter: string) => run(() => queueApi.call(id, counter));
-  const moveTo = (id: string, serviceId: string) => run(() => queueApi.patch(id, { serviceId }));
 
   return (
     <div className="space-y-4">
@@ -81,17 +76,36 @@ export default function WaitingBoard() {
         )}
       </div>
 
-      <QueueError error={error} onClose={clearError} />
-
       <div className="grid gap-4 lg:grid-cols-3">
-        {MODALITIES.map((m) => {
+        {MODALITIES.map((m) => (
+          <ModalityColumn key={m} m={m} />
+        ))}
+      </div>
+
+      <div className="flex justify-end">
+        <OperatorInput value={ws.operatorId} onChange={(v) => update({ operatorId: v })} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Jedna čekárna (RTG / UZ / MRI) — samostatně použitelná i jako okno na ploše.
+ * Všechny sloupce sdílejí jedno načítání fronty (viz useQueue).
+ */
+export function ModalityColumn({ m, className }: { m: Modality; className?: string }) {
+  const { items, error, clearError, busy, run, loading } = useQueue(WAITING_IDS, 2000);
+  const names = usePatientNames(items.map((i) => i.externalIdentifier ?? "").filter(Boolean));
+  const call = (id: string, counter: string) => run(() => queueApi.call(id, counter));
+  const moveTo = (id: string, serviceId: string) => run(() => queueApi.patch(id, { serviceId }));
+
           const inService = items.filter((i) => i.serviceId === WAITING_SERVICES[m]);
           const waiting = inService.filter((i) => i.status !== "called");
           const called = inService.filter((i) => i.status === "called");
           const st = MODALITY_STYLE[m];
 
-          return (
-            <section key={m} className={cn("rounded-xl border-2 overflow-hidden flex flex-col", st.border)}>
+  return (
+            <section className={cn("rounded-xl border-2 overflow-hidden flex flex-col", st.border, className)}>
               <header className={cn("px-4 py-3 flex items-center justify-between", st.header)}>
                 <span className="text-lg font-bold">{st.title}</span>
                 <span
@@ -104,9 +118,14 @@ export default function WaitingBoard() {
                   {waiting.length}
                 </span>
               </header>
+              {error && (
+                <div className="p-2">
+                  <QueueError error={error} onClose={clearError} />
+                </div>
+              )}
 
               {/* Čeká */}
-              <div className="p-3 space-y-2 flex-1">
+              <div className="p-3 space-y-2 flex-1 overflow-y-auto">
                 {loading ? (
                   <p className="text-sm text-gray-500">Načítám…</p>
                 ) : waiting.length === 0 ? (
@@ -173,14 +192,6 @@ export default function WaitingBoard() {
                 </div>
               )}
             </section>
-          );
-        })}
-      </div>
-
-      <div className="flex justify-end">
-        <OperatorInput value={ws.operatorId} onChange={(v) => update({ operatorId: v })} />
-      </div>
-    </div>
   );
 }
 
