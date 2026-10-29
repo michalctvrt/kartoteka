@@ -1,31 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ModalityTag, ReportStatus } from "@/components/study/StudyBits";
 import { StudyService } from "@/lib/api/generated/services/StudyService";
 import { OpenAPI } from "@/lib/api/generated/core/OpenAPI";
-
-interface StudyRow {
-  id: number;
-  pid: string;
-  studyDate?: string;
-  requestDate?: string;
-  description?: string;
-  flagCompleted?: boolean;
-  remark?: string;
-  idMedicalServiceCategory?: string;
-}
-
-const MODALITY_CLASSES: Record<string, string> = {
-  UZ: "bg-sky-100 text-sky-800",
-  RTG: "bg-orange-100 text-orange-800",
-  MRI: "bg-purple-100 text-purple-800",
-  CT: "bg-red-100 text-red-800",
-  OTHER: "bg-gray-200 text-gray-700",
-};
+import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 
 export default function ExaminationsSection({ pid }: { pid: string }) {
-  const [allStudies, setAllStudies] = useState<StudyRow[]>([]);
-  const [visibleStudies, setVisibleStudies] = useState<StudyRow[]>([]);
+  const router = useRouter();
+  const [allStudies, setAllStudies] = useState<StudyInfo[]>([]);
   const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +36,6 @@ export default function ExaminationsSection({ pid }: { pid: string }) {
   useEffect(() => {
     if (!pid) {
       setAllStudies([]);
-      setVisibleStudies([]);
       setLoading(false);
       return;
     }
@@ -66,16 +49,7 @@ export default function ExaminationsSection({ pid }: { pid: string }) {
           limitFilter: { first: 0, count: 500 },
         });
 
-        const data: StudyRow[] = (res.data ?? []).map((s: any) => ({
-          id: s.id,
-          pid: s.pid,
-          studyDate: s.studyDate,
-          requestDate: s.requestDate,
-          description: s.description,
-          flagCompleted: s.flagCompleted,
-          remark: s.remark,
-          idMedicalServiceCategory: s.idMedicalServiceCategory ?? "OTHER",
-        }));
+        const data = [...(res.data ?? [])];
 
         // nejnovější -> nejstarší
         data.sort((a, b) => {
@@ -86,10 +60,9 @@ export default function ExaminationsSection({ pid }: { pid: string }) {
 
         setAllStudies(data);
         setVisibleCount(10);
-        setVisibleStudies(data.slice(0, 10));
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Chyba načítání vyšetření:", err);
-        setError(err?.message ?? "Chyba");
+        setError((err as Error)?.message ?? "Chyba");
       } finally {
         setLoading(false);
       }
@@ -99,142 +72,121 @@ export default function ExaminationsSection({ pid }: { pid: string }) {
   }, [pid]);
 
   // filtr + stránkování
-  useEffect(() => {
-    const filtered = allStudies.filter(
-      (s) => filter === "ALL" || s.idMedicalServiceCategory === filter
-    );
-    setVisibleStudies(filtered.slice(0, visibleCount));
-  }, [filter, allStudies, visibleCount]);
+  const filteredStudies = useMemo(
+    () => allStudies.filter((s) => filter === "ALL" || s.idMedicalServiceCategory === filter),
+    [allStudies, filter]
+  );
+  const visibleStudies = filteredStudies.slice(0, visibleCount);
 
   const handleLoadMore = () => {
     setVisibleCount((c) => c + 10);
   };
 
-  const hasMore =
-    allStudies.filter((s) => filter === "ALL" || s.idMedicalServiceCategory === filter)
-      .length > visibleCount;
+  const hasMore = filteredStudies.length > visibleCount;
+
+  const count = (m: string) =>
+    m === "ALL" ? allStudies.length : allStudies.filter((s) => s.idMedicalServiceCategory === m).length;
 
   return (
-    <div className="bg-white dark:bg-neutral-800 border rounded-xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium border-b pb-2">Vyšetření</h2>
-        {/* (volitelně) další kontrolky zde */}
-      </div>
+    <section className="rounded-lg border border-ui-line" aria-labelledby="vysetreni">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ui-rule px-5 py-3">
+        <h2 id="vysetreni" className="text-base font-semibold">
+          Vyšetření <span className="font-normal text-ui-muted">{loading ? "" : allStudies.length}</span>
+        </h2>
+        {/* filtr modality – jen modality, které pacient má */}
+        <div role="radiogroup" aria-label="Modalita" className="flex h-9 items-center rounded-lg bg-ui-raised p-1">
+          {["ALL", "RTG", "UZ", "MRI"]
+            .filter((m) => m === "ALL" || count(m) > 0)
+            .map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={filter === m}
+                onClick={() => {
+                  setVisibleCount(10);
+                  setFilter(m);
+                }}
+                className={
+                  filter === m
+                    ? "h-7 rounded-md border border-ui-line bg-ui-sheet px-3 text-[13px] font-medium"
+                    : "h-7 rounded-md px-3 text-[13px] text-ui-muted hover:text-ui-ink"
+                }
+              >
+                {m === "ALL" ? "Vše" : m} <span className="text-ui-muted">{count(m)}</span>
+              </button>
+            ))}
+        </div>
+      </header>
 
-      {error && <div className="text-sm text-red-600 mb-3">Chyba: {error}</div>}
+      {error && <div className="px-5 py-3 text-sm">Vyšetření se nepodařilo načíst: {error}</div>}
 
       {loading ? (
-        <div className="text-sm text-gray-600">Načítám vyšetření...</div>
+        <div className="px-5 py-4 text-sm text-ui-muted">Načítám vyšetření…</div>
       ) : visibleStudies.length === 0 ? (
-        <div className="text-sm text-gray-600">Žádná vyšetření k zobrazení.</div>
+        <div className="px-5 py-4 text-sm text-ui-muted">Pacient zatím nemá žádné vyšetření.</div>
       ) : (
-        <div className="overflow-x-auto">
-          {/* table-fixed: zamkne rozložení sloupců */}
-          <table className="w-full text-sm table-fixed">
-            <thead>
-              {/* hlavní hlavička */}
-              <tr className="text-left border-b dark:border-neutral-700">
-                <th className="p-2" style={{ width: "6rem" }}>ID</th>
-                <th className="p-2 whitespace-nowrap" style={{ width: "12rem" }}>Datum</th>
-                <th className="p-2" style={{ width: "7rem" }}>Typ</th>
-                <th className="p-2">Popis</th>
-                <th className="p-2" style={{ width: "8rem" }}>Stav</th>
-                <th className="p-2 text-right" style={{ width: "11rem" }}>Akce</th>
-              </tr>
-
-              {/* druhý řádek hlavičky: filtr umístěný přímo nad sloupcem "Typ" */}
-              <tr className="text-left border-b border-transparent">
-                <th className="p-2" /> {/* ID - prázdné */}
-                <th className="p-2" /> {/* Datum - prázdné */}
-                <th className="p-2">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 dark:text-gray-400">Filtr:</label>
-                    <select
-                      className="px-2 py-1 border rounded bg-white dark:bg-neutral-900 text-sm"
-                      value={filter}
-                      onChange={(e) => {
-                        setVisibleCount(10);
-                        setFilter(e.target.value);
-                      }}
-                    >
-                      <option value="ALL">Vše</option>
-                      <option value="UZ">Ultrazvuk (UZ)</option>
-                      <option value="RTG">RTG</option>
-                      {/* rozšiř podle potřeby */}
-                    </select>
+        <table className="w-full text-sm">
+          <thead className="hidden text-left text-xs text-ui-muted lg:table-header-group">
+            <tr className="border-b border-ui-rule">
+              <th className="px-5 py-2 font-normal">Vyšetřeno</th>
+              <th className="px-5 py-2 font-normal">Vyšetření</th>
+              <th className="px-5 py-2 font-normal">Popis</th>
+              <th className="px-5 py-2 text-right font-normal">Číslo studie</th>
+              <th className="w-16 px-5 py-2 text-right font-normal">Zpráva</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleStudies.map((s) => (
+              <tr
+                key={s.id}
+                tabIndex={0}
+                onClick={() => router.push(`/reception/studies/${s.id}`)}
+                onKeyDown={(e) => e.key === "Enter" && router.push(`/reception/studies/${s.id}`)}
+                className="cursor-pointer border-b border-ui-rule align-top last:border-0 hover:bg-ui-raised focus-visible:bg-ui-raised focus-visible:outline-none"
+              >
+                <td className="whitespace-nowrap px-5 py-3">{formatDate(s.studyDate ?? s.requestDate)}</td>
+                <td className="px-5 py-3">
+                  <ModalityTag modality={s.idMedicalServiceCategory} />
+                  <div className="mt-1 hidden max-w-[260px] truncate text-[13px] text-ui-muted lg:block">
+                    {s.medicalDiagnosisRequestedInfo
+                      ? `${s.idMedicalDiagnosisRequested} ${s.medicalDiagnosisRequestedInfo.description ?? ""}`
+                      : "Bez diagnózy"}
                   </div>
-                </th>
-                <th className="p-2" /> {/* Popis - prázdné */}
-                <th className="p-2" /> {/* Stav - prázdné */}
-                <th className="p-2" /> {/* Akce - prázdné */}
+                </td>
+                <td className="px-5 py-3">
+                  <ReportStatus study={s} />
+                  {s.description && (
+                    <div className="mt-1 hidden max-w-[40ch] truncate text-[13px] text-ui-muted lg:block">
+                      {shortDesc(s.description)}
+                    </div>
+                  )}
+                </td>
+                <td className="hidden px-5 py-3 text-right lg:table-cell">{s.uid}</td>
+                <td className="px-5 py-3 text-right">
+                  <a
+                    href={`${OpenAPI.BASE}/study/${s.id}/documentData.pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-ui-primary hover:underline"
+                  >
+                    PDF
+                  </a>
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {visibleStudies.map((s) => {
-                const modality = s.idMedicalServiceCategory ?? "OTHER";
-                const cls = MODALITY_CLASSES[modality] ?? MODALITY_CLASSES.OTHER;
-
-                return (
-                  <tr key={s.id} className="border-b dark:border-neutral-800 align-top">
-                    <td className="p-2 align-top">{s.id}</td>
-
-                    <td className="p-2 align-top whitespace-nowrap">
-                      {formatDate(s.studyDate ?? s.requestDate)}
-                    </td>
-
-                    <td className="p-2 align-top">
-                      <span className={`inline-block w-20 text-center px-2 py-1 text-xs rounded ${cls}`}>
-                        {modality}
-                      </span>
-                    </td>
-
-                    <td className="p-2 align-top">
-                      <div className="max-w-[48ch] truncate" title={ (s.description ?? s.remark) ?? ""}>
-                        {shortDesc(s.description ?? s.remark) || "—"}
-                      </div>
-                    </td>
-
-                    <td className="p-2 align-top">
-                      {s.flagCompleted ? "Dokončeno" : "Probíhá"}
-                    </td>
-
-                    <td className="p-2 text-right align-top">
-                      <a
-                        href={`${OpenAPI.BASE}/study/${s.id}/documentData.pdf`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-block px-3 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 mr-2"
-                      >
-                        PDF
-                      </a>
-                      <button
-                        onClick={() => window.open(`/reception/studies/${s.id}`, "_blank")}
-                        className="inline-block px-3 py-1 text-xs rounded bg-brand-600 text-white hover:bg-brand-700"
-                      >
-                        Otevřít
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
 
-      <div className="mt-4 flex items-center justify-center">
-        {hasMore ? (
-          <button
-            onClick={handleLoadMore}
-            className="px-4 py-2 rounded-md bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200 dark:hover:bg-neutral-600 text-sm"
-          >
+      {hasMore && (
+        <div className="border-t border-ui-rule px-5 py-3">
+          <button type="button" onClick={handleLoadMore} className="text-sm text-ui-primary hover:underline">
             Zobrazit další
           </button>
-        ) : (
-          allStudies.length > 0 && <div className="text-sm text-gray-500">Žádná další vyšetření.</div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </section>
   );
 }
