@@ -83,6 +83,12 @@ Podrobně `CALL250V.md`. Shrnutí:
   Správa: `/admin/staff`. Zadání pro Václava: `docs/ROLE-BACKEND.md` (GET /me, /staff, kontrola oprávnění na backendu).
 - Frontend jen schovává – skutečná ochrana musí být na backendu.
 
+## Nastavení (`/settings`)
+- Bento: Toto pracoviště (pult recepce, operátor Call250V, pracoviště pro nová vyšetření – localStorage tohoto PC),
+  Vzhled (`lib/prefs.ts`: téma světlé/tmavé/podle systému, animace plné/omezené → `html[data-motion]` + MotionConfig),
+  Plocha (obnovit výchozí rozložení), Stav systému (`app/api/status`), Můj účet (role a skutečná oprávnění).
+- Sekce podle oprávnění; ukládá se hned, bez tlačítka Uložit.
+
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).

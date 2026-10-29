@@ -18,6 +18,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig } from "framer-motion";
+import { usePrefs } from "@/lib/prefs";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -32,37 +33,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (ready && !user) router.replace("/login");
   }, [ready, user, router]);
 
-  // 🌗 Téma. Server vždy "light" (žádný přístup k localStorage).
-  // V useEffect doplníme uloženou hodnotu na klientovi → vyhneme se hydration mismatchi.
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Vzhled z Nastavení (lib/prefs.ts): téma + omezení animací.
+  // Na serveru vždy světlé – třída se doplní až na klientovi (žádný hydration mismatch).
+  const { prefs, update: updatePrefs, dark } = usePrefs();
+  const theme: "light" | "dark" = dark ? "dark" : "light";
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("theme") as "light" | "dark" | null;
-      if (saved) setTheme(saved);
-    } catch {
-      /* ignore */
-    }
-  }, []);
+    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.dataset.motion = prefs.motion;
+  }, [dark, prefs.motion]);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    try {
-      localStorage.setItem("theme", newTheme);
-    } catch {}
-  };
+  // rychlý přepínač v menu: vždy na opačné téma (zruší „podle systému“)
+  const toggleTheme = () => updatePrefs({ theme: dark ? "light" : "dark" });
 
   const boardHref = ws === "doctor" ? "/doctor" : ws === "lab" ? "/lab" : "/reception";
   const allowed = canVisit(pathname);
 
   return (
-    // reducedMotion="user": kdo má v systému vypnuté animace, uvidí jen prolnutí bez pohybu
-    <MotionConfig reducedMotion="user">
+    // „user“ = podle systému; „always“ = v Nastavení zvoleno Omezené animace
+    <MotionConfig reducedMotion={prefs.motion === "reduced" ? "always" : "user"}>
     <div className="flex min-h-screen bg-ui-frame text-ui-ink">
       {/* MENU – desktop */}
       <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 lg:block">

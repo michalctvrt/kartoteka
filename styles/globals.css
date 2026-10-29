@@ -136,6 +136,15 @@ body {
   --ui-bevel: rgba(255, 255, 255, 0.04);
   --ui-recess: rgba(0, 0, 0, 0.35);
 }
+/* Nastavení → Vzhled → Omezené animace: bez přechodů a pulzování (framer-motion řeší MotionConfig) */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+}
+
 @layer components {
   .ui-tile {
     @apply rounded-xl border border-ui-line bg-ui-sheet;
