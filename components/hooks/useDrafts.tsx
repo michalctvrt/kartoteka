@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 
+export function isValidDraftId(id: string | undefined | null): id is string {
+  return !!id && id !== "undefined" && id !== "null";
+}
+
 /**
  * useDrafts – sleduje drafty pacientů v localStorage
  * vrací: { map, count, latestId, rescan }
@@ -12,16 +16,24 @@ export default function useDrafts() {
   const scan = useCallback(() => {
     try {
       const next: Record<string, { ts: number }> = {};
+      const junk: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (!key) continue;
-        if (key.startsWith("patient-draft:") && !key.endsWith(":meta")) {
-          const id = key.split(":")[1];
+        if (!key.startsWith("patient-draft:")) continue;
+        const id = key.split(":")[1];
+        // drafty bez platného PID (např. "undefined") nejdou otevřít → smazat
+        if (!isValidDraftId(id)) {
+          junk.push(key);
+          continue;
+        }
+        if (!key.endsWith(":meta")) {
           const meta = localStorage.getItem(`patient-draft:${id}:meta`);
           const ts = meta ? (JSON.parse(meta).ts as number) : 0;
           next[id] = { ts };
         }
       }
+      junk.forEach((k) => localStorage.removeItem(k));
 
       // aktualizuj jen pokud se změnilo
       setMap((prev) => {

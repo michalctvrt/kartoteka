@@ -131,6 +131,12 @@ export default function PatientDetailPage({
     setIsEditing(true);
   }, [hasNoData, draft, pid, setDraft]);
 
+  // Pacient v kartotéce není → případný draft pro toto RČ je k ničemu
+  // (jinak by v menu navždy svítil puntík „rozpracovaná karta“)
+  useEffect(() => {
+    if (loadState === "not-found" && hasDraft) discardDraft();
+  }, [loadState, hasDraft, discardDraft]);
+
   // ─── Načti pacienta z backendu (+ paralelně název pojišťovny) ───
   useEffect(() => {
     let cancelled = false;

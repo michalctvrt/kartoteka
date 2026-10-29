@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { isValidDraftId } from "@/components/hooks/useDrafts";
 
 export function usePatientDraft<T extends object | null>(
   patientId: string,
@@ -38,12 +39,13 @@ export function usePatientDraft<T extends object | null>(
         setLastSavedAt(null);
         return;
       }
+      if (!isValidDraftId(patientId)) return; // bez PID neukládat
       localStorage.setItem(key, JSON.stringify(obj));
       const meta = { ts: Date.now() };
       localStorage.setItem(metaKey, JSON.stringify(meta));
       setLastSavedAt(meta.ts);
     },
-    [key, metaKey]
+    [key, metaKey, patientId]
   );
 
   const setDraft = useCallback(
