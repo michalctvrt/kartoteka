@@ -89,6 +89,12 @@ Podrobně `CALL250V.md`. Shrnutí:
   Plocha (obnovit výchozí rozložení), Stav systému (`app/api/status`), Můj účet (role a skutečná oprávnění).
 - Sekce podle oprávnění; ukládá se hned, bez tlačítka Uložit.
 
+## Kalendář objednávek (`/reception/calendar`)
+- Vlastní (react-big-calendar odstraněn): `components/calendar/useBookings.ts` (SuperSaaS, rozvrh UZ Vídeňská),
+  `TimeGrid.tsx` (Den/Týden, souběžné vedle sebe, čára „teď“, blok ≥ 3 h = blokace šrafovaně).
+- Bento: Dnes (2 sl.), Další na řadě, Tento týden; kalendář (3 sl.) + detail (bez výběru = další na řadě),
+  „Vyhledat v kartotéce“ → `/reception/patients?q=jméno`. Šipky ← → posouvají den/týden.
+
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).

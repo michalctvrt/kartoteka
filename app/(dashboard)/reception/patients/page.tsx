@@ -32,6 +32,12 @@ export default function PatientsListPage() {
   const { map: drafts } = useDrafts();
 
   const [query, setQuery] = useState("");
+
+  // ?q= z jiných obrazovek (např. „Vyhledat v kartotéce“ v kalendáři objednávek)
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) queueMicrotask(() => setQuery(q));
+  }, []);
   const [results, setResults] = useState<PatientInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
