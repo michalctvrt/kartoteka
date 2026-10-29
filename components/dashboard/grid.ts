@@ -9,8 +9,8 @@ import type { Layout } from "react-grid-layout";
 export const COLS = 12;
 /** Šířky: ¼, ⅓, ½, ⅔, ¾, celá */
 export const WIDTHS = [3, 4, 6, 8, 9, 12];
-/** Výšky v řádcích (řádek ≈ 46 px): malá … extra velká */
-export const HEIGHTS = [4, 6, 9, 13, 18];
+/** Výšky v řádcích (řádek ≈ 46 px): od malé (~170 px) po přes celou obrazovku */
+export const HEIGHTS = [4, 6, 9, 13, 18, 24];
 
 interface Mins {
   minW?: number;

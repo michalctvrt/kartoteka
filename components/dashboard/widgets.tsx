@@ -9,6 +9,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { WidgetSize } from "./size";
 import type { Layout } from "react-grid-layout";
 import ReceptionQueuePanel from "@/components/queue/ReceptionQueuePanel";
 import { ModalityColumn } from "@/components/queue/WaitingBoard";
@@ -20,7 +21,8 @@ export type DashboardRole = "reception" | "lab" | "doctor";
 
 export interface WidgetDef {
   title: string;
-  render: () => ReactNode;
+  /** Obsah okna; `size` = podoba podle aktuální velikosti (S / M / L). */
+  render: (size: WidgetSize) => ReactNode;
   /** Výchozí a minimální velikost v mřížce */
   w: number;
   h: number;
@@ -33,38 +35,38 @@ export interface WidgetDef {
 export const WIDGETS: Record<string, WidgetDef> = {
   "waiting-RTG": {
     title: "Čekárna RTG",
-    render: () => <ModalityColumn m="RTG" className="h-full" />,
-    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
+    render: (sz) => <ModalityColumn m="RTG" className="h-full" size={sz} />,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
   },
   "waiting-UZ": {
     title: "Čekárna UZ",
-    render: () => <ModalityColumn m="UZ" className="h-full" />,
-    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
+    render: (sz) => <ModalityColumn m="UZ" className="h-full" size={sz} />,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
   },
   "waiting-MRI": {
     title: "Čekárna MRI",
-    render: () => <ModalityColumn m="MRI" className="h-full" />,
-    w: 4, h: 13, minW: 3, minH: 6, frameless: true,
+    render: (sz) => <ModalityColumn m="MRI" className="h-full" size={sz} />,
+    w: 4, h: 13, minW: 3, minH: 4, frameless: true,
   },
   "queue-reception": {
     title: "Vyvolávací systém – recepce",
-    render: () => <ReceptionQueuePanel embedded />,
-    w: 6, h: 13, minW: 6, minH: 13,
+    render: (sz) => <ReceptionQueuePanel embedded size={sz} />,
+    w: 6, h: 13, minW: 3, minH: 4,
   },
   "today-orders": {
     title: "Dnešní objednávky",
-    render: () => <ReceptionTodayList />,
-    w: 6, h: 18, minW: 4, minH: 13,
+    render: (sz) => <ReceptionTodayList size={sz} />,
+    w: 6, h: 18, minW: 3, minH: 4,
   },
   "new-patient": {
     title: "Nový pacient",
     render: () => <NewPatientBox />,
-    w: 6, h: 4, minW: 4, minH: 4,
+    w: 6, h: 4, minW: 3, minH: 4,
   },
   messages: {
     title: "Aktuality a provozní zprávy",
-    render: () => <ReceptionMessagesBlock />,
-    w: 6, h: 13, minW: 4, minH: 13,
+    render: (sz) => <ReceptionMessagesBlock size={sz} />,
+    w: 6, h: 9, minW: 3, minH: 4,
   },
 };
 
@@ -82,7 +84,7 @@ export const DEFAULT_LAYOUTS: Record<DashboardRole, Layout[]> = {
     at("queue-reception", 0, 0, 6, 13),
     at("today-orders", 6, 0, 6, 18),
     at("new-patient", 0, 13, 6, 4),
-    at("messages", 0, 17, 6, 13),
+    at("messages", 0, 17, 6, 9),
   ],
   lab: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
   doctor: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],

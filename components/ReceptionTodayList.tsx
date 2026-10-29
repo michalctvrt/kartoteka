@@ -6,6 +6,7 @@ import { format, isToday, differenceInMinutes } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock, User, Check, X, RotateCcw } from "lucide-react";
 import React from "react";
+import { FULL, type WidgetSize } from "@/components/dashboard/size";
 
 interface SuperSaaSBooking {
   id: string | number;
@@ -33,7 +34,12 @@ type DerivedStatus = "scheduled" | "late" | "absent" | "checked_in" | "removed";
 
 const LS_KEY = "rt_statuses_v9";
 
-export default function ReceptionTodayList() {
+/**
+ * `size` = podoba podle velikosti okna na ploše:
+ *  S – souhrn (počet čekajících objednávek + kdo je další),
+ *  M – jen aktivní objednávky, L – vše (aktivní, vyřízeno, zrušeno).
+ */
+export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize } = {}) {
   const pathname = usePathname();
 
   // ✅ Inicializace stavu z localStorage
@@ -230,6 +236,72 @@ export default function ReceptionTodayList() {
       })}
     </ul>
   );
+
+  // ── S: souhrn ──
+  if (size.size === "S") {
+    const next = activeEvents[0];
+    return (
+      <div className="h-full flex items-center gap-4">
+        <div className="text-center shrink-0">
+          <div className="text-4xl font-bold text-brand-700 dark:text-brand-300 leading-none">
+            {activeEvents.length}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">aktivních</div>
+        </div>
+        <div className="min-w-0 flex-1 text-sm">
+          {next ? (
+            <>
+              <div className="text-xs text-gray-500">Další</div>
+              <div className="font-medium truncate">{next.title}</div>
+              <div className="text-xs text-gray-500 truncate">
+                {format(new Date(next.start), "HH:mm")} · {truncate(next.details["Vyšetření"], 40)}
+              </div>
+            </>
+          ) : (
+            <div className="text-gray-500">Žádné aktivní objednávky.</div>
+          )}
+          <div className="text-[11px] text-gray-500 mt-1">
+            ✓ {doneEvents.length} vyřízeno · ✕ {removedEvents.length} zrušeno
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const activeActions = (ev: ApiEvent) => {
+    const status = deriveStatus(ev);
+    return (
+      <div className="flex items-center gap-2">
+        {status !== "checked_in" && (
+          <button
+            onClick={() => markCheckedIn(ev.id)}
+            title="Označit jako přítomný"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-green-700 hover:bg-green-100 transition"
+          >
+            <Check className="w-4 h-4" />
+          </button>
+        )}
+        {status === "absent" && (
+          <button
+            onClick={() => markRemoved(ev.id)}
+            title="Zrušit"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-red-700 hover:bg-red-100 transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  // ── M: jen aktivní objednávky, bez rámečků ──
+  if (size.size === "M") {
+    return activeEvents.length === 0 ? (
+      <p className="text-gray-500 text-sm">Žádné aktivní objednávky.</p>
+    ) : (
+      <div className="-mx-3 -mb-3">{renderList(activeEvents, "bg-white dark:bg-transparent", activeActions)}</div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FULL, type WidgetSize } from "@/components/dashboard/size";
 
 type Message = {
   id: number;
@@ -10,7 +11,11 @@ type Message = {
   created: string;
 };
 
-export default function ReceptionMessagesBlock() {
+/**
+ * `size`: S – poslední zpráva od vedení, M – zprávy od vedení,
+ * L – zprávy + vzkazy pro další směnu.
+ */
+export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetSize } = {}) {
   const [adminMessages, setAdminMessages] = useState<Message[]>([]);
   const [notes, setNotes] = useState<Message[]>([]);
   const [newNote, setNewNote] = useState("");
@@ -59,6 +64,26 @@ export default function ReceptionMessagesBlock() {
     setNotes((prev) => prev.filter((n) => n.id !== id));
   }
 
+  // ── S: jen nejnovější zpráva ──
+  if (size.size === "S") {
+    const last = adminMessages[adminMessages.length - 1];
+    return (
+      <div className="h-full flex flex-col justify-center text-sm">
+        {last ? (
+          <>
+            <p className="line-clamp-3">{last.text}</p>
+            <span className="text-xs text-gray-400 mt-1">
+              — {last.author}, {last.created}
+              {adminMessages.length > 1 && ` · +${adminMessages.length - 1} další`}
+            </span>
+          </>
+        ) : (
+          <p className="text-gray-400">Na dnešek nejsou žádné zprávy.</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* 🔸 Admin zprávy */}
@@ -88,6 +113,7 @@ export default function ReceptionMessagesBlock() {
         )}
       </div>
 
+      {size.size === "L" && (<>
       <hr />
 
       {/* ✏️ Vzkazy pro další směnu */}
@@ -147,6 +173,7 @@ export default function ReceptionMessagesBlock() {
           )}
         </div>
       </div>
+      </>)}
     </div>
   );
 }

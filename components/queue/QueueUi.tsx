@@ -80,21 +80,36 @@ export function QueueButton({
 }
 
 /** Jen v simulaci: nahrazuje kiosk u vstupu (tisk lístku). */
-export function MockKiosk({ onDone }: { onDone: () => void }) {
+export function MockKiosk({ onDone, compact = false }: { onDone: () => void; compact?: boolean }) {
+  const add = async (m: (typeof MODALITIES)[number]) => {
+    await queueApi.add(ARRIVAL_SERVICES[m]);
+    onDone();
+  };
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-300">
+        <span className="font-semibold">Simulace kiosku:</span>
+        {MODALITIES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => add(m)}
+            className="px-2 py-0.5 rounded border border-dashed border-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100"
+          >
+            + {m}
+          </button>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="rounded-md border border-dashed border-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 text-xs space-y-2">
       <div className="font-semibold text-amber-800 dark:text-amber-300">
         SIMULACE – Call250V není připojený. Kiosk u vstupu:
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {MODALITIES.map((m) => (
-          <QueueButton
-            key={m}
-            onClick={async () => {
-              await queueApi.add(ARRIVAL_SERVICES[m]);
-              onDone();
-            }}
-          >
+          <QueueButton key={m} onClick={() => add(m)}>
             Vytisknout lístek {m}
           </QueueButton>
         ))}

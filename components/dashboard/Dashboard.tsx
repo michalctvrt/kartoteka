@@ -18,6 +18,8 @@ import { Check, GripVertical, LayoutDashboard, RotateCcw, X } from "lucide-react
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_LAYOUTS, WIDGETS, type DashboardRole } from "./widgets";
+import { classify } from "./size";
+import { useElementSize } from "./useElementSize";
 import { COLS, collides, findSpot, fitAt, makeRoom, normalize, snapSize } from "./grid";
 
 const Grid = WidthProvider(GridLayout);
@@ -68,8 +70,13 @@ function DashboardInner({ role }: { role: DashboardRole }) {
 
   // Knihovna si drží vlastní kopii rozložení a převezme naše jen když se
   // „liší“ — při vrácení okna zpět by na obrazovce zůstal překryv. Proto
-  // po každé změně mřížku znovu sestavíme (rev) z našeho (správného) stavu.
+  // položkám přidáváme číslo verze (_v): mřížka pak vždy převezme náš
+  // (správný) stav, ale nesestavuje se znovu (žádné poskočení oken).
   const [rev, setRev] = useState(0);
+  const gridLayout = useMemo(
+    () => layout.map((l) => ({ ...l, _v: rev }) as Layout),
+    [layout, rev]
+  );
 
   const update = (next: Layout[]) => {
     // pojistka: nic se nesmí překrývat ani mít nepovolenou velikost
@@ -211,9 +218,8 @@ function DashboardInner({ role }: { role: DashboardRole }) {
         </p>
       ) : (
         <Grid
-          key={rev}
           className={cn("-mx-2", editing && "dashboard-editing")}
-          layout={layout}
+          layout={gridLayout}
           cols={12}
           rowHeight={30}
           margin={[16, 16]}
@@ -267,15 +273,34 @@ function DashboardInner({ role }: { role: DashboardRole }) {
                       {editing && <RemoveButton onClick={() => toggle(l.i)} />}
                     </div>
                   )}
-                  <div className={cn("flex-1 min-h-0 overflow-auto", !d.frameless && "p-3")}>
-                    {d.render()}
-                  </div>
+                  <WidgetBody d={d} />
                 </div>
               </div>
             );
           })}
         </Grid>
       )}
+    </div>
+  );
+}
+
+/**
+ * Obsah okna: změří se jeho skutečná velikost a obsah dostane podobu
+ * S / M / L (živě i během tažení za roh). Malé okno se nikdy neposouvá.
+ */
+function WidgetBody({ d }: { d: (typeof WIDGETS)[string] }) {
+  const [ref, px] = useElementSize<HTMLDivElement>();
+  const size = classify(px.width, px.height);
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex-1 min-h-0",
+        size.size === "S" ? "overflow-hidden" : "overflow-auto",
+        !d.frameless && "p-3"
+      )}
+    >
+      {px.width > 0 && d.render(size)}
     </div>
   );
 }

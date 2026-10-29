@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { Megaphone, RotateCcw, FileCheck2, UserRound, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { queueApi } from "@/lib/call250v/browser";
+import { cn } from "@/lib/utils";
 import {
   MODALITIES,
   RECEPTION_COUNTERS,
@@ -25,6 +26,7 @@ import {
 import type { QueueItem } from "@/lib/call250v/types";
 import { useQueue, useQueueMock } from "./useQueue";
 import { useWorkstation } from "./useWorkstation";
+import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import {
   MockKiosk,
   OperatorInput,
@@ -34,8 +36,15 @@ import {
   WaitTime,
 } from "./QueueUi";
 
-/** `embedded` = bez vlastního rámečku a nadpisu (okno na ploše má svůj). */
-export default function ReceptionQueuePanel({ embedded = false }: { embedded?: boolean } = {}) {
+/**
+ * `embedded` = bez vlastního rámečku a nadpisu (okno na ploše má svůj).
+ * `size` = podoba podle velikosti okna: S souhrn, M bez přehledu čekáren,
+ * L vše; široké okno = dva sloupce (vlevo pult, vpravo čekající).
+ */
+export default function ReceptionQueuePanel({
+  embedded = false,
+  size = FULL,
+}: { embedded?: boolean; size?: WidgetSize } = {}) {
   const router = useRouter();
   const { ws, update } = useWorkstation();
   const mock = useQueueMock();
@@ -54,92 +63,108 @@ export default function ReceptionQueuePanel({ embedded = false }: { embedded?: b
     if (first) run(() => queueApi.call(first.queueItemId, counter));
   };
 
-  const Outer = embedded ? "div" : Card;
-  const Header = embedded ? "div" : CardHeader;
-  const Content = embedded ? "div" : CardContent;
+  const openCard = (it: QueueItem, pid: string) =>
+    router.push(
+      `/reception/patients/${encodeURIComponent(pid)}?ticket=${encodeURIComponent(it.queueItemId)}`
+    );
 
-  return (
-    <Outer>
-      <Header className={embedded ? "pb-3" : "pb-3"}>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {!embedded && (
-            <CardTitle className="flex items-center gap-2">
-              <Megaphone className="w-5 h-5" /> Vyvolávací systém
-            </CardTitle>
-          )}
-          <div className="flex items-center gap-3">
-            <select
-              value={counter}
-              onChange={(e) => update({ receptionCounter: e.target.value })}
-              className="px-2 py-1 border rounded text-sm bg-white dark:bg-neutral-900"
-            >
-              {RECEPTION_COUNTERS.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <OperatorInput value={ws.operatorId} onChange={(v) => update({ operatorId: v })} />
-          </div>
-        </div>
-      </Header>
-
-      <Content className="space-y-4">
-        {mock && <MockKiosk onDone={refresh} />}
+  // ── S: souhrn ──
+  if (size.size === "S") {
+    return (
+      <div className="h-full flex flex-col justify-center gap-2">
         <QueueError error={error} onClose={clearError} />
-
-        {/* U mého pultu */}
-        {mine.map((it) => (
-          <CalledHere
-            key={it.queueItemId}
-            item={it}
-            busy={busy}
-            onRecall={() => run(() => queueApi.call(it.queueItemId, counter))}
-            onComplete={() => run(() => queueApi.complete(it.queueItemId))}
-            onOpenCard={(pid) =>
-              router.push(
-                `/reception/patients/${encodeURIComponent(pid)}?ticket=${encodeURIComponent(
-                  it.queueItemId
-                )}`
-              )
-            }
-          />
-        ))}
-
         <div className="flex items-center gap-3">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-brand-700 dark:text-brand-300 leading-none">
+              {waiting.length}
+            </div>
+            <div className="text-[11px] text-gray-500">čeká</div>
+          </div>
           <QueueButton variant="primary" onClick={callNext} disabled={busy || waiting.length === 0}>
             <Megaphone className="w-4 h-4" /> Vyvolat dalšího
           </QueueButton>
-          <span className="text-sm text-gray-500">
-            {waiting.length === 0 ? "Na recepci nikdo nečeká." : `Čeká: ${waiting.length}`}
-          </span>
         </div>
-
-        {/* Čekající na recepci */}
-        {waiting.length > 0 && (
-          <ul className="divide-y divide-gray-200 dark:divide-neutral-700 border rounded-md">
-            {waiting.map((it) => (
-              <li key={it.queueItemId} className="flex items-center justify-between px-3 py-2 gap-2">
-                <div className="flex items-center gap-3">
-                  <TicketNo no={it.orderNumber} />
-                  <span className="text-sm">
-                    {serviceLabel(it.serviceId)}
-                    {it.priority && <span className="ml-2 text-xs text-red-600 font-semibold">PRIORITA</span>}
-                  </span>
-                  <WaitTime created={it.createdDate} />
-                </div>
-                <QueueButton
-                  disabled={busy}
-                  onClick={() => run(() => queueApi.call(it.queueItemId, counter))}
-                >
-                  Vyvolat
-                </QueueButton>
-              </li>
+        {mine.length > 0 && (
+          <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+            U {counterLabel(counter)}:
+            {mine.map((it) => (
+              <TicketNo key={it.queueItemId} no={it.orderNumber} />
             ))}
-          </ul>
+          </div>
         )}
+      </div>
+    );
+  }
 
-        {/* Přehled čekáren */}
+  const controls = (
+    <div className="flex items-center gap-3 flex-wrap">
+      <select
+        value={counter}
+        onChange={(e) => update({ receptionCounter: e.target.value })}
+        className="px-2 py-1 border rounded text-sm bg-white dark:bg-neutral-900"
+      >
+        {RECEPTION_COUNTERS.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+      {size.size === "L" && (
+        <OperatorInput value={ws.operatorId} onChange={(v) => update({ operatorId: v })} />
+      )}
+    </div>
+  );
+
+  const counterPart = (
+    <div className="space-y-3">
+      {mock && <MockKiosk onDone={refresh} compact={size.size !== "L"} />}
+      <QueueError error={error} onClose={clearError} />
+      {/* U mého pultu */}
+      {mine.map((it) => (
+        <CalledHere
+          key={it.queueItemId}
+          item={it}
+          busy={busy}
+          onRecall={() => run(() => queueApi.call(it.queueItemId, counter))}
+          onComplete={() => run(() => queueApi.complete(it.queueItemId))}
+          onOpenCard={(pid) => openCard(it, pid)}
+          compact={size.size !== "L"}
+        />
+      ))}
+      <div className="flex items-center gap-3">
+        <QueueButton variant="primary" onClick={callNext} disabled={busy || waiting.length === 0}>
+          <Megaphone className="w-4 h-4" /> Vyvolat dalšího
+        </QueueButton>
+        <span className="text-sm text-gray-500">
+          {waiting.length === 0 ? "Na recepci nikdo nečeká." : `Čeká: ${waiting.length}`}
+        </span>
+      </div>
+    </div>
+  );
+
+  const waitingPart = (
+    <div className="space-y-3">
+      {waiting.length > 0 && (
+        <ul className="divide-y divide-gray-200 dark:divide-neutral-700 border rounded-md">
+          {waiting.map((it) => (
+            <li key={it.queueItemId} className="flex items-center justify-between px-3 py-2 gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <TicketNo no={it.orderNumber} />
+                <span className="text-sm truncate">
+                  {serviceLabel(it.serviceId)}
+                  {it.priority && <span className="ml-2 text-xs text-red-600 font-semibold">PRIORITA</span>}
+                </span>
+                <WaitTime created={it.createdDate} />
+              </div>
+              <QueueButton disabled={busy} onClick={() => run(() => queueApi.call(it.queueItemId, counter))}>
+                Vyvolat
+              </QueueButton>
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* Přehled čekáren — jen ve velkém okně */}
+      {size.size === "L" && (
         <div className="flex gap-2 flex-wrap text-xs">
           {MODALITIES.map((m) => {
             const n = items.filter((i) => i.serviceId === WAITING_SERVICES[m]).length;
@@ -153,20 +178,58 @@ export default function ReceptionQueuePanel({ embedded = false }: { embedded?: b
             Na zprávu: <b>{items.filter((i) => i.serviceId === REPORT_SERVICE).length}</b>
           </span>
         </div>
-      </Content>
-    </Outer>
+      )}
+    </div>
+  );
+
+  const content = size.wide ? (
+    <div className="grid grid-cols-2 gap-4 items-start">
+      {counterPart}
+      {waitingPart}
+    </div>
+  ) : (
+    <div className="space-y-3">
+      {counterPart}
+      {waitingPart}
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="space-y-3">
+        {controls}
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle className="flex items-center gap-2">
+            <Megaphone className="w-5 h-5" /> Vyvolávací systém
+          </CardTitle>
+          {controls}
+        </div>
+      </CardHeader>
+      <CardContent>{content}</CardContent>
+    </Card>
   );
 }
 
 function CalledHere({
   item,
   busy,
+  compact = false,
   onRecall,
   onComplete,
   onOpenCard,
 }: {
   item: QueueItem;
   busy: boolean;
+  /** střední okno: menší číslo a hustší rozložení */
+  compact?: boolean;
   onRecall: () => void;
   onComplete: () => void;
   onOpenCard: (pid: string) => void;
@@ -177,9 +240,14 @@ function CalledHere({
   const cleanRc = rc.replace(/\D/g, "");
 
   return (
-    <div className="rounded-lg border-2 border-brand-500 bg-brand-50 dark:bg-brand-950/40 p-3 space-y-3">
+    <div
+      className={cn(
+        "rounded-lg border-2 border-brand-500 bg-brand-50 dark:bg-brand-950/40",
+        compact ? "p-2 space-y-2" : "p-3 space-y-3"
+      )}
+    >
       <div className="flex items-center gap-3">
-        <TicketNo no={item.orderNumber} big />
+        <TicketNo no={item.orderNumber} big={!compact} />
         <div className="text-sm">
           <div className="font-semibold">Vyvolán k {counterLabel(item.counter)}</div>
           <div className="text-gray-600 dark:text-gray-400">{serviceLabel(item.serviceId)}</div>
