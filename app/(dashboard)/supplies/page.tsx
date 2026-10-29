@@ -424,8 +424,10 @@ function ItemsTable({
                   <li
                     key={it.id}
                     className={cn(
-                      "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-4 py-2 md:grid-cols-[minmax(0,1fr)_8.5rem_9rem_minmax(0,14rem)]",
-                      filled && "bg-brand-50/60 dark:bg-brand-950/30"
+                      // název má pevnou šířku → počet a jednotka jsou hned vedle (čitelné i na širokém monitoru)
+                      "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 px-4 py-2 md:grid-cols-[minmax(12rem,22rem)_auto_9rem_minmax(10rem,28rem)] md:justify-start",
+                      "relative transition-colors hover:bg-ui-raised focus-within:bg-ui-raised before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:rounded-r before:bg-transparent before:transition-colors hover:before:bg-brand-400 focus-within:before:bg-brand-500",
+                      filled && "bg-brand-50/60 hover:bg-brand-50 focus-within:bg-brand-50 dark:bg-brand-950/30 dark:hover:bg-brand-950/50 dark:focus-within:bg-brand-950/50"
                     )}
                   >
                     <span className="min-w-0">
@@ -514,7 +516,10 @@ function CustomItems({
       <h3 className="bg-ui-raised px-4 py-1.5 text-[12px] font-medium text-ui-muted">Mimo katalog</h3>
       <ul className="divide-y divide-ui-rule">
         {list.map((c) => (
-          <li key={c.key} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-2 md:grid-cols-[minmax(0,1fr)_8.5rem_9rem_minmax(0,14rem)_auto]">
+          <li
+            key={c.key}
+            className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-4 gap-y-1.5 px-4 py-2 md:grid-cols-[minmax(12rem,22rem)_auto_9rem_minmax(10rem,28rem)_auto] md:justify-start relative transition-colors hover:bg-ui-raised focus-within:bg-ui-raised before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:rounded-r before:bg-transparent before:transition-colors hover:before:bg-brand-400 focus-within:before:bg-brand-500"
+          >
             <input aria-label="Název" value={c.name} disabled={locked} onChange={(e) => onChange(c.key, { name: e.target.value })} className="ui-input h-8 text-[13px]" />
             <Stepper value={c.qty} disabled={locked} onChange={(v) => onChange(c.key, { qty: v })} label={c.name} />
             <span className="hidden text-[13px] text-ui-muted md:block">ks</span>

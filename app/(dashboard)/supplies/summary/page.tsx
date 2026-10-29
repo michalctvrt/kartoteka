@@ -200,16 +200,17 @@ function MatrixTile({ index, title, items, branches, loading }: { index: number;
         <Ghost label={`${title}: nic objednáno`} className="px-4 py-4" />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          {/* tabulka jen tak široká, jak potřebuje → čísla jsou hned u názvu (široké monitory) */}
+          <table className="w-full text-sm xl:w-auto">
             <thead className="text-left text-[12px] text-ui-muted">
               <tr className="border-b border-ui-line">
-                <th className="px-4 py-2 font-normal">Položka</th>
+                <th className="px-4 py-2 font-normal xl:min-w-[22rem]">Položka</th>
                 {cols.map((b) => (
-                  <th key={b.id} className="whitespace-nowrap px-3 py-2 text-right font-normal">
+                  <th key={b.id} className="w-36 whitespace-nowrap px-3 py-2 text-right font-normal">
                     {b.name}
                   </th>
                 ))}
-                <th className="whitespace-nowrap px-4 py-2 text-right font-medium text-ui-ink">Celkem</th>
+                <th className="w-36 whitespace-nowrap px-4 py-2 text-right font-medium text-ui-ink">Celkem</th>
               </tr>
             </thead>
             {GROUPS.map((g) => {
@@ -228,7 +229,7 @@ function MatrixTile({ index, title, items, branches, loading }: { index: number;
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.05 + Math.min(i, 20) * 0.015 }}
-                      className="border-b border-ui-rule align-top last:border-0"
+                      className="border-b border-ui-rule align-top transition-colors last:border-0 hover:bg-ui-raised"
                     >
                       <td className="px-4 py-2">
                         <span className="font-medium">{it.name}</span>
@@ -276,7 +277,7 @@ function WarehouseTile({ index, items, branches, loading }: { index: number; ite
                 {mine.length ? (
                   <ul className="divide-y divide-ui-rule text-sm">
                     {mine.map((it) => (
-                      <li key={it.name} className="flex justify-between gap-3 px-3 py-1.5">
+                      <li key={it.name} className="flex justify-between gap-3 px-3 py-1.5 transition-colors hover:bg-ui-raised">
                         <span className="truncate">{it.name}</span>
                         <span className="shrink-0 tabular-nums">{cell(it, b.id)}</span>
                       </li>

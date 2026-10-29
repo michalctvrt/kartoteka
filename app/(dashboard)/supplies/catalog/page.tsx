@@ -118,7 +118,11 @@ export default function SuppliesCatalogPage() {
                         initial={{ opacity: 0, x: -6 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.05 + Math.min(i, 15) * 0.015 }}
-                        className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 text-sm md:grid-cols-[minmax(0,1fr)_8rem_10rem_auto]", !it.active && "opacity-55")}
+                        className={cn(
+                          "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-2 text-sm md:grid-cols-[minmax(12rem,28rem)_8rem_12rem_auto] md:justify-start",
+                          "relative transition-colors hover:bg-ui-raised focus-within:bg-ui-raised before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:rounded-r before:bg-transparent before:transition-colors hover:before:bg-brand-400 focus-within:before:bg-brand-500",
+                          !it.active && "opacity-55"
+                        )}
                       >
                         <span className="min-w-0">
                           <span className="block truncate font-medium">{it.name}</span>
