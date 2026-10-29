@@ -151,6 +151,7 @@ const ROUTE_CAPS: [RegExp, Capability][] = [
   [/^\/supplies/, "supplies.order"],
   [/^\/reception\/studies/, "study.view"],
   [/^\/reception\/calendar/, "calendar.view"],
+  [/^\/doctor\/reports/, "report.write"],
   [/^\/(lab|doctor)\/worklist/, "worklist.view"],
   [/^\/admin/, "staff.manage"],
 ];

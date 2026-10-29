@@ -80,7 +80,9 @@ export function ReportTile({ study: s, index, onWrite }: { study: StudyInfo; ind
     >
       {done ? (
         // čtení: plný kontrast, řádek max ~72 znaků, velikost písma podle Nastavení (S/M/L)
-        <p className={cn("max-w-[72ch] whitespace-pre-wrap text-[color:var(--ui-paper-ink)]", REPORT_TEXT[prefs.reportSize])}>{s.description}</p>
+        <div className="ui-paper px-5 py-4">
+          <p className={cn("max-w-[72ch] whitespace-pre-wrap", REPORT_TEXT[prefs.reportSize])}>{s.description}</p>
+        </div>
       ) : (
         <Ghost label="Studie zatím není popsaná" className="pt-1" />
       )}

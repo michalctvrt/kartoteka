@@ -10,6 +10,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, FileDown, Pencil, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,8 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
   const [workplace, setWorkplace] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(false);
-  const [writing, setWriting] = useState(false); // psací plocha popisu
+  // psací plocha popisu (?write=1 = rovnou psát – z pracovního seznamu „K popisu“)
+  const [writing, setWriting] = useState(useSearchParams().get("write") === "1");
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const canEditStudy = useSession().can("study.edit");
 

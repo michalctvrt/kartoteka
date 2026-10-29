@@ -20,6 +20,7 @@ import {
   LogOut,
   Moon,
   Package,
+  PenLine,
   Printer,
   Stethoscope,
   Settings,
@@ -164,6 +165,11 @@ export default function AppNav({
             <NavButton icon={<FileText />} active={isStudyCard} onClick={openStudyCard}>
               Karta studie
             </NavButton>
+            {can("report.write") && (
+              <NavItem href="/doctor/reports" icon={<PenLine />} active={pathname === "/doctor/reports"} onNavigate={onNavigate}>
+                K popisu
+              </NavItem>
+            )}
             {can("doctors.view") && (
               <NavItem
                 href="/reception/doctors"

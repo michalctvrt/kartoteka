@@ -79,7 +79,8 @@ export function usePrefs() {
 
 /** Velikost písma zprávy → třídy (řádek ~ 72 znaků, řádkování 1,75). */
 export const REPORT_TEXT: Record<ReportSize, string> = {
-  s: "text-[15px] leading-[1.75]",
-  m: "text-[17px] leading-[1.75]",
-  l: "text-[19px] leading-[1.8]",
+  // řádkování vždy 1,75em – na něj jsou navázané psací linky (.ui-paper-lines)
+  s: "text-[15px] leading-[1.75em]",
+  m: "text-[17px] leading-[1.75em]",
+  l: "text-[19px] leading-[1.75em]",
 };
