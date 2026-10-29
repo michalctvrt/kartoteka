@@ -1,6 +1,6 @@
-// app/(dashboard)/lab/page.tsx
-import ModalityWorklist from "@/components/queue/ModalityWorklist";
+import WaitingBoard from "@/components/queue/WaitingBoard";
 
-export default function LabPage() {
-  return <ModalityWorklist />;
+/** Laborant i lékař: na prvním místě čekající pacienti (RTG / UZ / MRI). */
+export default function Page() {
+  return <WaitingBoard />;
 }

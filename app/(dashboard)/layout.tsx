@@ -1,6 +1,7 @@
 "use client";
 
 import StudieMenu from "@/components/StudieMenu";
+import QueueStatusBar from "@/components/queue/QueueStatusBar";
 import PacientiMenu from "@/components/PacientiMenu";
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -73,12 +74,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         : "/",
     },
 
-    ...(pathname.includes("/doctor")
+    // Lékař i laborant mají stejné menu (worklist = čekárny RTG/UZ/MRI)
+    ...(pathname.includes("/doctor") || pathname.includes("/lab")
       ? [
           {
             label: "Worklist",
             icon: <Calendar className="w-5 h-5" />,
-            href: "/doctor/worklist",
+            href: pathname.includes("/lab") ? "/lab/worklist" : "/doctor/worklist",
           },
         ]
       : []),
@@ -161,6 +163,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col">
           <header className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-sm transition-colors">
             <h1 className="text-lg font-semibold">{role} – Dashboard</h1>
+            {/* Vyvolávací systém: kolik kde čeká — vidět na každé stránce */}
+            <div className="flex-1 flex justify-center">
+              <QueueStatusBar
+                boardHref={
+                  pathname.includes("/reception")
+                    ? "/reception"
+                    : pathname.includes("/doctor")
+                    ? "/doctor"
+                    : "/lab"
+                }
+              />
+            </div>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-neutral-700 hover:scale-110 transition-transform"

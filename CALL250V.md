@@ -7,7 +7,7 @@
 | Kiosk u vstupu | pacient zvolí RTG/UZ/MRI, vytiskne se lístek s QR | (kiosk sám) |
 | Recepce – Domů | „Vyvolat dalšího“, zadat RČ → otevře/založí kartu | `call` |
 | Karta pacienta | „Čekárna RTG/UZ/MRI“ → lístek se propojí s RČ a přeřadí | `PATCH serviceId + externalIdentifier` |
-| Laborant / Lékař – Worklist | vyvolat k dveřím 1/2, po vyšetření poslat na další modalitu nebo na recepci | `call`, `PATCH serviceId` |
+| Laborant / Lékař – Domů i Worklist | tři sloupce RTG / UZ / MRI: vyvolat k dveřím 1/2, po vyšetření „Hotovo →“ na další modalitu nebo recepci; lišta nahoře ukazuje počty čekajících všude | `call`, `PATCH serviceId` |
 | Recepce – Domů | výdej zprávy → „Zpráva předána – ukončit lístek“ | `complete` |
 
 Lístek se ukončuje JEN na konci návštěvy, jinak by pacientovi přestal fungovat QR kód na dveřích.
@@ -18,7 +18,7 @@ Lístek se ukončuje JEN na konci návštěvy, jinak by pacientovi přestal fung
 - `lib/call250v/server.ts` – volání Call250V (jen ze serveru, Api-Key nesmí do prohlížeče)
 - `lib/call250v/mock.ts` – simulátor, běží, když není vyplněné `CALL250V_BASE_URL`
 - `app/api/queue/*` – API routes, které volá frontend
-- `components/queue/*` – panel recepce, box na kartě pacienta, worklist modality
+- `components/queue/*` – panel recepce, box na kartě pacienta, přehled čekáren (WaitingBoard), lišta s počty (QueueStatusBar)
 
 Upravené stránky: `reception/page.tsx` (panel), `reception/patients/[pid]/page.tsx` (box nad Identifikací),
 `lab/page.tsx` a `doctor/worklist/page.tsx` (worklist).

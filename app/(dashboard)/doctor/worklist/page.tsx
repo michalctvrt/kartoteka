@@ -1,5 +1,6 @@
-import ModalityWorklist from "@/components/queue/ModalityWorklist";
+import WaitingBoard from "@/components/queue/WaitingBoard";
 
-export default function WorklistPage() {
-  return <ModalityWorklist />;
+/** Laborant i lékař: na prvním místě čekající pacienti (RTG / UZ / MRI). */
+export default function Page() {
+  return <WaitingBoard />;
 }
