@@ -22,6 +22,8 @@ import {
   Sun,
   UserSearch,
 } from "lucide-react";
+import { LayoutGroup, motion } from "framer-motion";
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 import useDrafts from "@/components/hooks/useDrafts";
 import MenuPatientsBadge from "@/components/MenuPatientsBadge";
@@ -82,6 +84,9 @@ export default function AppNav({
     go(sid ? `/reception/studies/${encodeURIComponent(sid)}` : "/reception/studies/search");
   };
 
+  // vlastní skupina pro každou instanci menu (desktop / mobil), aby si zvýraznění nepřeskakovalo
+  const navId = useId();
+
   const isPatientCard =
     pathname.startsWith("/reception/patients/") &&
     !pathname.startsWith("/reception/patients/new");
@@ -104,6 +109,7 @@ export default function AppNav({
         </p>
       </div>
 
+      <LayoutGroup id={navId}>
       <nav className="flex-1 overflow-y-auto px-3 pb-4 text-sm" aria-label="Hlavní menu">
         <NavItem href={home} icon={<Home />} active={pathname === home} onNavigate={onNavigate}>
           Domů
@@ -162,6 +168,7 @@ export default function AppNav({
           </NavButton>
         </NavGroup>
       </nav>
+      </LayoutGroup>
 
       {/* Utility dole */}
       <div className="space-y-0.5 px-3 pb-4 text-sm">
@@ -190,11 +197,23 @@ function NavGroup({ label, children }: { label: string; children: ReactNode }) {
 
 const itemClass = (active?: boolean) =>
   cn(
-    "flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-left transition-colors [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
+    "relative flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-left transition-colors [&>svg]:relative [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
     active
-      ? "bg-ui-active font-medium text-ui-ink [&>svg]:text-brand-700 dark:[&>svg]:text-brand-300"
-      : "text-ui-muted hover:bg-ui-active/60 hover:text-ui-ink [&>svg]:text-ui-faint"
+      ? "font-medium text-ui-ink [&>svg]:text-brand-700 dark:[&>svg]:text-brand-300"
+      : "text-ui-muted hover:bg-ui-raised hover:text-ui-ink [&>svg]:text-ui-faint"
   );
+
+/** Podklad aktivní položky – při přechodu přejede na nově vybranou položku. */
+function ActivePill({ active }: { active?: boolean }) {
+  if (!active) return null;
+  return (
+    <motion.span
+      layoutId="nav-active"
+      className="ui-press absolute inset-0 rounded-lg border border-ui-line bg-ui-sheet"
+      transition={{ type: "spring", stiffness: 520, damping: 40 }}
+    />
+  );
+}
 
 function NavItem({
   href,
@@ -211,8 +230,9 @@ function NavItem({
 }) {
   return (
     <Link href={href} onClick={onNavigate} className={itemClass(active)} aria-current={active ? "page" : undefined}>
+      <ActivePill active={active} />
       {icon}
-      <span className="flex items-center gap-1.5">{children}</span>
+      <span className="relative flex items-center gap-1.5">{children}</span>
     </Link>
   );
 }
@@ -230,8 +250,9 @@ function NavButton({
 }) {
   return (
     <button type="button" onClick={onClick} className={itemClass(active)} aria-current={active ? "page" : undefined}>
+      <ActivePill active={active} />
       {icon}
-      <span className="flex items-center gap-1.5">{children}</span>
+      <span className="relative flex items-center gap-1.5">{children}</span>
     </button>
   );
 }

@@ -16,16 +16,19 @@
 import { use, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   AlertTriangle,
+  ExternalLink,
+  Pencil,
   Save,
   X,
   UserPlus,
   Plus,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Bento } from "@/components/ui/bento";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import { InsuranceCompanyService } from "@/lib/api/generated/services/InsuranceCompanyService";
 import { PatientDataSaveInfo } from "@/lib/api/generated/models/PatientDataSaveInfo";
@@ -37,44 +40,25 @@ import EzadankyList from "@/components/ezadanka/EzadankyList";
 import { parseRc } from "@/lib/rc";
 import PatientQueueBox from "@/components/queue/PatientQueueBox";
 import NewStudyDialog from "@/components/study/NewStudyDialog";
+import { useInsuranceCompanies } from "@/components/hooks/useInsuranceCompanies";
+import { usePatientStudies } from "@/components/hooks/usePatientStudies";
+import { EMPTY_FORM as EMPTY, GENDER_LABEL, type PatientForm as FormState } from "@/components/patient/form";
 import {
-  insuranceOptions,
-  useInsuranceCompanies,
-} from "@/components/hooks/useInsuranceCompanies";
+  BodyTile,
+  ContactTile,
+  IdentityTile,
+  InsuranceTile,
+  LastStudyTile,
+  PatientCardSkeleton,
+  StudiesCountTile,
+} from "@/components/patient/PatientTiles";
+import { ageYears } from "@/lib/study/card-check";
 import { missingForStudy } from "@/lib/study/card-check";
 import {
   legacyNewStudyUrl,
   legacyStudyListUrl,
   STUDY_VIA_API,
 } from "@/lib/legacy";
-
-interface FormState {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  title: string;
-  birthDate: string;
-  gender: "MALE" | "FEMALE" | "";
-  idInsuranceCompany: string;
-  phone: string;
-  email: string;
-  weight: string;
-  height: string;
-}
-
-const EMPTY: FormState = {
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  title: "",
-  birthDate: "",
-  gender: "",
-  idInsuranceCompany: "",
-  phone: "",
-  email: "",
-  weight: "",
-  height: "",
-};
 
 export default function PatientDetailPage({
   params,
@@ -100,6 +84,7 @@ export default function PatientDetailPage({
   const [isEditing, setIsEditing] = useState(false);
   const [newStudyOpen, setNewStudyOpen] = useState(false);
   const insuranceCompanies = useInsuranceCompanies();
+  const { studies, loading: studiesLoading, error: studiesError } = usePatientStudies(pid);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -259,36 +244,22 @@ export default function PatientDetailPage({
   // ─── Render ───
 
   // Stavy načítání
-  if (loadState === "loading") {
-    return (
-      <div className="space-y-4">
-        <BackButton />
-        <p className="text-sm text-ui-faint">Načítám pacienta…</p>
-      </div>
-    );
-  }
+  if (loadState === "loading") return <PatientCardSkeleton />;
 
   if (loadState === "error") {
     return (
       <div className="space-y-4">
         <BackButton />
-        <Card>
-          <CardContent className="p-6 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium">Chyba při načítání</p>
-              <p className="text-xs text-ui-faint mt-1">{loadError}</p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-3"
-                onClick={() => router.refresh()}
-              >
-                Zkusit znovu
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="ui-tile flex items-start gap-3 p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <div>
+            <p className="text-sm font-medium">Kartu se nepodařilo načíst</p>
+            <p className="mt-1 text-[13px] text-ui-muted">{loadError}</p>
+            <Button size="sm" variant="outline" className="mt-3" onClick={() => router.refresh()}>
+              Zkusit znovu
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -297,129 +268,105 @@ export default function PatientDetailPage({
     return (
       <div className="space-y-4">
         <BackButton />
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-ui-ink">
-              Pacient s rodným číslem <strong>{formatRc(pid)}</strong> nebyl
-              v kartotéce nalezen.
-            </p>
+        <div className="ui-tile p-5">
+          <p className="text-sm">
+            Pacient s rodným číslem <strong>{formatRc(pid)}</strong> nebyl v kartotéce nalezen.
+          </p>
+          <Button className="mt-4" asChild>
             <Link
               href={`/reception/patients/new?rc=${encodeURIComponent(pid)}${
-                ezadankaId
-                  ? `&ezadanka=${encodeURIComponent(ezadankaId)}`
-                  : ""
+                ezadankaId ? `&ezadanka=${encodeURIComponent(ezadankaId)}` : ""
               }`}
             >
-              <Button className="mt-4 gap-2">
-                <UserPlus className="w-4 h-4" />
-                Založit nového pacienta
-              </Button>
+              <UserPlus /> Založit nového pacienta
             </Link>
-          </CardContent>
-        </Card>
+          </Button>
+        </div>
       </div>
     );
   }
 
   // Co chybí na (uložené) kartě pro založení vyšetření
   const studyMissing = missingForStudy(patient?.patientDataInfo);
+  const age = ageYears(formValue.birthDate);
+  const name = [formValue.title, formValue.firstName, formValue.middleName, formValue.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const form = { value: formValue, editing: isEditing, onChange: updateForm };
 
-  // Loaded
   return (
-    <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
-        <div>
+    <div className="space-y-5">
+      {/* Hlavička: kdo to je + hlavní akce */}
+      <motion.header
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-wrap items-end justify-between gap-4"
+      >
+        <div className="min-w-0">
           <BackButton />
-          <h1 className="text-xl font-semibold mt-2 flex items-center gap-2">
-            {formValue.firstName} {formValue.lastName}
+          <h1 className="mt-2 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            {name || <span className="text-ui-faint">Bez jména</span>}
             {hasDraft && (
-              <span
-                title="Neuložené změny"
-                className="inline-block w-2.5 h-2.5 rounded-full bg-red-600"
-              />
+              <span title="Neuložené změny" className="inline-block h-2 w-2 rounded-full bg-red-600" />
             )}
           </h1>
-          <p className="text-sm text-ui-faint">
-            RČ <strong>{formatRc(pid)}</strong>
-            {ezadankaId && (
-              <>
-                {" "}
-                · ze e-žádanky{" "}
-                <code className="text-xs">{ezadankaId}</code>
-              </>
-            )}
+          <p className="mt-1 text-sm text-ui-muted">
+            RČ {formatRc(pid)}
+            {age !== null && ` · ${age} let`}
+            {formValue.gender && ` · ${GENDER_LABEL[formValue.gender]}`}
+            {ezadankaId && ` · ze e-žádanky ${ezadankaId}`}
           </p>
-          {hasNoData && (
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" />
-              Pacient je v kartotéce, ale nemá uložené žádné údaje. Doplň
-              jméno, příjmení a další informace a uložením je vytvoř.
-            </p>
-          )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isEditing ? (
             <>
-              <Button
-                variant="outline"
-                onClick={handleDiscard}
-                disabled={saving}
-                className="gap-2"
-              >
-                <X className="w-4 h-4" />
-                Zahodit
+              <Button variant="outline" onClick={handleDiscard} disabled={saving}>
+                <X /> Zahodit
               </Button>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {saving ? "Ukládám…" : "Uložit"}
+              <Button onClick={handleSave} disabled={saving}>
+                <Save /> {saving ? "Ukládám…" : "Uložit"}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" asChild>
-                <a href={legacyStudyListUrl(pid)}>Vyšetření pacienta</a>
+              <Button variant="ghost" asChild>
+                <a href={legacyStudyListUrl(pid)} title="Seznam vyšetření ve staré kartotéce">
+                  <ExternalLink /> Stará kartotéka
+                </a>
+              </Button>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Pencil /> Upravit
               </Button>
               {STUDY_VIA_API || studyMissing.length > 0 ? (
                 <Button
-                  variant="outline"
                   onClick={() => setNewStudyOpen(true)}
                   disabled={studyMissing.length > 0}
-                  title={
-                    studyMissing.length
-                      ? `Na kartě chybí: ${studyMissing.join(", ")}`
-                      : "Založit nové vyšetření"
-                  }
-                  className="gap-2"
+                  title={studyMissing.length ? `Na kartě chybí: ${studyMissing.join(", ")}` : "Založit nové vyšetření"}
                 >
-                  <Plus className="w-4 h-4" />
-                  Nové vyšetření
+                  <Plus /> Nové vyšetření
                 </Button>
               ) : (
                 // Dočasně: formulář nového vyšetření ve staré kartotéce
                 // (POST /study zatím vyžaduje ezadankaId — viz lib/legacy.ts)
-                <Button variant="outline" asChild className="gap-2">
+                <Button asChild>
                   <a href={legacyNewStudyUrl(pid)} title="Otevře formulář ve staré kartotéce">
-                    <Plus className="w-4 h-4" />
-                    Nové vyšetření
+                    <Plus /> Nové vyšetření
                   </a>
                 </Button>
               )}
-              <Button onClick={() => setIsEditing(true)}>Editovat</Button>
             </>
           )}
         </div>
-      </header>
+      </motion.header>
 
-      {!isEditing && studyMissing.length > 0 && (
-        <p className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-1 -mt-4">
-          <AlertTriangle className="w-3 h-3" />
-          Pro založení vyšetření doplňte na kartě: {studyMissing.join(", ")}.
-        </p>
+      {hasNoData && (
+        <Notice>Pacient je v kartotéce bez údajů. Doplňte jméno a další údaje a uložte.</Notice>
       )}
+      {!isEditing && !hasNoData && studyMissing.length > 0 && (
+        <Notice>Pro založení vyšetření doplňte: {studyMissing.join(", ")}.</Notice>
+      )}
+      {saveError && <Notice tone="error">{saveError}</Notice>}
 
       {STUDY_VIA_API && patient?.patientDataInfo && (
         <NewStudyDialog
@@ -431,146 +378,27 @@ export default function PatientDetailPage({
         />
       )}
 
-      {/* SEKCE: Vyvolávací systém — přiřazení lístku a poslání do čekárny */}
-      <PatientQueueBox pid={pid} ticketId={ticketId} />
+      <Bento>
+        {/* 1. řada: kde je pacient teď (nebo poslední vyšetření) · počet vyšetření · pojišťovna */}
+        <PatientQueueBox
+          pid={pid}
+          ticketId={ticketId}
+          index={0}
+          fallback={<LastStudyTile study={studies[0]} loading={studiesLoading} index={0} />}
+        />
+        <StudiesCountTile studies={studies} loading={studiesLoading} index={1} />
+        <InsuranceTile {...form} index={2} companies={insuranceCompanies} name={insuranceName} />
 
-      {/* SEKCE: Identifikace */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Identifikace</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Field
-            label="Rodné číslo"
-            value={formatRc(pid)}
-            editing={isEditing}
-            readOnly
-            onChange={() => {}}
-            hint="RČ je primary key, nelze měnit"
-          />
-          <Field
-            label="Jméno"
-            value={formValue.firstName}
-            editing={isEditing}
-            onChange={(v) => updateForm({ firstName: v })}
-          />
-          <Field
-            label="Příjmení"
-            value={formValue.lastName}
-            editing={isEditing}
-            onChange={(v) => updateForm({ lastName: v })}
-          />
-          <Field
-            label="Druhé jméno"
-            value={formValue.middleName}
-            editing={isEditing}
-            onChange={(v) => updateForm({ middleName: v })}
-          />
-          <Field
-            label="Titul"
-            value={formValue.title}
-            editing={isEditing}
-            onChange={(v) => updateForm({ title: v })}
-          />
-          <Field
-            label="Datum narození"
-            type="date"
-            value={formValue.birthDate}
-            editing={isEditing}
-            onChange={(v) => updateForm({ birthDate: v })}
-          />
-          <SelectField
-            label="Pohlaví"
-            value={formValue.gender}
-            editing={isEditing}
-            onChange={(v) =>
-              updateForm({ gender: v as FormState["gender"] })
-            }
-            options={[
-              { value: "", label: "—" },
-              { value: "MALE", label: "Muž" },
-              { value: "FEMALE", label: "Žena" },
-            ]}
-            displayValue={
-              formValue.gender === "MALE"
-                ? "Muž"
-                : formValue.gender === "FEMALE"
-                ? "Žena"
-                : ""
-            }
-          />
-        </CardContent>
-      </Card>
+        {/* 2. řada: osobní údaje · kontakt · tělo */}
+        <IdentityTile {...form} pid={pid} index={3} />
+        <ContactTile {...form} index={4} />
+        <BodyTile {...form} index={5} />
 
-      {/* SEKCE: Pojištění a kontakt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pojišťovna a kontakt</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <SelectField
-            label="Pojišťovna"
-            value={formValue.idInsuranceCompany}
-            editing={isEditing}
-            onChange={(v) => updateForm({ idInsuranceCompany: v })}
-            options={insuranceOptions(insuranceCompanies, formValue.idInsuranceCompany)}
-            displayValue={
-              formValue.idInsuranceCompany
-                ? [formValue.idInsuranceCompany, insuranceName].filter(Boolean).join(" – ")
-                : ""
-            }
-          />
-          <Field
-            label="Telefon"
-            value={formValue.phone}
-            editing={isEditing}
-            onChange={(v) => updateForm({ phone: v })}
-          />
-          <Field
-            label="E-mail"
-            type="email"
-            value={formValue.email}
-            editing={isEditing}
-            onChange={(v) => updateForm({ email: v })}
-          />
-        </CardContent>
-      </Card>
+        <ExaminationsSection studies={studies} loading={studiesLoading} error={studiesError} index={6} />
+      </Bento>
 
-      {/* SEKCE: Fyzické údaje */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Fyzické údaje</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Field
-            label="Váha (kg)"
-            type="number"
-            value={formValue.weight}
-            editing={isEditing}
-            onChange={(v) => updateForm({ weight: v })}
-          />
-          <Field
-            label="Výška (cm)"
-            type="number"
-            value={formValue.height}
-            editing={isEditing}
-            onChange={(v) => updateForm({ height: v })}
-          />
-        </CardContent>
-      </Card>
-
-      {saveError && (
-        <div className="border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-md p-3 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{saveError}</span>
-        </div>
-      )}
-
-      {/* SEKCE: Aktivní eŽádanky pacienta */}
-      <EzadankyList rid={pid} />
-
-      {/* SEKCE: Vyšetření — komponenta si studie tahá sama přes StudyService */}
-      <ExaminationsSection pid={pid} />
+      {/* e-žádanky jen když nějaké jsou */}
+      <EzadankyList rid={pid} hideEmpty />
     </div>
   );
 }
@@ -578,95 +406,29 @@ export default function PatientDetailPage({
 // ─── Helpery & sub-komponenty ────────────────────────────
 
 function BackButton() {
-  const router = useRouter();
   return (
-    <button
-      onClick={() => router.push("/reception/patients")}
-      className="flex items-center gap-2 text-sm text-ui-muted hover:text-brand-600"
+    <Link
+      href="/reception/patients"
+      className="inline-flex items-center gap-1.5 text-sm text-ui-muted transition-colors hover:text-ui-ink"
     >
-      <ArrowLeft className="w-4 h-4" />
-      Zpět na seznam pacientů
-    </button>
+      <ArrowLeft className="h-4 w-4" /> Vyhledat pacienta
+    </Link>
   );
 }
 
-function Field({
-  label,
-  value,
-  editing,
-  onChange,
-  type = "text",
-  readOnly = false,
-  hint,
-}: {
-  label: string;
-  value: string;
-  editing: boolean;
-  onChange: (v: string) => void;
-  type?: "text" | "email" | "date" | "number";
-  readOnly?: boolean;
-  hint?: string;
-}) {
+function Notice({ children, tone = "warning" }: { children: React.ReactNode; tone?: "warning" | "error" }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-ui-muted">
-        {label}
-      </span>
-      {editing && !readOnly ? (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
-        />
-      ) : (
-        <span className="text-sm text-ui-ink">
-          {value || "—"}
-        </span>
-      )}
-      {hint && <span className="text-xs text-ui-faint">{hint}</span>}
-    </div>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  editing,
-  onChange,
-  options,
-  displayValue,
-}: {
-  label: string;
-  value: string;
-  editing: boolean;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-  displayValue?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-ui-muted">
-        {label}
-      </span>
-      {editing ? (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
-        >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <span className="text-sm text-ui-ink">
-          {displayValue || value || "—"}
-        </span>
-      )}
-    </div>
+    <p
+      role={tone === "error" ? "alert" : undefined}
+      className={
+        tone === "error"
+          ? "flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-[13px] text-red-800 dark:border-red-900 dark:text-red-200"
+          : "flex items-center gap-2 rounded-lg border border-amber-200 px-3 py-2 text-[13px] text-amber-800 dark:border-amber-900 dark:text-amber-200"
+      }
+    >
+      <AlertTriangle className="h-4 w-4 shrink-0" />
+      {children}
+    </p>
   );
 }
 

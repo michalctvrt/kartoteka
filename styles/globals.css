@@ -122,6 +122,42 @@ body {
   }
 }
 
+/*
+ * Hmatové detaily (skeuomorphic touches) – jemně, bez stínů POD kartami:
+ *  - dlaždice: 1px linka + světlá vnitřní horní hrana (jako lehce vystouplý papír)
+ *  - pole: mírně vmáčknutá (vnitřní stín nahoře), při focusu brand linka
+ *  - tlačítka: světlá horní hrana, při stisku se zamáčknou o 1px
+ */
+:root {
+  --ui-bevel: rgba(255, 255, 255, 0.9);
+  --ui-recess: rgba(15, 42, 51, 0.07);
+}
+.dark {
+  --ui-bevel: rgba(255, 255, 255, 0.04);
+  --ui-recess: rgba(0, 0, 0, 0.35);
+}
+@layer components {
+  .ui-tile {
+    @apply rounded-xl border border-ui-line bg-ui-sheet;
+    box-shadow: inset 0 1px 0 var(--ui-bevel);
+  }
+  .ui-input {
+    @apply h-10 w-full rounded-lg border border-ui-control bg-ui-raised px-3 text-sm text-ui-ink transition-colors;
+    box-shadow: inset 0 1px 2px var(--ui-recess);
+  }
+  .ui-input:focus {
+    @apply border-ui-primary bg-ui-sheet outline-none;
+  }
+  .ui-press {
+    box-shadow: inset 0 1px 0 var(--ui-bevel);
+    transition: transform 80ms ease, background-color 120ms ease, box-shadow 120ms ease;
+  }
+  .ui-press:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: inset 0 1px 2px var(--ui-recess);
+  }
+}
+
 /* --- časové čáry mezi 20-min sloty --- */
 /* Trefíme elementy, které react-big-calendar vyrenderuje pro každý timeslot */
 .rbc-time-content .rbc-timeslot-group > div {

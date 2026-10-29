@@ -5,20 +5,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "ui-press inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-ui-primary text-white hover:bg-ui-primary-hover dark:text-brand-950",
+          "border border-ui-primary-hover bg-ui-primary text-white [--ui-bevel:rgba(255,255,255,0.18)] hover:bg-ui-primary-hover dark:text-brand-950",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
           "border border-ui-control bg-ui-sheet text-ui-ink hover:bg-ui-raised",
         secondary:
           "bg-ui-active text-ui-ink hover:bg-ui-active/70",
-        ghost: "text-ui-ink hover:bg-ui-raised",
-        link: "text-ui-primary underline-offset-4 hover:underline",
+        ghost: "text-ui-ink [--ui-bevel:transparent] hover:bg-ui-raised",
+        link: "text-ui-primary underline-offset-4 [--ui-bevel:transparent] hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",

@@ -12,6 +12,7 @@ import AppNav, { ROLE_LABEL, roleFromPath } from "@/components/AppNav";
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { MotionConfig } from "framer-motion";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -47,6 +48,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     role === "reception" ? "/reception" : role === "doctor" ? "/doctor" : "/lab";
 
   return (
+    // reducedMotion="user": kdo má v systému vypnuté animace, uvidí jen prolnutí bez pohybu
+    <MotionConfig reducedMotion="user">
     <div className="flex min-h-screen bg-ui-frame text-ui-ink">
       {/* MENU – desktop */}
       <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 lg:block">
@@ -92,5 +95,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
+    </MotionConfig>
   );
 }

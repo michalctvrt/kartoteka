@@ -59,6 +59,13 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Barva brandu jen na logu, jedné primární akci (`Button` default = brand-700) a vybraném stavu. Modality nesou
   data (RTG/UZ/MRI) – na čekárnách jen 3px horní hrana a světlé štítky, nic neblikat (`animate-pulse` ne).
 - Žádné stíny na klidných kartách, jeden poloměr `rounded-lg`, žádné emoji, každá obrazovka má jeden `h1`.
+- Michal chce (2026-10-29): border-monochrome (1px linka, žádný stín POD kartou), bento rozložení
+  (hlavní věc 2 sloupce, vedlejší 1), kontextová hustota (prázdná nepovinná pole skrýt), jemné hmatové detaily
+  a dynamiku. Prvky: `components/ui/bento.tsx` (Bento, BentoTile, Metric, DataRow), `components/ui/skeleton.tsx`
+  (Skeleton = načítání pulzuje, Ghost = prázdný stav v klidu + sr-only text), CSS `.ui-tile` `.ui-input` `.ui-press`.
+- Pohyb (framer-motion): dlaždice se rozevřou od levého horního rohu postupně (`index`), stránky se prolnou
+  (`app/(dashboard)/template.tsx`), zvýraznění menu přejede (`layoutId`). `MotionConfig reducedMotion="user"`.
+- Karta pacienta = bento z `components/patient/*`; lístek (2 sl.) → bez lístku místo něj poslední vyšetření.
 
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.

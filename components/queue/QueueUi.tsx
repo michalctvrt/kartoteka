@@ -58,8 +58,8 @@ export function QueueButton({
   title?: string;
 }) {
   const styles = {
-    default: "bg-ui-raised hover:bg-gray-200 dark:hover:bg-neutral-600",
-    primary: "bg-brand-600 hover:bg-brand-700 text-white",
+    default: "border border-ui-control bg-ui-sheet text-ui-ink hover:bg-ui-raised",
+    primary: "border border-ui-primary-hover bg-ui-primary text-white [--ui-bevel:rgba(255,255,255,0.18)] hover:bg-ui-primary-hover dark:text-brand-950",
     danger: "bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
     success: "bg-green-600 hover:bg-green-700 text-white",
   }[variant];
@@ -70,7 +70,7 @@ export function QueueButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition disabled:opacity-50 disabled:pointer-events-none",
+        "ui-press inline-flex h-8 items-center gap-1 rounded-md px-3 text-[13px] font-medium disabled:pointer-events-none disabled:opacity-50",
         styles
       )}
     >

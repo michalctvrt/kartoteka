@@ -30,6 +30,8 @@ interface Props {
   rid: string;
   /** Po kliknutí na "Importovat data" v detail modalu — pro předvyplnění formuláře nového pacienta */
   onImport?: (detail: ZadankaDetailT) => void;
+  /** Bez žádanek (a během načítání) nic nevykreslit – na kartě pacienta nezabírá místo. */
+  hideEmpty?: boolean;
 }
 
 const MODALITA_BARVY: Record<Modalita, string> = {
@@ -49,7 +51,7 @@ const URGENTNOST_BARVY: Record<string, string> = {
   statim: "text-red-600 dark:text-red-400 font-semibold",
 };
 
-export default function EzadankyList({ rid, onImport }: Props) {
+export default function EzadankyList({ rid, onImport, hideEmpty }: Props) {
   const [data, setData] = useState<ZadankaListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,8 @@ export default function EzadankyList({ rid, onImport }: Props) {
       cancelled = true;
     };
   }, [rid]);
+
+  if (hideEmpty && !error && (loading || data.length === 0)) return null;
 
   return (
     <Card>

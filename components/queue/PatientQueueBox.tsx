@@ -10,8 +10,9 @@
  * - Když už je lístek propojený, ukáže kde pacient je a dovolí přeřadit.
  */
 
-import { ArrowRightLeft, Ticket } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ReactNode } from "react";
+import { BentoTile } from "@/components/ui/bento";
+import { Skeleton } from "@/components/ui/skeleton";
 import { queueApi } from "@/lib/call250v/browser";
 import {
   ARRIVAL_SERVICES,
@@ -29,12 +30,20 @@ import { QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
 
 const ARRIVALS = Object.values(ARRIVAL_SERVICES);
 
+/**
+ * Dlaždice (2 sloupce) na kartě pacienta. Bez lístku vrátí `fallback`
+ * (typicky poslední vyšetření) – na kartě se tak neukazuje prázdné místo.
+ */
 export default function PatientQueueBox({
   pid,
   ticketId,
+  fallback = null,
+  index = 0,
 }: {
   pid: string;
   ticketId?: string | null;
+  fallback?: ReactNode;
+  index?: number;
 }) {
   const { ws } = useWorkstation();
   const { items, error, clearError, busy, run, loading } = useQueue([], 4000);
@@ -51,14 +60,25 @@ export default function PatientQueueBox({
           !i.externalIdentifier
       ));
 
-  if (loading) return null;
-  if (!linked && !unlinked && !error) {
+  if (loading) {
     return (
-      <p className="text-xs text-ui-faint flex items-center gap-1">
-        <Ticket className="w-3.5 h-3.5" /> Pacient nemá lístek ve vyvolávacím systému.
-      </p>
+      <BentoTile span={2} index={index}>
+        <div className="flex items-center gap-4 pt-2">
+          <Skeleton className="h-14 w-24 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-8 w-24" />
+          ))}
+        </div>
+      </BentoTile>
     );
   }
+  if (!linked && !unlinked && !error) return <>{fallback}</>;
 
   const item = linked || unlinked || null;
   const kioskChoice = unlinked ? modalityOfService(unlinked.serviceId) : null;
@@ -73,70 +93,60 @@ export default function PatientQueueBox({
     );
 
   return (
-    <Card className="border-brand-300 dark:border-brand-800">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Ticket className="w-5 h-5" /> Vyvolávací systém
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <QueueError error={error} onClose={clearError} />
-        {item && (
-          <>
-            <div className="flex items-center gap-3 flex-wrap">
-              <TicketNo no={item.orderNumber} big />
-              <div className="text-sm">
-                <div className="font-semibold">
-                  {linked ? serviceLabel(item.serviceId) : "Lístek zatím není přiřazený k pacientovi"}
-                </div>
-                <div className="text-ui-muted flex gap-2 items-center">
-                  {item.status === "called"
-                    ? `Vyvolán k ${counterLabel(item.counter)}`
-                    : "Čeká"}
-                  <WaitTime created={item.createdDate} />
-                </div>
-                {kioskChoice && (
-                  <div className="text-xs text-ui-faint">Na kiosku zvolil: {kioskChoice}</div>
-                )}
+    <BentoTile
+      span={2}
+      index={index}
+      title="Návštěva – vyvolávací systém"
+      action={item && <WaitTime created={item.createdDate} />}
+    >
+      <QueueError error={error} onClose={clearError} />
+      {item && (
+        <>
+          <div className="flex flex-wrap items-center gap-4">
+            <TicketNo no={item.orderNumber} big />
+            <div className="min-w-0">
+              <div className="text-lg font-semibold leading-tight">
+                {linked ? serviceLabel(item.serviceId) : "Lístek bez pacienta"}
+              </div>
+              <div className="mt-1 text-[13px] text-ui-muted">
+                {item.status === "called" ? `Vyvolán k ${counterLabel(item.counter)}` : "Čeká na vyvolání"}
+                {kioskChoice && ` · na kiosku zvolil ${kioskChoice}`}
               </div>
             </div>
+          </div>
 
-            <div className="space-y-1">
-              <div className="text-xs text-ui-muted flex items-center gap-1">
-                <ArrowRightLeft className="w-3.5 h-3.5" />
-                {linked
-                  ? "Přeřadit do:"
-                  : "Po založení vyšetření se pošle do čekárny sám, nebo ručně do:"}
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {MODALITIES.map((m) => {
-                  const target = WAITING_SERVICES[m];
-                  const current = linked && item.serviceId === target;
-                  return (
-                    <span key={m} className={cn(m === kioskChoice && "ring-2 ring-brand-400 rounded-md")}>
-                      <QueueButton
-                        variant={m === kioskChoice ? "primary" : "default"}
-                        disabled={busy || !!current}
-                        onClick={() => sendTo(target)}
-                      >
-                        Čekárna {m}
-                      </QueueButton>
-                    </span>
-                  );
-                })}
-                {linked && (
-                  <QueueButton
-                    disabled={busy || item.serviceId === REPORT_SERVICE}
-                    onClick={() => sendTo(REPORT_SERVICE)}
-                  >
-                    Recepce – výdej zprávy
-                  </QueueButton>
-                )}
-              </div>
+          <div className="mt-4">
+            <div className="mb-2 text-[13px] text-ui-muted">
+              {linked ? "Přeřadit do" : "Po založení vyšetření se pošle sám, nebo ručně do"}
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+            <div className="flex flex-wrap gap-2">
+              {MODALITIES.map((m) => {
+                const target = WAITING_SERVICES[m];
+                const current = linked && item.serviceId === target;
+                return (
+                  <span key={m} className={cn(m === kioskChoice && "rounded-md ring-2 ring-brand-400")}>
+                    <QueueButton
+                      variant={m === kioskChoice ? "primary" : "default"}
+                      disabled={busy || !!current}
+                      onClick={() => sendTo(target)}
+                    >
+                      Čekárna {m}
+                    </QueueButton>
+                  </span>
+                );
+              })}
+              {linked && (
+                <QueueButton
+                  disabled={busy || item.serviceId === REPORT_SERVICE}
+                  onClick={() => sendTo(REPORT_SERVICE)}
+                >
+                  Recepce – výdej zprávy
+                </QueueButton>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </BentoTile>
   );
 }
