@@ -126,9 +126,13 @@ export function makeRoom(
 
   // výška nového okna: co největší (do preferované), co se vejde
   const hs = HEIGHTS.filter((h) => h >= (mins(drag.i).minH ?? 0) && h <= Math.max(drag.prefH, 0)).reverse();
-  for (const h of hs) {
-    const item = { i: drag.i, x: dragX, y: drag.y, w, h };
-    if (!collides(item, placed)) return [...placed, item];
+  // zarovnat na horní hranu řady (když to jde), jinak tam, kde bylo puštěno
+  const rowTop = Math.min(...row.map((r) => r.y));
+  for (const y of [...new Set([rowTop, drag.y])]) {
+    for (const h of hs) {
+      const item = { i: drag.i, x: dragX, y, w, h };
+      if (!collides(item, placed)) return [...placed, item];
+    }
   }
   return null;
 }
