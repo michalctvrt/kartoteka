@@ -65,7 +65,7 @@ export default function ServicesEditor({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium">Výkony</label>
+      <label className="block text-[13px] text-ui-muted">Výkony</label>
 
       {Object.keys(value).length > 0 && (
         <ul className="divide-y divide-ui-rule rounded-lg border border-ui-line">
@@ -97,7 +97,7 @@ export default function ServicesEditor({
           placeholder={
             !category ? "Nejdřív vyberte modalitu" : loading ? "Načítám výkony…" : "Kód nebo název výkonu"
           }
-          className="h-10 w-full rounded-lg border border-ui-control bg-ui-sheet pl-8 pr-3 text-sm disabled:opacity-60"
+          className="ui-input pl-8 disabled:opacity-60"
         />
         {matches.length > 0 && (
           <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-lg border border-ui-line bg-ui-sheet shadow-lg text-sm">

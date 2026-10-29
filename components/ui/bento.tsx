@@ -34,6 +34,8 @@ const SPAN: Record<1 | 2 | 4, string> = {
 
 type TileProps = {
   span?: 1 | 2 | 4
+  /** na širokém displeji přes 2 řádky (např. popis vedle sloupce faktů) */
+  rows?: 1 | 2
   index?: number
   title?: React.ReactNode
   action?: React.ReactNode
@@ -44,6 +46,7 @@ type TileProps = {
 
 function BentoTile({
   span = 1,
+  rows = 1,
   index = 0,
   title,
   action,
@@ -59,7 +62,7 @@ function BentoTile({
       animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
       transition={{ type: "spring", stiffness: 380, damping: 32, delay: index * 0.045 }}
       style={{ transformOrigin: "0% 0%" }}
-      className={cn("ui-tile flex min-w-0 flex-col", SPAN[span], className)}
+      className={cn("ui-tile flex min-w-0 flex-col", SPAN[span], rows === 2 && "xl:row-span-2", className)}
       {...(props as React.ComponentProps<typeof motion.section>)}
     >
       {(title || action) && (

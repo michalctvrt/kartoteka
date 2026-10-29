@@ -7,14 +7,20 @@
  *   - rodné číslo (full match na pid), NEBO
  *   - jméno / příjmení (volný text na "name" filtr)
  *
- * Výsledky tabulkou; klik na řádek → /reception/patients/{pid}.
+ * Výsledky v bento dlaždici (skeleton při hledání, Ghost když nic); klik → /reception/patients/{pid}.
+ * Bez dotazu ukáže rozpracované karty (drafty v prohlížeči), jsou-li nějaké.
  * Mock pacienti pryč — vše přes Václavův backend (PatientService.search3).
  */
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, AlertTriangle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Search, AlertTriangle, ChevronRight, X } from "lucide-react";
+import { Bento, BentoTile } from "@/components/ui/bento";
+import { Ghost, Skeleton } from "@/components/ui/skeleton";
+import { ageYears } from "@/lib/study/card-check";
+import { formatDate } from "@/lib/studies";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
@@ -80,115 +86,131 @@ export default function PatientsListPage() {
     []
   );
 
+  const draftIds = Object.keys(drafts).sort((x, y) => drafts[y].ts - drafts[x].ts);
+  const open = (pid: string) => router.push(`/reception/patients/${encodeURIComponent(pid)}`);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <header>
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <Search className="w-5 h-5" />
-          Vyhledávání pacientů
-        </h1>
-        <p className="text-sm text-ui-faint mt-1">
-          Najdi existující kartu zadáním RČ, jména nebo příjmení.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">Vyhledat pacienta</h1>
+        <p className="mt-1 text-sm text-ui-muted">Rodné číslo, jméno nebo příjmení</p>
       </header>
 
-      <div className="flex gap-2 items-center">
+      <label className="relative block">
+        <span className="sr-only">{placeholder}</span>
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ui-faint" />
         <input
           type="text"
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          className="flex-1 px-3 py-2 rounded-md border border-ui-line bg-ui-sheet text-sm"
+          placeholder="např. 691110/3815 nebo Novák"
+          className="ui-input h-11 pl-9 pr-9 text-[15px]"
         />
-        <span className="text-xs text-ui-faint">
-          {loading
-            ? "Hledám…"
-            : touched
-            ? `${results.length} výsledků`
-            : ""}
-        </span>
-      </div>
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-ui-faint hover:bg-ui-sheet hover:text-ui-ink"
+            aria-label="Vymazat hledání"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </label>
 
       {error && (
-        <div className="border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-md p-3 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
+        <p role="alert" className="flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-[13px] text-red-800 dark:border-red-900 dark:text-red-200">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> {error}
+        </p>
       )}
 
-      {!touched ? (
-        <Card>
-          <CardContent className="p-6 text-sm text-ui-faint">
-            Začni psát do vyhledávacího pole. Pro založení nového pacienta
-            použij box &quot;Nový pacient&quot; na hlavní stránce recepce.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="bg-ui-sheet border border-ui-line rounded-lg overflow-hidden">
-          <table className="min-w-full text-sm">
-            <thead className="bg-ui-raised text-left">
-              <tr>
-                <th className="p-3">Příjmení</th>
-                <th className="p-3">Jméno</th>
-                <th className="p-3">Rodné číslo</th>
-                <th className="p-3">Datum narození</th>
-                <th className="p-3 w-10 text-center">Stav</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!loading && results.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="p-6 text-center text-ui-faint"
-                  >
-                    Žádné výsledky pro &quot;{query}&quot;.
-                  </td>
-                </tr>
-              )}
-              {results.map((p) => {
-                // Backend někdy vrátí patientDataInfo === undefined (PID bez detailů)
-                const d = p.patientDataInfo;
-                const hasDraft = Boolean(drafts[p.pid]);
-                const lastName = d?.lastName?.trim();
-                const firstName = d?.firstName?.trim();
-                const isEmpty = !lastName && !firstName;
-                return (
-                  <tr
-                    key={p.id}
-                    onClick={() =>
-                      router.push(
-                        `/reception/patients/${encodeURIComponent(p.pid)}`
-                      )
-                    }
-                    className="border-t border-ui-line hover:bg-ui-raised cursor-pointer"
-                  >
-                    <td className="p-3 font-medium">
-                      {lastName ?? (
-                        <span className="text-amber-600 italic">
-                          (bez údajů)
+      <Bento>
+        {touched ? (
+          <BentoTile
+            span={4}
+            index={0}
+            title={loading && results.length === 0 ? "Hledám" : `Nalezeno · ${results.length}`}
+            bodyClassName="px-0 pb-1"
+          >
+            {loading && results.length === 0 ? (
+              <div className="divide-y divide-ui-rule">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex items-center gap-4 px-4 py-3">
+                    <Skeleton className="h-4 w-44" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-28" />
+                  </div>
+                ))}
+              </div>
+            ) : results.length === 0 ? (
+              <Ghost label={`Žádný pacient pro „${query}“`} className="px-4 py-4" />
+            ) : (
+              <ul className={`divide-y divide-ui-rule transition-opacity ${loading ? "opacity-50" : ""}`}>
+                {results.map((p, i) => {
+                  // Backend někdy vrátí patientDataInfo === undefined (PID bez detailů)
+                  const d = p.patientDataInfo;
+                  const name = [d?.title, d?.firstName, d?.lastName].filter(Boolean).join(" ");
+                  const age = ageYears(d?.birthDate);
+                  return (
+                    <motion.li
+                      key={p.id}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.08 + Math.min(i, 12) * 0.025, duration: 0.2 }}
+                    >
+                      <div
+                        role="link"
+                        tabIndex={0}
+                        onClick={() => open(p.pid)}
+                        onKeyDown={(e) => e.key === "Enter" && open(p.pid)}
+                        className="group grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-2.5 transition-colors hover:bg-ui-raised focus-visible:bg-ui-raised focus-visible:outline-none md:grid-cols-[minmax(0,1fr)_8rem_10rem_auto]"
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="truncate text-sm font-medium">
+                            {name || <span className="font-normal text-amber-700 dark:text-amber-300">bez údajů</span>}
+                          </span>
+                          {drafts[p.pid] && (
+                            <span title="Rozpracovaná karta" className="h-2 w-2 shrink-0 rounded-full bg-red-600" />
+                          )}
                         </span>
-                      )}
-                    </td>
-                    <td className="p-3">{firstName ?? (isEmpty ? "" : "—")}</td>
-                    <td className="p-3">{formatRc(p.pid)}</td>
-                    <td className="p-3">{d?.birthDate ?? "—"}</td>
-                    <td className="p-3 text-center">
-                      {hasDraft && (
-                        <span
-                          className="inline-block w-2.5 h-2.5 rounded-full bg-red-600"
-                          title="Rozpracovaná karta"
-                        />
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        <span className="text-sm text-ui-muted md:text-ui-ink">{formatRc(p.pid)}</span>
+                        <span className="hidden text-sm text-ui-muted md:block">
+                          {d?.birthDate ? `${formatDate(d.birthDate)}${age !== null ? ` · ${age} let` : ""}` : "—"}
+                        </span>
+                        <ChevronRight className="hidden h-4 w-4 text-ui-faint transition-transform group-hover:translate-x-0.5 md:block" />
+                      </div>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+            )}
+          </BentoTile>
+        ) : (
+          draftIds.length > 0 && (
+            <BentoTile span={2} index={0} title={`Rozpracované karty · ${draftIds.length}`} bodyClassName="px-0 pb-1">
+              <ul className="divide-y divide-ui-rule">
+                {draftIds.map((id) => (
+                  <li key={id}>
+                    <Link
+                      href={`/reception/patients/${encodeURIComponent(id)}`}
+                      className="group flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-ui-raised"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-red-600" aria-hidden />
+                        {formatRc(id)}
+                      </span>
+                      <span className="text-[13px] text-ui-muted">
+                        {drafts[id].ts ? new Date(drafts[id].ts).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit" }) : ""}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </BentoTile>
+          )
+        )}
+      </Bento>
     </div>
   );
 }

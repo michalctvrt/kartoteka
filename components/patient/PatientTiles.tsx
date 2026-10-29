@@ -20,7 +20,7 @@ import { formatDate, formatDateTime, formatRc, hasReport } from "@/lib/studies";
 
 /** Sytější odstíny barev čekáren pro tenký pruh poměru modalit. */
 const BAR: Record<string, string> = { RTG: "bg-orange-400", UZ: "bg-sky-500", MRI: "bg-purple-500" };
-import { GENDER_LABEL, bmi, type FormProps } from "./form";
+import { GENDER_LABEL, type FormProps } from "./form";
 import InlineField from "./InlineField";
 
 // ─── Identita ───
@@ -145,7 +145,6 @@ export function ContactTile({ value: v, editing, onChange, index }: FormProps & 
 // ─── Tělo ───
 
 export function BodyTile({ value: v, editing, onChange, index }: FormProps & { index: number }) {
-  const b = bmi(v.height, v.weight);
   return (
     <BentoTile index={index} title="Výška a váha">
       {editing ? (
@@ -161,7 +160,6 @@ export function BodyTile({ value: v, editing, onChange, index }: FormProps & { i
         <Metric
           value={`${v.height || "—"} / ${v.weight || "—"}`}
           unit="cm / kg"
-          sub={b !== null ? `BMI ${b.toLocaleString("cs-CZ")}` : undefined}
         />
       ) : (
         <Ghost label="Výška a váha nejsou vyplněné" />

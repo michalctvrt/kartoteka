@@ -66,6 +66,9 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Pohyb (framer-motion): dlaždice se rozevřou od levého horního rohu postupně (`index`), stránky se prolnou
   (`app/(dashboard)/template.tsx`), zvýraznění menu přejede (`layoutId`). `MotionConfig reducedMotion="user"`.
 - Karta pacienta = bento z `components/patient/*`; lístek (2 sl.) → bez lístku místo něj poslední vyšetření.
+- Tento styl platí pro VŠECHNY obrazovky (i nové). Sdílené: `components/ui/segmented.tsx` (přepínač s přejíždějícím
+  výběrem), `components/study/StudyList.tsx` (řádky studií – karta pacienta i vyhledávání), `components/study/StudyTiles.tsx`
+  (karta studie: popis 2×2, pacient, žádanka, výkony, záznam, přílohy jen když jsou).
 
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.

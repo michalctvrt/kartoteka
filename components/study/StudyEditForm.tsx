@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Bento, BentoTile } from "@/components/ui/bento";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { StudyService } from "@/lib/api/generated/services/StudyService";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
@@ -201,22 +202,20 @@ export default function StudyEditForm({
     set({ category: c, services: {} });
   };
 
-  const field = "h-10 w-full rounded-lg border border-ui-control bg-ui-sheet px-3 text-sm";
-  const label = "mb-1.5 block text-sm font-medium";
+  const field = "ui-input";
+  const label = "mb-1 block text-[13px] text-ui-muted";
 
   return (
     <form
-      className="space-y-6"
+      className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         void save();
       }}
     >
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <div className="space-y-6">
+      <Bento>
           {/* Vyšetření */}
-          <section className="rounded-lg border border-ui-line p-5" aria-labelledby="ed-vys">
-            <h2 id="ed-vys" className="mb-4 text-base font-semibold">Vyšetření</h2>
+          <BentoTile span={2} index={0} title="Vyšetření">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="ed-date" className={label}>Datum a čas vyšetření</label>
@@ -255,81 +254,86 @@ export default function StudyEditForm({
                 onChange={(remoteAccess) => set({ remoteAccess })}
               />
             </fieldset>
-          </section>
-
-          {/* Poznámka + popis */}
-          <section className="rounded-lg border border-ui-line p-5" aria-labelledby="ed-pozn">
-            <label id="ed-pozn" htmlFor="ed-remark" className="mb-1.5 block text-base font-semibold">Poznámka</label>
-            <textarea
-              id="ed-remark"
-              value={f.remark}
-              onChange={(e) => set({ remark: e.target.value })}
-              rows={3}
-              className="w-full rounded-lg border border-ui-control bg-ui-sheet px-3 py-2 text-sm"
-            />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-ui-raised px-4 py-3 text-sm">
-              <span className="text-ui-muted">Popis lékaře se zatím upravuje ve staré kartotéce.</span>
-              <a
-                href={legacyStudyEditUrl(study.id, study.pid)}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-ui-primary hover:underline"
-              >
-                <ExternalLink className="h-4 w-4" /> Otevřít popis
-              </a>
-            </div>
-          </section>
-        </div>
-
+          </BentoTile>
         {/* Žádanka */}
-        <section className="space-y-4 rounded-lg border border-ui-line p-5" aria-labelledby="ed-zad">
-          <h2 id="ed-zad" className="text-base font-semibold">
-            Žádanka{f.selfPay && <span className="font-normal text-ui-muted"> · u samoplátce nepovinná</span>}
-          </h2>
-          <Lookup
-            label="Žádající lékař"
-            placeholder="IČP, jméno nebo název"
-            value={f.doctor}
-            onChange={(doctor) => set({ doctor })}
-            search={searchDoctors}
-          />
-          <Lookup
-            label="Diagnóza"
-            placeholder="Kód (M25.5) nebo popis"
-            value={f.diagnosis}
-            onChange={(diagnosis) => set({ diagnosis })}
-            search={searchDiagnoses}
-          />
-          <div>
-            <label htmlFor="ed-req" className={label}>Datum žádanky</label>
-            <input id="ed-req" type="date" value={f.requestDate} onChange={(e) => set({ requestDate: e.target.value })} className={field} />
+        <BentoTile
+          span={2}
+          index={1}
+          title={<>Žádanka{f.selfPay && <span className="text-ui-faint"> · u samoplátce nepovinná</span>}</>}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Lookup
+              label="Žádající lékař"
+              placeholder="IČP, jméno nebo název"
+              value={f.doctor}
+              onChange={(doctor) => set({ doctor })}
+              search={searchDoctors}
+            />
+            <Lookup
+              label="Diagnóza"
+              placeholder="Kód (M25.5) nebo popis"
+              value={f.diagnosis}
+              onChange={(diagnosis) => set({ diagnosis })}
+              search={searchDiagnoses}
+            />
+            <div>
+              <label htmlFor="ed-req" className={label}>Datum žádanky</label>
+              <input id="ed-req" type="date" value={f.requestDate} onChange={(e) => set({ requestDate: e.target.value })} className={field} />
+            </div>
+            <div>
+              <label htmlFor="ed-ins" className={label}>Pojišťovna</label>
+              <select id="ed-ins" value={f.insurance} onChange={(e) => set({ insurance: e.target.value })} className={field}>
+                <option value="">— vyberte —</option>
+                {!insurances.some((i) => i.id === f.insurance) && f.insurance && (
+                  <option value={f.insurance}>{f.insurance}</option>
+                )}
+                {insurances.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.id} {i.description}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label htmlFor="ed-ins" className={label}>Pojišťovna</label>
-            <select id="ed-ins" value={f.insurance} onChange={(e) => set({ insurance: e.target.value })} className={field}>
-              <option value="">— vyberte —</option>
-              {!insurances.some((i) => i.id === f.insurance) && f.insurance && (
-                <option value={f.insurance}>{f.insurance}</option>
-              )}
-              {insurances.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.id} {i.description}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-      </div>
+        </BentoTile>
+
+        {/* Poznámka */}
+        <BentoTile
+          span={4}
+          index={2}
+          title="Poznámka"
+          action={
+            <a
+              href={legacyStudyEditUrl(study.id, study.pid)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-[13px] text-ui-primary hover:underline"
+              title="Popis lékaře backend přes API upravit neumí"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Popis upravit ve staré kartotéce
+            </a>
+          }
+        >
+          <label htmlFor="ed-remark" className="sr-only">Poznámka</label>
+          <textarea
+            id="ed-remark"
+            value={f.remark}
+            onChange={(e) => set({ remark: e.target.value })}
+            rows={3}
+            className="ui-input h-auto py-2"
+          />
+        </BentoTile>
+      </Bento>
 
       {error && (
-        <div role="alert" className="flex gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200">
+        <div role="alert" className="flex gap-2 rounded-lg border border-red-200 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:text-red-200">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span className="break-words">{error.text}</span>
         </div>
       )}
 
       {/* Akce – vždy na konci formuláře */}
-      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-ui-rule pt-4">
+      <div className="ui-tile flex flex-wrap items-center justify-end gap-3 px-4 py-3">
         <p className="mr-auto text-[13px] text-ui-muted">
           {missing.length ? `Chybí: ${missing.join(", ")}` : dirty ? "Neuložené změny" : "Beze změn"}
         </p>

@@ -35,11 +35,3 @@ export type FormProps = {
 };
 
 export const GENDER_LABEL: Record<string, string> = { MALE: "Muž", FEMALE: "Žena" };
-
-/** BMI z výšky (cm) a váhy (kg), jinak null. */
-export function bmi(heightCm: string, weightKg: string): number | null {
-  const h = Number(heightCm) / 100;
-  const w = Number(weightKg);
-  if (!h || !w) return null;
-  return Math.round((w / (h * h)) * 10) / 10;
-}

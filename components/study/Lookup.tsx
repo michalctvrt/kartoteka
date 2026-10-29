@@ -44,7 +44,7 @@ export default function Lookup({
 
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-[13px] text-ui-muted">{label}</label>
       {value ? (
         <div className="flex min-h-10 items-center justify-between gap-2 rounded-lg border border-ui-line bg-ui-raised px-3 py-1.5 text-sm">
           <div className="min-w-0">
@@ -62,7 +62,7 @@ export default function Lookup({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={placeholder}
-            className="h-10 w-full rounded-lg border border-ui-control bg-ui-sheet pl-8 pr-3 text-sm"
+            className="ui-input pl-8"
           />
           {showResults && (
             <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-lg border border-ui-line bg-ui-sheet shadow-lg text-sm">
