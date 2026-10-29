@@ -40,6 +40,13 @@ import { useWorkstation } from "@/components/queue/useWorkstation";
 import Lookup from "./Lookup";
 import ServicesEditor from "./ServicesEditor";
 
+/**
+ * Pracoviště (idWorkingplace) = kód ordinace v kartotéce (např. BRLE = Lesná).
+ * Backend ho u POST /study vyžaduje. Nastavuje se jednou pro pobočku v
+ * .env.local (NEXT_PUBLIC_WORKINGPLACE) — recepční ho nevybírá. Výběr ve
+ * formuláři se ukáže jen když chybí v konfiguraci.
+ */
+const CONFIG_WORKINGPLACE = process.env.NEXT_PUBLIC_WORKINGPLACE ?? "";
 const WP_KEY = "kartoteka_workingplace_v1";
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -71,7 +78,7 @@ export default function NewStudyDialog({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Pracoviště si pamatuje každý počítač zvlášť
-  const [workingplace, setWorkingplace] = useState(readWorkingplace);
+  const [workingplace, setWorkingplace] = useState(() => CONFIG_WORKINGPLACE || readWorkingplace());
   const [category, setCategory] = useState("");
   const [services, setServices] = useState<Record<string, number>>({});
   const [selfPay, setSelfPay] = useState(false);
@@ -88,7 +95,7 @@ export default function NewStudyDialog({
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    Promise.all([listWorkingplaces(), listCategories()])
+    Promise.all([CONFIG_WORKINGPLACE ? Promise.resolve([]) : listWorkingplaces(), listCategories()])
       .then(([w, c]) => {
         if (cancelled) return;
         setWorkingplaces(w);
@@ -190,17 +197,19 @@ export default function NewStudyDialog({
         {loadError && <p className="text-sm text-red-600">{loadError}</p>}
 
         <div className="grid sm:grid-cols-2 gap-4">
+          {!CONFIG_WORKINGPLACE && (
           <div className="space-y-1">
-            <label className={lbl}>Pracoviště</label>
+            <label className={lbl}>Pracoviště (kód ordinace – nastavte v .env.local)</label>
             <select value={workingplace} onChange={(e) => chooseWorkingplace(e.target.value)} className={field}>
               <option value="">— vyberte —</option>
               {workingplaces.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.label} ({w.id})
+                  {w.id} – {w.label}
                 </option>
               ))}
             </select>
           </div>
+          )}
           <div className="space-y-1">
             <label className={lbl}>Modalita</label>
             <select
