@@ -13,7 +13,7 @@ export class InsuranceCompanyService {
      * @returns InsuranceCompanyInfo default response
      * @throws ApiError
      */
-    public static findById(
+    public static findById1(
         id: string,
     ): CancelablePromise<InsuranceCompanyInfo> {
         return __request(OpenAPI, {

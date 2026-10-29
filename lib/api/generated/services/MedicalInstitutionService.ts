@@ -16,7 +16,7 @@ export class MedicalInstitutionService {
      * @returns MedicalInstitutionInfo default response
      * @throws ApiError
      */
-    public static findById2(
+    public static findById3(
         id: string,
     ): CancelablePromise<MedicalInstitutionInfo> {
         return __request(OpenAPI, {
@@ -28,7 +28,7 @@ export class MedicalInstitutionService {
         });
     }
     /**
-     * Search Medical Institutions by filters
+     * Store medical institution
      * @param id
      * @param requestBody
      * @returns MedicalInstitutionInfo default response

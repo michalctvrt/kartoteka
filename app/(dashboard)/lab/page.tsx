@@ -1,9 +1,6 @@
 // app/(dashboard)/lab/page.tsx
+import ModalityWorklist from "@/components/queue/ModalityWorklist";
+
 export default function LabPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Laboratoř — Worklist</h1>
-      <div className="bg-white p-6 rounded shadow">Žádné nové žádanky.</div>
-    </div>
-  );
+  return <ModalityWorklist />;
 }

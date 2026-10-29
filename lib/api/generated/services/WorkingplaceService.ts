@@ -13,7 +13,7 @@ export class WorkingplaceService {
      * @returns WorkingplaceInfo default response
      * @throws ApiError
      */
-    public static findById6(
+    public static findById7(
         id: string,
     ): CancelablePromise<WorkingplaceInfo> {
         return __request(OpenAPI, {

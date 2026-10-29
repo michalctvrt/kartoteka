@@ -20,7 +20,7 @@ import { ArrowLeft, Save, AlertTriangle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
-import { StorePatientDataRequest } from "@/lib/api/generated/models/StorePatientDataRequest";
+import { PatientDataSaveInfo } from "@/lib/api/generated/models/PatientDataSaveInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import EzadankyList from "@/components/ezadanka/EzadankyList";
 import type { ZadankaDetail } from "@/lib/ezadanka/types";
@@ -149,13 +149,13 @@ export default function NewPatientPage() {
     setError(null);
     setLoading(true);
 
-    const request: StorePatientDataRequest = {
+    const request: PatientDataSaveInfo = {
       firstName: form.firstName.trim(),
       middleName: form.middleName.trim() || null,
       lastName: form.lastName.trim(),
       title: form.title.trim() || null,
       birthDate: form.birthDate,
-      gender: form.gender as StorePatientDataRequest.gender,
+      gender: form.gender as PatientDataSaveInfo.gender,
       idInsuranceCompany: form.idInsuranceCompany.trim() || null,
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,

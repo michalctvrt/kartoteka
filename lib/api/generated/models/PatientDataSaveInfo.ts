@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Request for patient's data insert
+ * Request for patient's data save
  */
-export type StorePatientDataRequest = {
+export type PatientDataSaveInfo = {
     /**
      * ID of patient's insurance company
      */
@@ -17,7 +17,7 @@ export type StorePatientDataRequest = {
     /**
      * Patient's gender
      */
-    gender?: StorePatientDataRequest.gender;
+    gender?: PatientDataSaveInfo.gender;
     /**
      * Patient's first name
      */
@@ -51,7 +51,7 @@ export type StorePatientDataRequest = {
      */
     height?: number | null;
 };
-export namespace StorePatientDataRequest {
+export namespace PatientDataSaveInfo {
     /**
      * Patient's gender
      */

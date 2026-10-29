@@ -9,9 +9,6 @@ import type { PatientDataInfo } from './PatientDataInfo';
 import type { StudyAttachmentInfo } from './StudyAttachmentInfo';
 import type { StudyRemoteAccessInfo } from './StudyRemoteAccessInfo';
 import type { StudyServiceInfo } from './StudyServiceInfo';
-/**
- * Returned records
- */
 export type StudyInfo = {
     id: number;
     uid: string;

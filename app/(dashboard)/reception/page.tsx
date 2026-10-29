@@ -4,6 +4,7 @@ import ReceptionTodayList from "@/components/ReceptionTodayList";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import ReceptionMessagesBlock from "@/components/ReceptionMessagesBlock";
 import NewPatientBox from "@/components/NewPatientBox";
+import ReceptionQueuePanel from "@/components/queue/ReceptionQueuePanel";
 
 export default function ReceptionHomePage() {
   return (
@@ -13,6 +14,9 @@ export default function ReceptionHomePage() {
 
       {/* 📦 Pravá část – novinky a zprávy */}
       <div className="space-y-6">
+        {/* 📣 Vyvolávací systém Call250V */}
+        <ReceptionQueuePanel />
+
         {/* 🩺 Nový pacient */}
         <Card>
           <CardHeader>

@@ -7,6 +7,8 @@ import type { SearchRequestStudySearchFilterStudyBrowseFilter } from '../models/
 import type { SearchResponseStudyInfo } from '../models/SearchResponseStudyInfo';
 import type { StudyInfo } from '../models/StudyInfo';
 import type { StudyRemoteAccessInfo } from '../models/StudyRemoteAccessInfo';
+import type { StudySaveBasicInfo } from '../models/StudySaveBasicInfo';
+import type { UpdateStudyDataRequest } from '../models/UpdateStudyDataRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -26,6 +28,22 @@ export class StudyService {
             path: {
                 'id': id,
             },
+        });
+    }
+    /**
+     * Store new study
+     * @param requestBody
+     * @returns StudyInfo default response
+     * @throws ApiError
+     */
+    public static create(
+        requestBody?: StudySaveBasicInfo,
+    ): CancelablePromise<StudyInfo> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/study',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -102,7 +120,7 @@ export class StudyService {
      * @returns StudyInfo Finds study by id
      * @throws ApiError
      */
-    public static findById5(
+    public static findById6(
         id: number,
     ): CancelablePromise<StudyInfo> {
         return __request(OpenAPI, {
@@ -111,6 +129,27 @@ export class StudyService {
             path: {
                 'id': id,
             },
+        });
+    }
+    /**
+     * Update existing study
+     * @param id
+     * @param requestBody
+     * @returns StudyInfo default response
+     * @throws ApiError
+     */
+    public static update(
+        id: number,
+        requestBody?: UpdateStudyDataRequest,
+    ): CancelablePromise<StudyInfo> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/study/{id}',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

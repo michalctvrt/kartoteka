@@ -20,7 +20,7 @@ export class MedicalDefinitionsService {
      * @returns MedicalDiagnosisInfo default response
      * @throws ApiError
      */
-    public static findById1(
+    public static findById2(
         id: string,
     ): CancelablePromise<MedicalDiagnosisInfo> {
         return __request(OpenAPI, {
@@ -53,7 +53,7 @@ export class MedicalDefinitionsService {
      * @returns MedicalServiceCategoryInfo default response
      * @throws ApiError
      */
-    public static findById3(
+    public static findById4(
         id: string,
     ): CancelablePromise<MedicalServiceCategoryInfo> {
         return __request(OpenAPI, {
@@ -81,7 +81,7 @@ export class MedicalDefinitionsService {
      * @returns MedicalServiceInfo default response
      * @throws ApiError
      */
-    public static findById4(
+    public static findById5(
         id: string,
     ): CancelablePromise<MedicalServiceInfo> {
         return __request(OpenAPI, {

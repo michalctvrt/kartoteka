@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { PatientDataInfo } from '../models/PatientDataInfo';
+import type { PatientDataSaveInfo } from '../models/PatientDataSaveInfo';
 import type { PatientInfo } from '../models/PatientInfo';
 import type { SearchRequestPatientSearchFilterPatientBrowseFilter } from '../models/SearchRequestPatientSearchFilterPatientBrowseFilter';
 import type { SearchResponsePatientInfo } from '../models/SearchResponsePatientInfo';
-import type { StorePatientDataRequest } from '../models/StorePatientDataRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -39,7 +39,7 @@ export class PatientService {
      */
     public static storeNewPatientData(
         pid: string,
-        requestBody?: StorePatientDataRequest,
+        requestBody?: PatientDataSaveInfo,
     ): CancelablePromise<PatientDataInfo> {
         return __request(OpenAPI, {
             method: 'POST',

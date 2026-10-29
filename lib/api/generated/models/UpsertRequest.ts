@@ -3,14 +3,41 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UpsertRequest = {
-    description?: string;
-    descriptionLong?: string;
-    doctorName?: string;
+    /**
+     * Medical institution short description
+     */
+    description: string;
+    /**
+     * Medical institution long description
+     */
+    descriptionLong: string;
+    /**
+     * Medical institution long description
+     */
+    doctorName: string;
+    /**
+     * Medical institution long description
+     */
     doctorEmail?: string;
-    idMedicalSkill?: string;
+    /**
+     * Medical skill
+     */
+    idMedicalSkill: string;
+    /**
+     * Until when is record valid
+     */
     dateValidTill?: string;
+    /**
+     * ICZ
+     */
     icz?: string;
+    /**
+     * ID in CGM system
+     */
     cgmId?: string;
-    idXmlExportDefinition?: Array<string>;
+    /**
+     * Which XML exports should be fired for this medical institution
+     */
+    idXmlExportDefinition: Array<string>;
 };
 

@@ -22,18 +22,23 @@ import {
   Save,
   X,
   UserPlus,
+  Plus,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import { InsuranceCompanyService } from "@/lib/api/generated/services/InsuranceCompanyService";
-import { StorePatientDataRequest } from "@/lib/api/generated/models/StorePatientDataRequest";
+import { PatientDataSaveInfo } from "@/lib/api/generated/models/PatientDataSaveInfo";
 import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { usePatientDraft } from "@/components/hooks/usePatientDraft";
 import ExaminationsSection from "@/components/ExaminationsSection";
 import EzadankyList from "@/components/ezadanka/EzadankyList";
 import { parseRc } from "@/lib/rc";
+import PatientQueueBox from "@/components/queue/PatientQueueBox";
+import NewStudyDialog from "@/components/study/NewStudyDialog";
+import { missingForStudy } from "@/lib/study/card-check";
+import { legacyStudyListUrl } from "@/lib/legacy";
 
 interface FormState {
   firstName: string;
@@ -72,6 +77,8 @@ export default function PatientDetailPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const ezadankaId = searchParams.get("ezadanka");
+  // Lístek z vyvolávacího systému (přechod z panelu recepce)
+  const ticketId = searchParams.get("ticket");
 
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const [loadState, setLoadState] = useState<
@@ -83,6 +90,7 @@ export default function PatientDetailPage({
   const [insuranceName, setInsuranceName] = useState<string>("");
 
   const [isEditing, setIsEditing] = useState(false);
+  const [newStudyOpen, setNewStudyOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -131,7 +139,7 @@ export default function PatientDetailPage({
         const insId = res.patientDataInfo?.idInsuranceCompany;
         if (insId) {
           try {
-            const ins = await InsuranceCompanyService.findById(insId);
+            const ins = await InsuranceCompanyService.findById1(insId);
             if (!cancelled) {
               setInsuranceName(ins.description ?? ins.descriptionLong ?? "");
             }
@@ -192,7 +200,7 @@ export default function PatientDetailPage({
     setSaveError(null);
     setSaving(true);
 
-    const request: StorePatientDataRequest = {
+    const request: PatientDataSaveInfo = {
       firstName: formValue.firstName.trim(),
       middleName: formValue.middleName.trim() || null,
       lastName: formValue.lastName.trim(),
@@ -200,7 +208,7 @@ export default function PatientDetailPage({
       birthDate: formValue.birthDate,
       gender:
         formValue.gender === "MALE" || formValue.gender === "FEMALE"
-          ? (formValue.gender as StorePatientDataRequest.gender)
+          ? (formValue.gender as PatientDataSaveInfo.gender)
           : undefined,
       idInsuranceCompany: formValue.idInsuranceCompany.trim() || null,
       phone: formValue.phone.trim() || null,
@@ -298,6 +306,9 @@ export default function PatientDetailPage({
     );
   }
 
+  // Co chybí na (uložené) kartě pro založení vyšetření
+  const studyMissing = missingForStudy(patient?.patientDataInfo);
+
   // Loaded
   return (
     <div className="space-y-6">
@@ -353,10 +364,49 @@ export default function PatientDetailPage({
               </Button>
             </>
           ) : (
-            <Button onClick={() => setIsEditing(true)}>Editovat</Button>
+            <>
+              <Button variant="outline" asChild>
+                <a href={legacyStudyListUrl(pid)}>Vyšetření pacienta</a>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setNewStudyOpen(true)}
+                disabled={studyMissing.length > 0}
+                title={
+                  studyMissing.length
+                    ? `Na kartě chybí: ${studyMissing.join(", ")}`
+                    : "Založit nové vyšetření"
+                }
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Nové vyšetření
+              </Button>
+              <Button onClick={() => setIsEditing(true)}>Editovat</Button>
+            </>
           )}
         </div>
       </header>
+
+      {!isEditing && studyMissing.length > 0 && (
+        <p className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-1 -mt-4">
+          <AlertTriangle className="w-3 h-3" />
+          Pro založení vyšetření doplňte na kartě: {studyMissing.join(", ")}.
+        </p>
+      )}
+
+      {patient?.patientDataInfo && (
+        <NewStudyDialog
+          open={newStudyOpen}
+          onOpenChange={setNewStudyOpen}
+          pid={pid}
+          patient={patient.patientDataInfo}
+          ticketId={ticketId}
+        />
+      )}
+
+      {/* SEKCE: Vyvolávací systém — přiřazení lístku a poslání do čekárny */}
+      <PatientQueueBox pid={pid} ticketId={ticketId} />
 
       {/* SEKCE: Identifikace */}
       <Card>
