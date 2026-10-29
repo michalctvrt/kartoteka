@@ -70,7 +70,7 @@ export function QueueButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition disabled:opacity-50 disabled:pointer-events-none",
         styles
       )}
     >

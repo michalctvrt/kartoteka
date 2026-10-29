@@ -12,7 +12,8 @@
  */
 
 import Link from "next/link";
-import { Megaphone, RotateCcw, Stethoscope, Users } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, Megaphone, RotateCcw, Stethoscope, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { queueApi } from "@/lib/call250v/browser";
 import {
@@ -28,6 +29,7 @@ import { useQueue, useQueueMock } from "./useQueue";
 import { useWorkstation } from "./useWorkstation";
 import { usePatientNames } from "./usePatientNames";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
+import { useElementSize } from "@/components/dashboard/useElementSize";
 import { OperatorInput, QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
 
 /** Barvy modalit — stejné jako u vyšetření na kartě pacienta. */
@@ -92,10 +94,18 @@ export default function WaitingBoard() {
 
 /**
  * Jedna čekárna (RTG / UZ / MRI) — samostatně použitelná i jako okno na ploše.
- * Podoba podle velikosti okna (size): S = velké číslo + další na řadě,
- * M/L = seznam; `wide` = řádky na jeden řádek s tlačítky vpravo.
+ *
+ * Každý pacient = jeden kompaktní řádek (číslo, jméno, čas, tlačítka vpravo).
+ * V okně na ploše se spočítá, kolik řádků se vejde do výšky, a tolik se
+ * jich ukáže — nikdy posuvník; zbytek jako „+ N dalších čeká“.
+ * Na samostatné stránce (Worklist) se ukážou všichni.
  * Všechny sloupce sdílejí jedno načítání fronty (viz useQueue).
  */
+const ROW = 42; // výška řádku v px
+const GAP = 5;
+const SECTION = 22; // nadpis „Na vyšetření“
+const FOOTER = 18; // „+ N dalších“
+
 export function ModalityColumn({
   m,
   className,
@@ -109,46 +119,56 @@ export function ModalityColumn({
   const names = usePatientNames(items.map((i) => i.externalIdentifier ?? "").filter(Boolean));
   const call = (id: string, counter: string) => run(() => queueApi.call(id, counter));
   const moveTo = (id: string, serviceId: string) => run(() => queueApi.patch(id, { serviceId }));
+  const [listRef, list] = useElementSize<HTMLDivElement>();
 
   const inService = items.filter((i) => i.serviceId === WAITING_SERVICES[m]);
   const waiting = inService.filter((i) => i.status !== "called");
   const called = inService.filter((i) => i.status === "called");
   const st = MODALITY_STYLE[m];
-  const small = size.size === "S";
+  const fit = size !== FULL; // okno na ploše → jen co se vejde
+  const slimHeader = fit && size.height < 260;
+  const wide = size.wide;
   const counters = MODALITY_COUNTERS[m];
 
-  const callButtons = (it: QueueItem, compact = false) =>
-    counters.map((c) => (
-      <QueueButton
-        key={c.id}
-        variant="primary"
-        disabled={busy}
-        title={`Vyvolat – ${c.label}`}
-        onClick={() => call(it.queueItemId, c.id)}
-      >
-        <Megaphone className="w-4 h-4" />
-        {compact
-          ? counters.length > 1 && c.label.match(/\d+$/)?.[0]
-          : counters.length > 1
-          ? c.label.split("–").pop()!.trim()
-          : "Vyvolat"}
-      </QueueButton>
-    ));
+  // ── kolik řádků se vejde ──
+  // Priorita: aspoň 1 čekající (koho volat), pak vyšetřovaní, pak další čekající.
+  // V malém okně bez nadpisu „Na vyšetření“ (řádky jsou podbarvené).
+  const showSection = !fit || list.height >= 300;
+  let showCalled = called.length;
+  let showWaiting = waiting.length;
+  if (fit) {
+    const rows = (px: number) => Math.max(0, Math.floor((px + GAP) / (ROW + GAP)));
+    const total = rows(list.height - (called.length && showSection ? SECTION + GAP : 0));
+    const plan = (cap: number) => {
+      const w1 = Math.min(waiting.length, 1, cap);
+      const c = Math.min(called.length, cap - w1);
+      return { c, w: Math.min(waiting.length, cap - c) };
+    };
+    let r = plan(total);
+    // nevejdou se všichni čekající → místo na řádek „+ N dalších“
+    if (r.w < waiting.length) r = plan(rows(list.height - (called.length && showSection ? SECTION + GAP : 0) - FOOTER));
+    showCalled = r.c;
+    showWaiting = r.w;
+  }
+  const hiddenWaiting = waiting.length - showWaiting;
+  const hiddenCalled = called.length - showCalled;
+
+  const name = (it: QueueItem) => names[it.externalIdentifier ?? ""] ?? it.externalIdentifier ?? "";
 
   return (
     <section className={cn("rounded-xl border-2 overflow-hidden flex flex-col", st.border, className)}>
       <header
         className={cn(
           "flex items-center justify-between shrink-0",
-          small ? "px-3 py-1.5" : "px-4 py-3",
+          slimHeader ? "px-3 py-1.5" : "px-4 py-2.5",
           st.header
         )}
       >
-        <span className={cn("font-bold", small ? "text-base" : "text-lg")}>{st.title}</span>
+        <span className={cn("font-bold", slimHeader ? "text-base" : "text-lg")}>{st.title}</span>
         <span
           className={cn(
-            "min-w-[2.5rem] text-center rounded-full px-3 py-0.5 font-bold bg-white/25",
-            small ? "text-base" : "text-lg",
+            "min-w-[2.25rem] text-center rounded-full px-2.5 py-0.5 font-bold bg-white/25",
+            slimHeader ? "text-sm" : "text-base",
             waiting.length > 0 && "animate-pulse"
           )}
           title="Počet čekajících"
@@ -162,143 +182,241 @@ export function ModalityColumn({
         </div>
       )}
 
-      {small ? (
-        /* ── S: souhrn — další na řadě ── */
-        <div className="flex-1 min-h-0 p-2.5 flex flex-col justify-center gap-1.5">
-          {loading ? (
-            <p className="text-sm text-gray-500 text-center">Načítám…</p>
-          ) : waiting.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center">Nikdo nečeká</p>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <TicketNo no={waiting[0].orderNumber} />
-                <span className="text-sm font-medium truncate flex-1">
-                  {names[waiting[0].externalIdentifier ?? ""] ?? waiting[0].externalIdentifier ?? "—"}
-                </span>
-                <div className="flex gap-1">{callButtons(waiting[0], true)}</div>
-              </div>
-              {(waiting.length > 1 || called.length > 0) && (
-                <div className="text-xs text-gray-500 flex gap-3">
-                  {waiting.length > 1 && <span>+ {waiting.length - 1} další</span>}
-                  {called.length > 0 && <span>{called.length} na vyšetření</span>}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* ── M/L: Čeká ── */}
-          <div className="p-3 space-y-2 flex-1 min-h-0 overflow-y-auto">
-            {loading ? (
-              <p className="text-sm text-gray-500">Načítám…</p>
-            ) : waiting.length === 0 ? (
-              <p className="text-sm text-gray-500 py-4 text-center">Nikdo nečeká.</p>
-            ) : (
-              waiting.map((it) => (
-                <TicketRow
-                  key={it.queueItemId}
-                  item={it}
-                  name={names[it.externalIdentifier ?? ""]}
-                  inline={size.wide}
-                >
-                  {callButtons(it, !size.wide && size.width < 340)}
-                </TicketRow>
-              ))
-            )}
-          </div>
-
-          {/* ── Na vyšetření ── */}
-          {called.length > 0 && (
-            <div className={cn("border-t p-3 space-y-2 shrink-0 max-h-[50%] overflow-y-auto", st.soft)}>
-              <div className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                <Stethoscope className="w-3.5 h-3.5" /> Na vyšetření
-              </div>
-              {called.map((it) => (
-                <TicketRow
-                  key={it.queueItemId}
-                  item={it}
-                  name={names[it.externalIdentifier ?? ""]}
-                  status={`→ ${counterLabel(it.counter)}`}
-                  inline={size.wide}
-                >
-                  <QueueButton disabled={busy} title="Znovu vyvolat" onClick={() => call(it.queueItemId, it.counter!)}>
-                    <RotateCcw className="w-4 h-4" /> {size.size === "L" && "Znovu"}
-                  </QueueButton>
-                  <span className="text-xs text-gray-500 self-center">Hotovo →</span>
-                  {MODALITIES.filter((x) => x !== m).map((x) => (
-                    <button
-                      key={x}
-                      type="button"
+      <div
+        ref={listRef}
+        className={cn("p-2 flex-1 min-h-0 flex flex-col", fit ? "overflow-hidden" : "")}
+        style={{ gap: GAP }}
+      >
+        {loading ? (
+          <p className="text-sm text-gray-500 text-center py-2">Načítám…</p>
+        ) : inService.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-3">Nikdo nečeká</p>
+        ) : (
+          <>
+            {waiting.slice(0, showWaiting).map((it) => (
+              <Row key={it.queueItemId} item={it} name={name(it)}>
+                {counters.length > 1 && size.width < 280 ? (
+                  <MenuButton
+                    disabled={busy}
+                    variant="primary"
+                    title="Vyvolat – vyberte dveře"
+                    label={<Megaphone className="w-4 h-4" />}
+                    options={counters.map((c) => ({
+                      label: c.label,
+                      cls: "bg-brand-600 text-white",
+                      run: () => call(it.queueItemId, c.id),
+                    }))}
+                  />
+                ) : (
+                  counters.map((c) => (
+                    <QueueButton
+                      key={c.id}
+                      variant="primary"
                       disabled={busy}
-                      onClick={() => moveTo(it.queueItemId, WAITING_SERVICES[x])}
-                      className={cn(
-                        "px-2.5 py-1.5 text-xs font-semibold rounded-md disabled:opacity-50",
-                        MODALITY_STYLE[x].badge
-                      )}
+                      title={`Vyvolat – ${c.label}`}
+                      onClick={() => call(it.queueItemId, c.id)}
                     >
-                      {x}
-                    </button>
-                  ))}
-                  <QueueButton variant="success" disabled={busy} onClick={() => moveTo(it.queueItemId, REPORT_SERVICE)}>
-                    Recepce
-                  </QueueButton>
-                </TicketRow>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+                      <Megaphone className="w-4 h-4" />
+                      {counters.length > 1
+                        ? wide
+                          ? c.label.split("–").pop()!.trim()
+                          : c.label.match(/\d+$/)?.[0]
+                        : wide && "Vyvolat"}
+                    </QueueButton>
+                  ))
+                )}
+              </Row>
+            ))}
+            {hiddenWaiting > 0 && (
+              <div className="text-xs text-gray-500 px-1" style={{ height: FOOTER - GAP }}>
+                + {hiddenWaiting} {hiddenWaiting === 1 ? "další čeká" : hiddenWaiting < 5 ? "další čekají" : "dalších čeká"}
+              </div>
+            )}
+
+            {/* Na vyšetření */}
+            {called.length > 0 && (
+              <>
+                {showSection && (
+                <div
+                  className={cn(
+                    "mt-auto text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400 flex items-center gap-1 px-1",
+                  )}
+                  style={{ height: SECTION }}
+                >
+                  <Stethoscope className="w-3.5 h-3.5" /> Na vyšetření
+                  {hiddenCalled > 0 && <span className="normal-case font-normal">(+{hiddenCalled})</span>}
+                </div>
+                )}
+                {called.slice(0, showCalled).map((it) => (
+                  <Row
+                    key={it.queueItemId}
+                    item={it}
+                    name={name(it)}
+                    status={counterLabel(it.counter).replace(/^.*–\s*/, "")}
+                    tint={st.soft}
+                    hideWait={size.width < 360}
+                  >
+                    {size.width >= 280 && (
+                      <QueueButton disabled={busy} title="Znovu vyvolat" onClick={() => call(it.queueItemId, it.counter!)}>
+                        <RotateCcw className="w-4 h-4" />
+                      </QueueButton>
+                    )}
+                    {size.width >= 360 ? (
+                      <>
+                        {wide && <span className="text-xs text-gray-500 self-center px-1">Hotovo →</span>}
+                        {MODALITIES.filter((x) => x !== m).map((x) => (
+                          <button
+                            key={x}
+                            type="button"
+                            disabled={busy}
+                            title={`Hotovo – poslat na ${x}`}
+                            onClick={() => moveTo(it.queueItemId, WAITING_SERVICES[x])}
+                            className={cn(
+                              "px-2 py-1.5 text-xs font-semibold rounded-md disabled:opacity-50",
+                              MODALITY_STYLE[x].badge
+                            )}
+                          >
+                            {x}
+                          </button>
+                        ))}
+                        <QueueButton
+                          variant="success"
+                          disabled={busy}
+                          title="Hotovo – zpět na recepci (zpráva)"
+                          onClick={() => moveTo(it.queueItemId, REPORT_SERVICE)}
+                        >
+                          Recepce
+                        </QueueButton>
+                      </>
+                    ) : (
+                      <MenuButton
+                        disabled={busy}
+                        variant="success"
+                        title="Hotovo – kam dál?"
+                        label={
+                          size.width < 340 ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            "Hotovo"
+                          )
+                        }
+                        options={[
+                          // nejužší okno: „Znovu vyvolat“ je tady v nabídce
+                          ...(size.width < 280
+                            ? [{ label: "Znovu vyvolat", cls: "bg-gray-100 dark:bg-neutral-700", run: () => call(it.queueItemId, it.counter!) }]
+                            : []),
+                          ...MODALITIES.filter((x) => x !== m).map((x) => ({
+                            label: `na ${x}`,
+                            cls: MODALITY_STYLE[x].badge,
+                            run: () => moveTo(it.queueItemId, WAITING_SERVICES[x]),
+                          })),
+                          {
+                            label: "na recepci (zpráva)",
+                            cls: "bg-green-600 text-white",
+                            run: () => moveTo(it.queueItemId, REPORT_SERVICE),
+                          },
+                        ]}
+                      />
+                    )}
+                  </Row>
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </div>
     </section>
   );
 }
 
-function TicketRow({
+/** Tlačítko s malou nabídkou (úzké okno: volba dveří, „Hotovo → kam“). */
+function MenuButton({
+  label,
+  title,
+  variant,
+  options,
+  disabled,
+}: {
+  label: React.ReactNode;
+  title: string;
+  variant: "primary" | "success";
+  options: { label: string; cls: string; run: () => void }[];
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <QueueButton variant={variant} disabled={disabled} onClick={() => setOpen((o) => !o)} title={title}>
+        {label} <ChevronDown className="w-3.5 h-3.5" />
+      </QueueButton>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border bg-white dark:bg-neutral-900 shadow-lg p-1 space-y-1">
+            {options.map((o) => (
+              <button
+                key={o.label}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  o.run();
+                }}
+                className={cn("w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-md", o.cls)}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Kompaktní řádek pacienta: číslo · jméno + čas · tlačítka vpravo. */
+function Row({
   item,
   name,
   status,
-  inline = false,
+  tint,
+  hideWait = false,
   children,
 }: {
   item: QueueItem;
-  name?: string;
+  name: string;
   status?: string;
-  /** široké okno: vše na jednom řádku, tlačítka vpravo */
-  inline?: boolean;
+  tint?: string;
+  /** úzké okno: bez času čekání */
+  hideWait?: boolean;
   children: React.ReactNode;
 }) {
   const pid = item.externalIdentifier ?? "";
-  const info = (
-    <div className="flex items-center gap-3 min-w-0 flex-1">
+  return (
+    <div
+      className={cn(
+        "shrink-0 flex items-center gap-2 rounded-lg border px-2 shadow-sm bg-white dark:bg-neutral-900",
+        tint
+      )}
+      style={{ height: ROW }}
+    >
       <TicketNo no={item.orderNumber} />
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 leading-tight">
         <div className="text-sm font-medium truncate">
           {pid ? (
-            <Link href={`/reception/patients/${encodeURIComponent(pid)}`} className="hover:underline">
-              {name ?? pid}
+            <Link href={`/reception/patients/${encodeURIComponent(pid)}`} className="hover:underline" title={name}>
+              {name}
             </Link>
           ) : (
             <span className="text-gray-500">Nepřiřazený lístek</span>
           )}
         </div>
-        <div className="text-xs flex gap-2">
+        <div className="text-[11px] flex gap-1.5 truncate">
           {status && <span className="font-semibold text-brand-700 dark:text-brand-300">{status}</span>}
-          <WaitTime created={item.createdDate} />
+          {!hideWait && <WaitTime created={item.createdDate} />}
           {item.priority && <span className="text-red-600 font-semibold">PRIORITA</span>}
         </div>
       </div>
-    </div>
-  );
-  return (
-    <div
-      className={cn(
-        "rounded-lg border bg-white dark:bg-neutral-900 p-2.5 shadow-sm",
-        inline ? "flex items-center gap-3" : "space-y-2"
-      )}
-    >
-      {info}
-      <div className={cn("flex gap-1.5 flex-wrap", inline && "justify-end shrink-0")}>{children}</div>
+      <div className="flex gap-1 shrink-0">{children}</div>
     </div>
   );
 }
