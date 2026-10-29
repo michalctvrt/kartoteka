@@ -7,7 +7,11 @@
  */
 
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { extendRemoteAccess } from "@/lib/ops";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { BentoTile, DataRow, Metric } from "@/components/ui/bento";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
@@ -185,13 +189,75 @@ export function RecordTile({ study: s, workplace, index }: { study: StudyInfo; w
           ["Založil", s.whoCr ? `${s.whoCr} · ${formatDateTime(s.dateCr)}` : null],
           ["Upravil", s.whoEdit && s.dateEdit !== s.dateCr ? `${s.whoEdit} · ${formatDateTime(s.dateEdit)}` : null],
           ["Odesláno", s.dateEmailed ? formatDateTime(s.dateEmailed) : null],
-          ["Online přístup", s.studyRemoteAccessInfo ? `do ${formatDate(s.studyRemoteAccessInfo.dateValidTill)}` : null],
         ]}
       />
       <details className="group mt-2 text-[12px] text-ui-muted">
         <summary className="cursor-pointer list-none hover:text-ui-ink">DICOM UID</summary>
         <p className="mt-1 break-all">{s.dicomUid}</p>
       </details>
+    </BentoTile>
+  );
+}
+
+/**
+ * Online přístup pacienta ke zprávě (převzato z /opt/testapp → Pacient → detail vyšetření).
+ * Prodloužení o 3 dny jde přes backend testappu (zápis do DB kartotéky).
+ */
+export function AccessTile({
+  study: s,
+  index,
+  onExtended,
+}: {
+  study: StudyInfo;
+  index: number;
+  onExtended: (until: string) => void;
+}) {
+  const canExtend = useSession().can("remoteAccess.extend");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const access = s.studyRemoteAccessInfo;
+  if (!access) return null; // kontextová hustota: bez odkazu žádná dlaždice
+
+  const till = new Date(`${access.dateValidTill}T23:59:59`);
+  const expired = till.getTime() < Date.now();
+  const soon = !expired && till.getTime() - Date.now() < 864e5;
+  const extend = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const { until } = await extendRemoteAccess(s.uid, 3);
+      onExtended(until.slice(0, 10));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <BentoTile index={index} title="Online přístup ke zprávě">
+      <div className="flex items-center gap-2 text-sm">
+        <span aria-hidden className={cn("h-2 w-2 rounded-full", expired ? "bg-red-600" : soon ? "bg-amber-500" : "bg-emerald-600")} />
+        <span className={cn("font-medium", expired && "text-red-700 dark:text-red-300")}>
+          {expired ? "Vypršel" : "Platný"} {expired ? formatDate(access.dateValidTill) : `do ${formatDate(access.dateValidTill)}`}
+        </span>
+      </div>
+      <dl className="mt-2 divide-y divide-ui-rule">
+        <DataRow label="E-mail">{s.patientDataInfo?.email}</DataRow>
+        <DataRow label="Odesláno">{s.dateEmailed ? formatDateTime(s.dateEmailed) : null}</DataRow>
+      </dl>
+      {canExtend && (
+        <Button
+          size="sm"
+          variant={expired || soon ? "default" : "outline"}
+          className="mt-3 w-full"
+          onClick={extend}
+          disabled={busy}
+        >
+          {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />} Prodloužit o 3 dny
+        </Button>
+      )}
+      {error && <p className="mt-2 text-[12px] text-red-700 dark:text-red-300">{error}</p>}
     </BentoTile>
   );
 }

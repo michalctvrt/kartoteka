@@ -22,6 +22,7 @@ import { formatDate, formatDateTime, formatRc, hasReport } from "@/lib/studies";
 const BAR: Record<string, string> = { RTG: "bg-orange-400", UZ: "bg-sky-500", MRI: "bg-purple-500" };
 import { GENDER_LABEL, type FormProps } from "./form";
 import InlineField from "./InlineField";
+import InsuranceCheck from "./InsuranceCheck";
 
 // ─── Identita ───
 
@@ -177,7 +178,18 @@ export function InsuranceTile({
   index,
   companies,
   name,
-}: FormProps & { index: number; companies: InsuranceCompanyInfo[]; name: string }) {
+  pid,
+  check,
+  onUseCode,
+}: FormProps & {
+  index: number;
+  companies: InsuranceCompanyInfo[];
+  name: string;
+  pid: string;
+  /** ověřovat v registru pojištěnců (oprávnění insurance.check) */
+  check?: boolean;
+  onUseCode?: (code: string) => void;
+}) {
   return (
     <BentoTile index={index} title="Pojišťovna">
       {editing ? (
@@ -196,6 +208,7 @@ export function InsuranceTile({
       ) : (
         <Ghost label="Pojišťovna není vyplněná" />
       )}
+      {check && !editing && <InsuranceCheck pid={pid} cardCode={v.idInsuranceCompany} onUseCode={onUseCode} />}
     </BentoTile>
   );
 }

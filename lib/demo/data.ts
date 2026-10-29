@@ -177,6 +177,10 @@ export function buildStudies(patients: PatientInfo[]): StudyInfo[] {
         flagCompleted: reported,
         flagRemoteAccessAfterCompleted: false,
         studyAttachmentInfo: [],
+        // online přístup ke zprávě: u části studií platný, u části prošlý (na vyzkoušení prodloužení)
+        studyRemoteAccessInfo: reported && (pi + k) % 3 !== 2
+          ? { idStudy: id, accessHash: `demo${id}`, dateValidTill: new Date(when.getTime() + ((pi + k) % 2 ? 14 : 2) * day).toISOString().slice(0, 10) }
+          : undefined,
         rtgSeries: mod === "RTG" ? 2 : undefined,
       };
       list.push(s as unknown as StudyInfo);

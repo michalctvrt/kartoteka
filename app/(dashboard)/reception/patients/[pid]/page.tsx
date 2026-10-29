@@ -396,7 +396,23 @@ export default function PatientDetailPage({
           fallback={<LastStudyTile study={studies[0]} loading={studiesLoading} index={0} />}
         />
         <StudiesCountTile studies={studies} loading={studiesLoading} index={1} />
-        <InsuranceTile {...form} index={2} companies={insuranceCompanies} name={insuranceName} />
+        <InsuranceTile
+          {...form}
+          index={2}
+          companies={insuranceCompanies}
+          name={insuranceName}
+          pid={pid}
+          check={can("insurance.check")}
+          onUseCode={
+            canEdit
+              ? (code) => {
+                  // přepnout do úprav s pojišťovnou z registru – recepční jen potvrdí Uložit
+                  setIsEditing(true);
+                  updateForm({ idInsuranceCompany: code });
+                }
+              : undefined
+          }
+        />
 
         {/* 2. řada: osobní údaje · kontakt · tělo */}
         <IdentityTile {...form} pid={pid} index={3} />

@@ -19,6 +19,8 @@ import {
   ListChecks,
   LogOut,
   Moon,
+  Printer,
+  Stethoscope,
   Settings,
   Sun,
   UserSearch,
@@ -161,6 +163,26 @@ export default function AppNav({
             <NavButton icon={<FileText />} active={isStudyCard} onClick={openStudyCard}>
               Karta studie
             </NavButton>
+            {can("doctors.view") && (
+              <NavItem
+                href="/reception/doctors"
+                icon={<Stethoscope />}
+                active={pathname === "/reception/doctors"}
+                onNavigate={onNavigate}
+              >
+                Připojení lékaři
+              </NavItem>
+            )}
+            {can("print.batch") && (
+              <NavItem
+                href="/reception/print"
+                icon={<Printer />}
+                active={pathname === "/reception/print"}
+                onNavigate={onNavigate}
+              >
+                Hromadný tisk
+              </NavItem>
+            )}
           </NavGroup>
         )}
 

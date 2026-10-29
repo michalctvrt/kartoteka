@@ -66,12 +66,18 @@ export const CAPABILITIES = {
   "patient.view": { group: "Pacienti", label: "Vyhledat a zobrazit kartu pacienta", roles: ALL },
   "patient.create": { group: "Pacienti", label: "Založit nového pacienta", roles: ["admin", "reception"] },
   "patient.edit": { group: "Pacienti", label: "Upravit údaje pacienta", roles: ["admin", "reception"] },
+  "insurance.check": { group: "Pacienti", label: "Ověřit pojištění v registru", roles: ["admin", "reception"] },
 
   // Studie
   "study.view": { group: "Studie", label: "Vyhledat a zobrazit studii", roles: ALL },
   "study.create": { group: "Studie", label: "Založit vyšetření", roles: ["admin", "reception"] },
   "study.edit": { group: "Studie", label: "Upravit vyšetření (žádanka, výkony)", roles: ["admin", "reception"] },
   "report.write": { group: "Studie", label: "Popsat studii", roles: ["admin", "doctor"] },
+  "remoteAccess.extend": { group: "Studie", label: "Prodloužit online přístup ke zprávě", roles: ["admin", "reception"] },
+  "print.batch": { group: "Studie", label: "Hromadný tisk zpráv za den", roles: ["admin", "reception"] },
+
+  // Spolupráce
+  "doctors.view": { group: "Spolupráce", label: "Připojení lékaři (CGM, E-zpráva, LIVEcom)", roles: ALL },
 
   // Objednávky
   "calendar.view": { group: "Objednávky", label: "Kalendář objednávek", roles: ["admin", "reception"] },
@@ -133,6 +139,8 @@ export function workspaceOf(pathname: string): Role | null {
 const ROUTE_CAPS: [RegExp, Capability][] = [
   [/^\/reception\/patients\/new/, "patient.create"],
   [/^\/reception\/patients/, "patient.view"],
+  [/^\/reception\/print/, "print.batch"],
+  [/^\/reception\/doctors/, "doctors.view"],
   [/^\/reception\/studies/, "study.view"],
   [/^\/reception\/calendar/, "calendar.view"],
   [/^\/(lab|doctor)\/worklist/, "worklist.view"],

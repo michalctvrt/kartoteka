@@ -22,6 +22,10 @@ import {
 type Db = { patients: PatientInfo[]; studies: StudyInfo[]; nextId: number };
 // jeden stav pro celý proces dev serveru (přežije i hot reload)
 const g = globalThis as unknown as { __kartotekaDemo?: Db };
+/** Sdílený stav demo dat (používá i lib/demo/ops.ts). */
+export function demoDb(): Db {
+  return db();
+}
 function db(): Db {
   if (!g.__kartotekaDemo) {
     const patients = buildPatients();

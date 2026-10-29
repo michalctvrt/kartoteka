@@ -25,6 +25,7 @@ import { MODALITY_NAME, formatDateTime, patientName } from "@/lib/studies";
 import { Bento } from "@/components/ui/bento";
 import { Flag, ModalityTag } from "@/components/study/StudyBits";
 import {
+  AccessTile,
   AttachmentsTile,
   PatientTile,
   RecordTile,
@@ -190,7 +191,18 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
           <RequestTile study={s} index={2} />
           <ServicesTile study={s} names={serviceNames} index={3} />
           <RecordTile study={s} workplace={workplace} index={4} />
-          <AttachmentsTile study={s} index={5} />
+          <AccessTile
+            study={s}
+            index={5}
+            onExtended={(until) =>
+              s.studyRemoteAccessInfo &&
+              setResult({
+                key,
+                load: { state: "ok", study: { ...s, studyRemoteAccessInfo: { ...s.studyRemoteAccessInfo, dateValidTill: until } } },
+              })
+            }
+          />
+          <AttachmentsTile study={s} index={6} />
         </Bento>
       )}
     </div>

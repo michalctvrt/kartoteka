@@ -95,6 +95,14 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Bento: Dnes (2 sl.), Další na řadě, Tento týden; kalendář (3 sl.) + detail (bez výběru = další na řadě),
   „Vyhledat v kartotéce“ → `/reception/patients?q=jméno`. Šipky ← → posouvají den/týden.
 
+## Funkce z provozní aplikace `/opt/testapp` (OSTRÝ PROVOZ – nic tam neměnit)
+- Přebíráme postupně podle `docs/TESTAPP.md` (stav, API, spec spotřebního materiálu). Data přes jeho backend:
+  brána `app/api/ops/[...path]` → `TESTAPP_API_URL` (jen v .env.local), jen povolené cesty (ALLOW),
+  demo odpovědi `lib/demo/ops.ts`. Zápisy do jeho dat (prodloužení přístupu, objednávky) netestovat bez souhlasu.
+- Hotovo: hromadný tisk `/reception/print` (`print.batch`); ověření pojištění v dlaždici Pojišťovna
+  (`insurance.check`, `lib/ops/vzp.ts`, VZP_API_URL + VZP_CONNECT_HOST, chybějící mezilehlý cert v `certs/`); online přístup ke zprávě na kartě studie (`remoteAccess.extend`).
+  Připojení lékaři `/reception/doctors` (`doctors.view`). Zbývá: spotřební materiál (zapisuje do jeho SQLite!).
+
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).
