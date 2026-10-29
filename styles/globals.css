@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokeny Kartotéky – styl „rám a list“ (framed sheet), brand DC Flipper.
+ * Rám (menu + horní lišta) = jemný tón brandu, práce leží na bílém listu.
+ * Barva brandu jen na logu, jedné primární akci a vybraném stavu; data nesou
+ * barvy modalit (RTG/UZ/MRI). Všechny šedé, které nesou text, mají ≥ 4.5:1.
+ */
+:root {
+  --ui-frame: #eff5f6;     /* rám: menu + lišta (low-chroma brand-50) */
+  --ui-sheet: #ffffff;     /* list s obsahem */
+  --ui-raised: #f6f9fa;    /* plocha o krok jinak (řádek, well) */
+  --ui-active: #dcebee;    /* vybraná položka menu (brand-100) */
+  --ui-line: #e1e9eb;      /* hrana listu a karet */
+  --ui-rule: #edf2f3;      /* linky mezi řádky */
+  --ui-control: #c9d5d9;   /* hrana inputů a tlačítek */
+  --ui-ink: #0f2a33;       /* hlavní text (tónovaný brand-950) */
+  --ui-muted: #4f646b;     /* vedlejší text 6.0:1 */
+  --ui-faint: #586b71;     /* meta, placeholder ≥ 4.9:1 i na rámu */
+  --ui-primary: #126c8b;   /* brand-700 – jediná primární akce */
+  --ui-primary-hover: #124b5b;
+}
+.dark {
+  --ui-frame: #101314;
+  --ui-sheet: #171a1b;
+  --ui-raised: #1d2122;
+  --ui-active: #23333a;
+  --ui-line: #262b2d;
+  --ui-rule: #202426;
+  --ui-control: #3a4144;
+  --ui-ink: #eef3f4;
+  --ui-muted: #aab6ba;
+  --ui-faint: #8f9da2;
+  --ui-primary: #59a9b6;   /* brand-400 na tmavém, s tmavým textem */
+  --ui-primary-hover: #8cc4cb;
+}
+
 html {
   color-scheme: light;
 }
@@ -9,62 +44,64 @@ html.dark {
   color-scheme: dark;
 }
 body {
-  @apply bg-[#f4f7f8] text-gray-900 transition-colors duration-300 dark:bg-neutral-900 dark:text-gray-100;
+  background: var(--ui-frame);
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 34 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --foreground: 195 55% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 195 55% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 195 55% 13%;
     --primary: 195 77% 31%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
+    --secondary: 192 25% 96%;
+    --secondary-foreground: 195 55% 13%;
+    --muted: 192 25% 96%;
+    --muted-foreground: 195 15% 36%;
+    --accent: 192 25% 95%;
+    --accent-foreground: 195 55% 13%;
+    --destructive: 357 69% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 192 18% 90%;
+    --input: 194 16% 82%;
     --ring: 195 77% 31%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-1: 195 77% 31%;
+    --chart-2: 199 89% 40%;
+    --chart-3: 27 90% 45%;
+    --chart-4: 195 15% 60%;
+    --chart-5: 195 15% 80%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --background: 195 6% 9%;
+    --foreground: 190 15% 95%;
+    --card: 195 6% 9%;
+    --card-foreground: 190 15% 95%;
+    --popover: 195 6% 11%;
+    --popover-foreground: 190 15% 95%;
     --primary: 188 39% 53%;
     --primary-foreground: 200 72% 12%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --secondary: 195 6% 13%;
+    --secondary-foreground: 190 15% 95%;
+    --muted: 195 6% 13%;
+    --muted-foreground: 194 9% 70%;
+    --accent: 195 6% 14%;
+    --accent-foreground: 190 15% 95%;
+    --destructive: 357 70% 62%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 195 6% 16%;
+    --input: 195 6% 24%;
+    --ring: 188 39% 53%;
+    --chart-1: 188 39% 53%;
+    --chart-2: 199 80% 60%;
+    --chart-3: 27 90% 60%;
+    --chart-4: 195 10% 55%;
+    --chart-5: 195 10% 35%;
   }
 }
 
@@ -73,9 +110,18 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-[15px] leading-6;
+  }
+  ::placeholder {
+    color: var(--ui-faint);
+    opacity: 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: 2px;
   }
 }
+
 /* --- časové čáry mezi 20-min sloty --- */
 /* Trefíme elementy, které react-big-calendar vyrenderuje pro každý timeslot */
 .rbc-time-content .rbc-timeslot-group > div {

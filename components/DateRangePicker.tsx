@@ -113,38 +113,38 @@ export function DateRangePicker({ from, to, onChange }: Props) {
     <div className="relative" ref={pickerRef}>
       <button
         onClick={() => setIsOpen((p) => !p)}
-        className="w-full px-3 py-2 rounded-md border dark:bg-neutral-900 flex items-center justify-between"
+        className="w-full px-3 py-2 rounded-md border flex items-center justify-between"
       >
-        <span className={from && to ? undefined : "text-gray-400"}>{displayLabel()}</span>
+        <span className={from && to ? undefined : "text-ui-faint"}>{displayLabel()}</span>
         <CalendarIcon className="w-4 h-4 opacity-60" />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-md shadow-lg p-4 w-[320px]">
+        <div className="absolute z-50 mt-2 bg-ui-sheet border border-ui-line rounded-md shadow-lg p-4 w-[320px]">
           <div className="flex flex-col gap-4">
             {/* Presety */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setPreset("today")}
-                className="px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200"
+                className="px-2 py-1 rounded-md text-sm bg-ui-raised hover:bg-gray-200"
               >
                 Dnes
               </button>
               <button
                 onClick={() => setPreset("week")}
-                className="px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200"
+                className="px-2 py-1 rounded-md text-sm bg-ui-raised hover:bg-gray-200"
               >
                 Tento týden
               </button>
               <button
                 onClick={() => setPreset("month")}
-                className="px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200"
+                className="px-2 py-1 rounded-md text-sm bg-ui-raised hover:bg-gray-200"
               >
                 Tento měsíc
               </button>
               <button
                 onClick={() => setPreset("year")}
-                className="px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200"
+                className="px-2 py-1 rounded-md text-sm bg-ui-raised hover:bg-gray-200"
               >
                 Tento rok
               </button>
@@ -160,7 +160,7 @@ export function DateRangePicker({ from, to, onChange }: Props) {
                   const v = e.target.value || null;
                   setLocalFrom(v);
                 }}
-                className="px-3 py-2 border rounded-md dark:bg-neutral-900"
+                className="px-3 py-2 border rounded-md"
               />
             </div>
 
@@ -173,7 +173,7 @@ export function DateRangePicker({ from, to, onChange }: Props) {
                   const v = e.target.value || null;
                   setLocalTo(v);
                 }}
-                className="px-3 py-2 border rounded-md dark:bg-neutral-900"
+                className="px-3 py-2 border rounded-md"
               />
             </div>
 
@@ -181,7 +181,7 @@ export function DateRangePicker({ from, to, onChange }: Props) {
             <div className="flex justify-between">
               <button
                 onClick={clearRange}
-                className="px-3 py-1 text-sm rounded-md bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200"
+                className="px-3 py-1 text-sm rounded-md bg-ui-raised hover:bg-gray-200"
               >
                 Vymazat
               </button>

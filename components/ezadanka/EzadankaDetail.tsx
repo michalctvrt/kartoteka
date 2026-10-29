@@ -72,7 +72,7 @@ export default function EzadankaDetail({ kod, onClose, onImport }: Props) {
         </DialogHeader>
 
         {loading && (
-          <p className="py-6 text-sm text-gray-500">Načítám detail…</p>
+          <p className="py-6 text-sm text-ui-faint">Načítám detail…</p>
         )}
 
         {error && (
@@ -90,7 +90,7 @@ export default function EzadankaDetail({ kod, onClose, onImport }: Props) {
               <Badge variant={urgentnostVariant(data.urgentnost.nazev)}>
                 {data.urgentnost.nazev}
               </Badge>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-ui-faint">
                 vystaveno {formatDate(data.datumVytvoreni)}
               </span>
             </div>
@@ -209,7 +209,7 @@ export default function EzadankaDetail({ kod, onClose, onImport }: Props) {
             </Section>
 
             {/* Akce */}
-            <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-neutral-700">
+            <div className="flex justify-end gap-2 pt-2 border-t border-ui-line">
               <Button variant="outline" onClick={onClose}>
                 Zavřít
               </Button>
@@ -244,7 +244,7 @@ function Section({
 }) {
   return (
     <section>
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+      <h3 className="text-sm font-semibold text-ui-ink mb-2 uppercase tracking-wide">
         {title}
       </h3>
       <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
@@ -266,12 +266,12 @@ function Row({
   if (value === null || value === undefined || value === "") return null;
   return (
     <div className="flex flex-col">
-      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-xs text-ui-faint">{label}</span>
       <span
         className={`${
           highlight
             ? "text-amber-700 dark:text-amber-300 font-medium"
-            : "text-gray-900 dark:text-gray-100"
+            : "text-ui-ink"
         }`}
       >
         {value}

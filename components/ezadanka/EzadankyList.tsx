@@ -40,11 +40,11 @@ const MODALITA_BARVY: Record<Modalita, string> = {
   MRI: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   CT: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   OTHER:
-    "bg-gray-200 text-gray-700 dark:bg-neutral-700 dark:text-neutral-300",
+    "bg-gray-200 text-ui-ink dark:text-neutral-300",
 };
 
 const URGENTNOST_BARVY: Record<string, string> = {
-  rutinní: "text-gray-600 dark:text-gray-400",
+  rutinní: "text-ui-muted",
   urgentní: "text-amber-600 dark:text-amber-400 font-medium",
   statim: "text-red-600 dark:text-red-400 font-semibold",
 };
@@ -85,7 +85,7 @@ export default function EzadankyList({ rid, onImport }: Props) {
           <FileText className="w-4 h-4" />
           Aktivní eŽádanky
           {!loading && data.length > 0 && (
-            <span className="text-xs font-normal text-gray-500 ml-2">
+            <span className="text-xs font-normal text-ui-faint ml-2">
               ({data.length})
             </span>
           )}
@@ -93,7 +93,7 @@ export default function EzadankyList({ rid, onImport }: Props) {
       </CardHeader>
       <CardContent className="p-0">
         {loading && (
-          <p className="p-6 text-sm text-gray-500">Načítám eŽádanky…</p>
+          <p className="p-6 text-sm text-ui-faint">Načítám eŽádanky…</p>
         )}
 
         {error && (
@@ -104,14 +104,14 @@ export default function EzadankyList({ rid, onImport }: Props) {
         )}
 
         {!loading && !error && data.length === 0 && (
-          <p className="p-6 text-sm text-gray-500">
+          <p className="p-6 text-sm text-ui-faint">
             Pacient nemá žádné aktivní eŽádanky.
           </p>
         )}
 
         {!loading && !error && data.length > 0 && (
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-neutral-800 text-left">
+            <thead className="bg-ui-raised text-left">
               <tr>
                 <th className="px-4 py-2 font-medium">Modalita</th>
                 <th className="px-4 py-2 font-medium">Vyšetření</th>
@@ -126,7 +126,7 @@ export default function EzadankyList({ rid, onImport }: Props) {
                 <tr
                   key={z.id}
                   onClick={() => setOpenKod(z.kod)}
-                  className="border-t border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition"
+                  className="border-t border-ui-line hover:bg-ui-raised cursor-pointer transition"
                 >
                   <td className="px-4 py-3">
                     {z.modalita ? (
@@ -138,11 +138,11 @@ export default function EzadankyList({ rid, onImport }: Props) {
                         {z.modalita}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-ui-faint">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {z.vysetreniNazev ?? <span className="text-gray-400">—</span>}
+                    {z.vysetreniNazev ?? <span className="text-ui-faint">—</span>}
                   </td>
                   <td
                     className={`px-4 py-3 ${
@@ -152,13 +152,13 @@ export default function EzadankyList({ rid, onImport }: Props) {
                   >
                     {z.urgentnost.nazev}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                  <td className="px-4 py-3 text-ui-muted">
                     {z.zadatel ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                  <td className="px-4 py-3 text-ui-muted">
                     {formatDate(z.datumVytvoreni)}
                   </td>
-                  <td className="px-4 py-3 text-gray-400">
+                  <td className="px-4 py-3 text-ui-faint">
                     <ChevronRight className="w-4 h-4" />
                   </td>
                 </tr>

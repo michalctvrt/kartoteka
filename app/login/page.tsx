@@ -22,7 +22,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white p-6 rounded-lg shadow"
+        className="w-full max-w-md bg-ui-sheet p-6 rounded-lg"
       >
         <h2 className="text-xl font-semibold mb-4">Přihlášení (demo)</h2>
 
@@ -46,7 +46,7 @@ export default function LoginPage() {
           Přihlásit se
         </button>
 
-        <p className="text-xs text-gray-500 mt-3">
+        <p className="text-xs text-ui-faint mt-3">
           Demo: zadej email obsahující &quot;admin&quot;, &quot;doctor&quot;,
           &quot;lab&quot; nebo cokoli jiného pro recepci.
         </p>

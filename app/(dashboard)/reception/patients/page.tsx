@@ -87,7 +87,7 @@ export default function PatientsListPage() {
           <Search className="w-5 h-5" />
           Vyhledávání pacientů
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-ui-faint mt-1">
           Najdi existující kartu zadáním RČ, jména nebo příjmení.
         </p>
       </header>
@@ -99,9 +99,9 @@ export default function PatientsListPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm"
+          className="flex-1 px-3 py-2 rounded-md border border-ui-line bg-ui-sheet text-sm"
         />
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-ui-faint">
           {loading
             ? "Hledám…"
             : touched
@@ -119,15 +119,15 @@ export default function PatientsListPage() {
 
       {!touched ? (
         <Card>
-          <CardContent className="p-6 text-sm text-gray-500">
+          <CardContent className="p-6 text-sm text-ui-faint">
             Začni psát do vyhledávacího pole. Pro založení nového pacienta
             použij box &quot;Nový pacient&quot; na hlavní stránce recepce.
           </CardContent>
         </Card>
       ) : (
-        <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg overflow-hidden">
+        <div className="bg-ui-sheet border border-ui-line rounded-lg overflow-hidden">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 dark:bg-neutral-700 text-left">
+            <thead className="bg-ui-raised text-left">
               <tr>
                 <th className="p-3">Příjmení</th>
                 <th className="p-3">Jméno</th>
@@ -141,7 +141,7 @@ export default function PatientsListPage() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="p-6 text-center text-gray-500"
+                    className="p-6 text-center text-ui-faint"
                   >
                     Žádné výsledky pro &quot;{query}&quot;.
                   </td>
@@ -162,7 +162,7 @@ export default function PatientsListPage() {
                         `/reception/patients/${encodeURIComponent(p.pid)}`
                       )
                     }
-                    className="border-t border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer"
+                    className="border-t border-ui-line hover:bg-ui-raised cursor-pointer"
                   >
                     <td className="p-3 font-medium">
                       {lastName ?? (

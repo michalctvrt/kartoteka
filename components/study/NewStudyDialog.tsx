@@ -180,8 +180,8 @@ export default function NewStudyDialog({
     }
   };
 
-  const field = "w-full px-3 py-2 border rounded-md text-sm bg-white dark:bg-neutral-900";
-  const lbl = "text-xs font-medium text-gray-600 dark:text-gray-400";
+  const field = "w-full px-3 py-2 border rounded-md text-sm bg-ui-sheet";
+  const lbl = "text-xs font-medium text-ui-muted";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -281,7 +281,7 @@ export default function NewStudyDialog({
         )}
 
         <div className="flex items-center justify-between gap-3 pt-2">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-ui-faint">
             {missing.length ? `Chybí: ${missing.join(", ")}` : "Vše vyplněno."}
           </p>
           <div className="flex gap-2">

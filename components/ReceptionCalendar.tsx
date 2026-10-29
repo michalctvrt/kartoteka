@@ -90,7 +90,7 @@ export default function ReceptionCalendar({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500">
+      <div className="flex flex-col items-center justify-center h-[60vh] text-ui-faint">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-400 mb-3"></div>
         <p>Načítám kalendář…</p>
       </div>
@@ -110,7 +110,7 @@ export default function ReceptionCalendar({
         </h2>
       )}
 
-      <div className="relative border rounded-lg shadow-sm bg-white overflow-hidden">
+      <div className="relative border rounded-lg bg-ui-sheet overflow-hidden">
         <Calendar
           localizer={localizer}
           events={events}
@@ -171,22 +171,22 @@ export default function ReceptionCalendar({
             transition={{ duration: 0.3 }}
             className="mt-6"
           >
-            <Card className="shadow-md border border-gray-200">
+            <Card className=" border border-ui-line">
               <CardHeader className="flex flex-row justify-between items-center">
                 <CardTitle className="text-lg font-semibold">
                   {selectedEvent.title}
                 </CardTitle>
                 <Button
                   variant="ghost"
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-ui-faint hover:text-gray-700"
                   onClick={() => setSelectedEvent(null)}
                 >
-                  Zavřít ✕
+                  Zavřít
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="text-sm text-gray-600 mb-3">
-                  <span className="font-medium text-gray-800">Datum:</span>{" "}
+                <div className="text-sm text-ui-muted mb-3">
+                  <span className="font-medium text-ui-ink">Datum:</span>{" "}
                   {format(selectedEvent.start, "d.M.yyyy HH:mm")} –{" "}
                   {format(selectedEvent.end, "HH:mm")}
                 </div>
@@ -195,10 +195,10 @@ export default function ReceptionCalendar({
                   {Object.entries(selectedEvent.details || {}).map(
                     ([key, value]) => (
                       <div key={key} className="flex flex-col">
-                        <span className="text-gray-500 text-xs uppercase tracking-wide">
+                        <span className="text-ui-faint text-xs uppercase tracking-wide">
                           {key}
                         </span>
-                        <span className="font-medium text-gray-800">
+                        <span className="font-medium text-ui-ink">
                           {String(value) || "—"}
                         </span>
                       </div>

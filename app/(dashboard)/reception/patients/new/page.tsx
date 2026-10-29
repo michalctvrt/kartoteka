@@ -190,7 +190,7 @@ export default function NewPatientPage() {
         <BackButton />
         <Card>
           <CardContent className="p-6">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-ui-muted">
               Stránka pro založení nového pacienta vyžaduje rodné číslo
               v parametru <code>?rc=...</code>. Pro založení použij box
               &quot;Nový pacient&quot; na hlavní stránce recepce.
@@ -210,7 +210,7 @@ export default function NewPatientPage() {
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium">Neplatné rodné číslo</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-ui-faint mt-1">
                 Zadané RČ {rcInfo.normalized}: {rcInfo.error}
               </p>
             </div>
@@ -227,7 +227,7 @@ export default function NewPatientPage() {
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold">Založení nového pacienta</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ui-faint mt-1">
             Rodné číslo: <strong>{formatRc(rcInfo.normalized)}</strong>
             {ezadankaId && (
               <>
@@ -246,7 +246,7 @@ export default function NewPatientPage() {
       </header>
 
       {loadingEzadanka && (
-        <p className="text-xs text-gray-500">Načítám data z e-žádanky…</p>
+        <p className="text-xs text-ui-faint">Načítám data z e-žádanky…</p>
       )}
 
       {/* SEKCE: eŽádanky pacienta — recepční může importovat data do formuláře */}
@@ -393,7 +393,7 @@ function BackButton() {
   return (
     <button
       onClick={() => router.push("/reception")}
-      className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600"
+      className="flex items-center gap-2 text-sm text-ui-muted hover:text-brand-600"
     >
       <ArrowLeft className="w-4 h-4" />
       Zpět na recepci
@@ -420,7 +420,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <span className="text-sm font-medium text-ui-ink">
         {label}
       </span>
       <input
@@ -429,9 +429,9 @@ function Field({
         autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-md bg-white dark:bg-neutral-900 text-sm"
+        className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
       />
-      {hint && <span className="text-xs text-gray-500">{hint}</span>}
+      {hint && <span className="text-xs text-ui-faint">{hint}</span>}
     </label>
   );
 }
@@ -451,13 +451,13 @@ function SelectField({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <span className="text-sm font-medium text-ui-ink">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-md bg-white dark:bg-neutral-900 text-sm"
+        className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -465,7 +465,7 @@ function SelectField({
           </option>
         ))}
       </select>
-      {hint && <span className="text-xs text-gray-500">{hint}</span>}
+      {hint && <span className="text-xs text-ui-faint">{hint}</span>}
     </label>
   );
 }

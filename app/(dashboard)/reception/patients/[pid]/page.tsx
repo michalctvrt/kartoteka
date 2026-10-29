@@ -263,7 +263,7 @@ export default function PatientDetailPage({
     return (
       <div className="space-y-4">
         <BackButton />
-        <p className="text-sm text-gray-500">Načítám pacienta…</p>
+        <p className="text-sm text-ui-faint">Načítám pacienta…</p>
       </div>
     );
   }
@@ -277,7 +277,7 @@ export default function PatientDetailPage({
             <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium">Chyba při načítání</p>
-              <p className="text-xs text-gray-500 mt-1">{loadError}</p>
+              <p className="text-xs text-ui-faint mt-1">{loadError}</p>
               <Button
                 size="sm"
                 variant="outline"
@@ -299,7 +299,7 @@ export default function PatientDetailPage({
         <BackButton />
         <Card>
           <CardContent className="p-6">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
+            <p className="text-sm text-ui-ink">
               Pacient s rodným číslem <strong>{formatRc(pid)}</strong> nebyl
               v kartotéce nalezen.
             </p>
@@ -339,7 +339,7 @@ export default function PatientDetailPage({
               />
             )}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-ui-faint">
             RČ <strong>{formatRc(pid)}</strong>
             {ezadankaId && (
               <>
@@ -582,7 +582,7 @@ function BackButton() {
   return (
     <button
       onClick={() => router.push("/reception/patients")}
-      className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600"
+      className="flex items-center gap-2 text-sm text-ui-muted hover:text-brand-600"
     >
       <ArrowLeft className="w-4 h-4" />
       Zpět na seznam pacientů
@@ -609,7 +609,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+      <span className="text-sm font-medium text-ui-muted">
         {label}
       </span>
       {editing && !readOnly ? (
@@ -617,14 +617,14 @@ function Field({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-md bg-white dark:bg-neutral-900 text-sm"
+          className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
         />
       ) : (
-        <span className="text-sm text-gray-900 dark:text-gray-100">
+        <span className="text-sm text-ui-ink">
           {value || "—"}
         </span>
       )}
-      {hint && <span className="text-xs text-gray-500">{hint}</span>}
+      {hint && <span className="text-xs text-ui-faint">{hint}</span>}
     </div>
   );
 }
@@ -646,14 +646,14 @@ function SelectField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+      <span className="text-sm font-medium text-ui-muted">
         {label}
       </span>
       {editing ? (
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-md bg-white dark:bg-neutral-900 text-sm"
+          className="px-3 py-2 border border-ui-line rounded-md bg-ui-sheet text-sm"
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>
@@ -662,7 +662,7 @@ function SelectField({
           ))}
         </select>
       ) : (
-        <span className="text-sm text-gray-900 dark:text-gray-100">
+        <span className="text-sm text-ui-ink">
           {displayValue || value || "—"}
         </span>
       )}

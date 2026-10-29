@@ -4,9 +4,9 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full bg-white rounded-xl shadow p-8 text-center">
+      <div className="max-w-2xl w-full bg-ui-sheet rounded-lg p-8 text-center">
         <h1 className="text-2xl font-bold mb-2">Kartotéka — UI prototype</h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-ui-muted mb-6">
           Rychlý přehled rolí a dashboardů. Fokus: frontend.
         </p>
 

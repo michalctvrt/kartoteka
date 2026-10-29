@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { format, isToday, differenceInMinutes } from "date-fns";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock, User, Check, X, RotateCcw } from "lucide-react";
 import React from "react";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
@@ -42,7 +41,7 @@ const LS_KEY = "rt_statuses_v9";
 export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize } = {}) {
   const pathname = usePathname();
 
-  // ✅ Inicializace stavu z localStorage
+  // Inicializace stavu z localStorage
   const [localState, setLocalState] = useState<LocalState>(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -124,7 +123,7 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
 
         if (mounted) setEvents(todayEvents);
       } catch (error) {
-        console.error("❌ Chyba při načítání dnešních pacientů:", error);
+        console.error("Chyba při načítání dnešních pacientů:", error);
         if (mounted) setEvents([]);
       } finally {
         if (mounted) setLoading(false);
@@ -178,14 +177,12 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>📋 Dnešní přehled</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500 text-sm">Načítám dnešní objednávky…</p>
-        </CardContent>
-      </Card>
+      <section>
+                  <h3 className="mb-1 text-sm font-semibold">Dnešní objednávky</h3>
+                <div>
+          <p className="text-ui-faint text-sm">Načítám dnešní objednávky…</p>
+        </div>
+      </section>
     );
   }
 
@@ -216,11 +213,11 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex flex-col min-w-0">
-                <span className="flex items-center gap-1 text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+                <span className="flex items-center gap-1 text-sm font-medium text-ui-ink truncate">
                   <User className="w-3.5 h-3.5 text-brand-500 flex-shrink-0" />
                   <span className="truncate">{ev.title}</span>
                 </span>
-                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2 text-xs text-ui-muted">
                   <Clock className="w-3.5 h-3.5 text-brand-400" />
                   <span className="font-medium">{timeLabel}</span>
                   <span className="hidden sm:inline">•</span>
@@ -246,22 +243,22 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
           <div className="text-4xl font-bold text-brand-700 dark:text-brand-300 leading-none">
             {activeEvents.length}
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">aktivních</div>
+          <div className="text-[11px] text-ui-faint mt-1">aktivních</div>
         </div>
         <div className="min-w-0 flex-1 text-sm">
           {next ? (
             <>
-              <div className="text-xs text-gray-500">Další</div>
+              <div className="text-xs text-ui-faint">Další</div>
               <div className="font-medium truncate">{next.title}</div>
-              <div className="text-xs text-gray-500 truncate">
+              <div className="text-xs text-ui-faint truncate">
                 {format(new Date(next.start), "HH:mm")} · {truncate(next.details["Vyšetření"], 40)}
               </div>
             </>
           ) : (
-            <div className="text-gray-500">Žádné aktivní objednávky.</div>
+            <div className="text-ui-faint">Žádné aktivní objednávky.</div>
           )}
-          <div className="text-[11px] text-gray-500 mt-1">
-            ✓ {doneEvents.length} vyřízeno · ✕ {removedEvents.length} zrušeno
+          <div className="text-[11px] text-ui-faint mt-1">
+            {doneEvents.length} vyřízeno · {removedEvents.length} zrušeno
           </div>
         </div>
       </div>
@@ -297,26 +294,24 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
   // ── M: jen aktivní objednávky, bez rámečků ──
   if (size.size === "M") {
     return activeEvents.length === 0 ? (
-      <p className="text-gray-500 text-sm">Žádné aktivní objednávky.</p>
+      <p className="text-ui-faint text-sm">Žádné aktivní objednávky.</p>
     ) : (
-      <div className="-mx-3 -mb-3">{renderList(activeEvents, "bg-white dark:bg-transparent", activeActions)}</div>
+      <div className="-mx-3 -mb-3">{renderList(activeEvents, "bg-ui-sheet dark:bg-transparent", activeActions)}</div>
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
       {/* 🔵 Aktivní objednávky */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Aktivní objednávky</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      <section>
+                  <h3 className="mb-1 text-sm font-semibold">Aktivní objednávky</h3>
+                <div className="-mx-3">
           {activeEvents.length === 0 ? (
-            <p className="text-gray-500 text-sm p-4">
+            <p className="text-ui-faint text-sm p-4">
               Žádné aktivní objednávky.
             </p>
           ) : (
-            renderList(activeEvents, "bg-white", (ev) => {
+            renderList(activeEvents, "bg-ui-sheet", (ev) => {
               const status = deriveStatus(ev);
               return (
                 <div className="flex items-center gap-2">
@@ -342,52 +337,48 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
               );
             })
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      {/* ✅ Vyřízeno */}
-      <Card>
-        <CardHeader>
-          <CardTitle>✅ Vyřízeno</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      {/* Vyřízeno */}
+      <section>
+                  <h3 className="mb-1 text-sm font-semibold">Vyřízeno</h3>
+                <div className="-mx-3">
           {doneEvents.length === 0 ? (
-            <p className="text-gray-500 text-sm p-4">Zatím žádní vyřízení.</p>
+            <p className="text-ui-faint text-sm py-2">Zatím žádní vyřízení.</p>
           ) : (
             renderList(doneEvents, "bg-green-50", (ev) => (
               <button
                 onClick={() => uncheck(ev.id)}
                 title="Vrátit zpět"
-                className="inline-flex items-center justify-center p-1 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+                className="inline-flex items-center justify-center p-1 rounded-md text-ui-muted hover:text-gray-900 hover:bg-ui-raised transition"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      {/* ❌ Zrušeno */}
-      <Card>
-        <CardHeader>
-          <CardTitle>❌ Zrušeno</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      {/* Zrušeno */}
+      <section>
+                  <h3 className="mb-1 text-sm font-semibold">Zrušeno</h3>
+                <div className="-mx-3">
           {removedEvents.length === 0 ? (
-            <p className="text-gray-500 text-sm p-4">Nic zrušeného.</p>
+            <p className="text-ui-faint text-sm py-2">Nic zrušeného.</p>
           ) : (
             renderList(removedEvents, "bg-red-50", (ev) => (
               <button
                 onClick={() => uncheck(ev.id)}
                 title="Vrátit zpět"
-                className="inline-flex items-center justify-center p-1 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+                className="inline-flex items-center justify-center p-1 rounded-md text-ui-muted hover:text-gray-900 hover:bg-ui-raised transition"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

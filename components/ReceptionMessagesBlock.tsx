@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
 
 type Message = {
@@ -72,13 +73,13 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
         {last ? (
           <>
             <p className="line-clamp-3">{last.text}</p>
-            <span className="text-xs text-gray-400 mt-1">
+            <span className="text-xs text-ui-faint mt-1">
               — {last.author}, {last.created}
               {adminMessages.length > 1 && ` · +${adminMessages.length - 1} další`}
             </span>
           </>
         ) : (
-          <p className="text-gray-400">Na dnešek nejsou žádné zprávy.</p>
+          <p className="text-ui-faint">Na dnešek nejsou žádné zprávy.</p>
         )}
       </div>
     );
@@ -88,12 +89,12 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
     <div className="space-y-4">
       {/* 🔸 Admin zprávy */}
       <div>
-        <h4 className="font-medium text-sm text-gray-700 mb-2">
+        <h4 className="font-medium text-sm text-ui-ink mb-2">
           Denní zprávy od vedení
         </h4>
 
         {adminMessages.length === 0 ? (
-          <p className="text-gray-400 text-sm">
+          <p className="text-ui-faint text-sm">
             Na dnešek nejsou žádné zprávy.
           </p>
         ) : (
@@ -101,10 +102,10 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
             {adminMessages.map((m) => (
               <li
                 key={m.id}
-                className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                className="p-3 bg-ui-raised border border-ui-line rounded-lg text-sm"
               >
                 <p>{m.text}</p>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-ui-faint">
                   — {m.author}, {m.created}
                 </span>
               </li>
@@ -118,7 +119,7 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
 
       {/* ✏️ Vzkazy pro další směnu */}
       <div>
-        <h4 className="font-medium text-sm text-gray-700 mb-2">
+        <h4 className="font-medium text-sm text-ui-ink mb-2">
           Vzkazy pro zítřejší směnu
         </h4>
 
@@ -153,13 +154,14 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
               >
                 <button
                   onClick={() => removeNote(n.id)}
-                  className="absolute top-1 right-1 text-gray-400 hover:text-red-500 text-xs"
+                  className="absolute top-1 right-1 text-ui-faint hover:text-red-500 text-xs"
                   title="Smazat vzkaz"
+                  aria-label="Smazat vzkaz"
                 >
-                  ❌
+                  <X className="h-4 w-4" />
                 </button>
                 <p className="text-sm">{n.text}</p>
-                <span className="text-xs text-gray-400 block mt-1">
+                <span className="text-xs text-ui-faint block mt-1">
                   — {n.author}, {n.created}
                 </span>
               </motion.div>
@@ -167,7 +169,7 @@ export default function ReceptionMessagesBlock({ size = FULL }: { size?: WidgetS
           </AnimatePresence>
 
           {notes.length === 0 && (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-ui-faint">
               Zatím žádné vzkazy pro zítřejší směnu.
             </p>
           )}

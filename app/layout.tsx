@@ -25,13 +25,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         />
       </head>
-      <body className="bg-[#f4f7f8] dark:bg-neutral-950 text-gray-900 dark:text-gray-100">
-        <div className="flex min-h-screen">
-          {/* Sidebar menu */}
-
-          {/* Obsah stránky */}
-          <main className="flex-1 p-6 overflow-y-auto">{children}</main>
-        </div>
+      <body>{children}
       </body>
     </html>
   );

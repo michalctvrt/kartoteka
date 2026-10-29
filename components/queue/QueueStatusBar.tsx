@@ -2,7 +2,7 @@
 
 /**
  * Lišta v hlavičce aplikace: kolik pacientů kde čeká. Je vidět na každé
- * stránce, obnovuje se každé 3 s a bliká, když někdo čeká.
+ * stránce a obnovuje se každé 3 s (bez blikání – kouká se na to celý den).
  */
 
 import Link from "next/link";
@@ -27,30 +27,31 @@ export default function QueueStatusBar({ boardHref }: { boardHref: string }) {
   const reception = pending.filter((i) => RECEPTION_SERVICES.includes(i.serviceId ?? "")).length;
 
   return (
-    <Link href={boardHref} className="flex items-center gap-1.5 text-sm" title="Čekající pacienti">
-      <span className="text-gray-500 dark:text-gray-400 mr-1 hidden sm:inline">Čeká:</span>
+    <Link
+      href={boardHref}
+      className="flex items-center gap-1 rounded-lg px-1 py-1 text-[13px] hover:bg-ui-active/60"
+      title="Čekající pacienti – otevřít čekárny"
+    >
+      <span className="mr-1 hidden text-ui-muted sm:inline">Čeká</span>
       {counts.map(({ m, n }) => (
-        <span
-          key={m}
-          className={cn(
-            "px-2.5 py-1 rounded-md font-semibold",
-            n > 0 ? MODALITY_STYLE[m].header : "bg-gray-100 text-gray-500 dark:bg-neutral-700 dark:text-gray-400",
-            n > 0 && "animate-pulse"
-          )}
-        >
-          {m} {n}
-        </span>
+        <Count key={m} label={m} n={n} tone={MODALITY_STYLE[m].badge} />
       ))}
-      <span
-        className={cn(
-          "px-2.5 py-1 rounded-md font-semibold",
-          reception > 0
-            ? "bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-900"
-            : "bg-gray-100 text-gray-500 dark:bg-neutral-700 dark:text-gray-400"
-        )}
-      >
-        Recepce {reception}
-      </span>
+      <Count label="Recepce" n={reception} tone="bg-ui-active text-ui-ink" />
     </Link>
+  );
+}
+
+/** Počet čekajících: s někým = světlý podklad modality, prázdno = šedý text. */
+function Count({ label, n, tone }: { label: string; n: number; tone: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 items-center gap-1.5 rounded-md px-2",
+        n > 0 ? tone : "text-ui-muted"
+      )}
+    >
+      {label}
+      <span className={cn("font-semibold", n === 0 && "font-normal")}>{n}</span>
+    </span>
   );
 }

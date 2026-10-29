@@ -168,7 +168,9 @@ function DashboardInner({ role }: { role: DashboardRole }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <TodayTitle />
+        <div className="flex gap-2">
         {editing ? (
           <>
             <Button variant="outline" size="sm" className="gap-2" onClick={() => update(DEFAULT_LAYOUTS[role])}>
@@ -183,11 +185,12 @@ function DashboardInner({ role }: { role: DashboardRole }) {
             <LayoutDashboard className="w-4 h-4" /> Upravit plochu
           </Button>
         )}
+        </div>
       </div>
 
       {editing && (
-        <div className="rounded-xl border-2 border-dashed border-brand-300 bg-brand-50 dark:bg-brand-950/30 p-4 space-y-2">
-          <div className="text-sm font-semibold text-brand-900 dark:text-brand-100">
+        <div className="rounded-lg border border-dashed border-ui-control bg-ui-raised p-4 space-y-2">
+          <div className="text-sm font-semibold">
             Zobrazená okna
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -203,7 +206,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
               </label>
             ))}
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-[13px] text-ui-muted">
             Okna přesunete tažením za záhlaví, velikost změníte tažením za kterýkoli okraj nebo roh
             (okno skáče po pevných velikostech). Do menší mezery se okno samo zmenší, mezi dvě
             okna vedle sebe se vmáčkne a ta mu udělají místo.
@@ -213,7 +216,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
       )}
 
       {layout.length === 0 ? (
-        <p className="text-sm text-gray-500 text-center py-10">
+        <p className="rounded-lg border border-dashed border-ui-control py-10 text-center text-sm text-ui-muted">
           Plocha je prázdná. Klikněte na „Upravit plochu“ a zaškrtněte okna.
         </p>
       ) : (
@@ -241,13 +244,13 @@ function DashboardInner({ role }: { role: DashboardRole }) {
           {layout.map((l) => {
             const d = WIDGETS[l.i];
             return (
-              <div key={l.i} className={cn("relative", editing && "ring-2 ring-brand-300 rounded-xl")}>
+              <div key={l.i} className={cn("relative", editing && "ring-2 ring-brand-300 rounded-lg")}>
                 <div
                   className={cn(
-                    "h-full flex flex-col rounded-xl overflow-hidden",
+                    "h-full flex flex-col rounded-lg overflow-hidden",
                     // čekárny mají vlastní barevný rámeček
                     !d.frameless &&
-                      "bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-sm"
+                      "bg-ui-sheet border border-ui-line"
                   )}
                 >
                   {d.frameless ? (
@@ -262,7 +265,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
                   ) : (
                     <div
                       className={cn(
-                        "widget-drag flex items-center justify-between gap-2 px-4 py-2.5 border-b border-gray-200 dark:border-neutral-700 font-semibold text-brand-900 dark:text-brand-100 select-none",
+                        "widget-drag flex items-center justify-between gap-2 px-4 py-2.5 border-b border-ui-rule text-[15px] font-semibold text-ui-ink select-none",
                         editing && "cursor-move bg-brand-50 dark:bg-brand-950/40"
                       )}
                     >
@@ -318,3 +321,18 @@ function RemoveButton({ onClick }: { onClick: () => void }) {
     </button>
   );
 }
+
+/** Titulek plochy = dnešní den (recepce i laboranti pracují „na dnešek“). */
+function TodayTitle() {
+  const today = useSyncExternalStore(
+    noopSubscribe,
+    () => new Date().toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "long" }),
+    () => ""
+  );
+  return (
+    <h1 className="text-xl font-semibold">
+      Dnes{today && <span className="font-normal text-ui-muted"> · {today}</span>}
+    </h1>
+  );
+}
+const noopSubscribe = () => () => {};

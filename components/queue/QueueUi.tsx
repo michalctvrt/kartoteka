@@ -10,8 +10,8 @@ export function TicketNo({ no, big }: { no?: string | null; big?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-md font-mono font-bold bg-brand-600 text-white",
-        big ? "text-3xl px-4 py-2 min-w-[5.5rem]" : "text-sm px-2 py-0.5 min-w-[3.5rem]"
+        "inline-flex items-center justify-center rounded-md font-mono font-semibold bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200",
+        big ? "text-3xl px-4 py-2 min-w-[5.5rem] bg-brand-700 text-white dark:bg-brand-700 dark:text-white" : "text-sm px-2 py-0.5 min-w-[3.5rem]"
       )}
     >
       {no ?? "—"}
@@ -23,7 +23,7 @@ export function WaitTime({ created }: { created?: string | null }) {
   const m = waitingMinutes(created);
   if (m === null) return null;
   return (
-    <span className={cn("text-xs", m >= 30 ? "text-red-600 font-semibold" : "text-gray-500")}>
+    <span className={cn("text-xs", m >= 30 ? "text-red-600 font-semibold" : "text-ui-faint")}>
       čeká {m} min
     </span>
   );
@@ -58,7 +58,7 @@ export function QueueButton({
   title?: string;
 }) {
   const styles = {
-    default: "bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600",
+    default: "bg-ui-raised hover:bg-gray-200 dark:hover:bg-neutral-600",
     primary: "bg-brand-600 hover:bg-brand-700 text-white",
     danger: "bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
     success: "bg-green-600 hover:bg-green-700 text-white",
@@ -126,13 +126,13 @@ export function OperatorInput({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+    <label className="flex items-center gap-1 text-xs text-ui-muted">
       Operátor
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="ID v Call250V"
-        className="w-28 px-2 py-1 border rounded bg-white dark:bg-neutral-900"
+        className="w-28 px-2 py-1 border rounded bg-ui-sheet"
       />
     </label>
   );

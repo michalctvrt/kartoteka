@@ -39,22 +39,22 @@ export const MODALITY_STYLE: Record<
 > = {
   RTG: {
     title: "RTG",
-    header: "bg-orange-500 text-white",
-    border: "border-orange-300 dark:border-orange-800",
+    header: "border-t-orange-500",
+    border: "border-ui-line",
     badge: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200",
     soft: "bg-orange-50 dark:bg-orange-950/30",
   },
   UZ: {
     title: "Ultrazvuk",
-    header: "bg-sky-600 text-white",
-    border: "border-sky-300 dark:border-sky-800",
+    header: "border-t-sky-600",
+    border: "border-ui-line",
     badge: "bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200",
     soft: "bg-sky-50 dark:bg-sky-950/30",
   },
   MRI: {
     title: "MRI",
-    header: "bg-purple-600 text-white",
-    border: "border-purple-300 dark:border-purple-800",
+    header: "border-t-purple-600",
+    border: "border-ui-line",
     badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200",
     soft: "bg-purple-50 dark:bg-purple-950/30",
   },
@@ -156,20 +156,20 @@ export function ModalityColumn({
   const name = (it: QueueItem) => names[it.externalIdentifier ?? ""] ?? it.externalIdentifier ?? "";
 
   return (
-    <section className={cn("rounded-xl border-2 overflow-hidden flex flex-col", st.border, className)}>
+    <section className={cn("rounded-lg border overflow-hidden flex flex-col bg-ui-sheet", st.border, className)}>
       <header
         className={cn(
-          "flex items-center justify-between shrink-0",
+          // barva modality jen jako horní hrana – na čekárnu se kouká celý den
+          "flex items-center justify-between shrink-0 border-t-[3px]",
           slimHeader ? "px-3 py-1.5" : "px-4 py-2.5",
           st.header
         )}
       >
-        <span className={cn("font-bold", slimHeader ? "text-base" : "text-lg")}>{st.title}</span>
+        <span className={cn("font-semibold", slimHeader ? "text-sm" : "text-base")}>{st.title}</span>
         <span
           className={cn(
-            "min-w-[2.25rem] text-center rounded-full px-2.5 py-0.5 font-bold bg-white/25",
-            slimHeader ? "text-sm" : "text-base",
-            waiting.length > 0 && "animate-pulse"
+            "min-w-[2rem] text-center rounded-md px-2 py-0.5 text-sm",
+            waiting.length > 0 ? cn("font-semibold", st.badge) : "text-ui-muted"
           )}
           title="Počet čekajících"
         >
@@ -188,9 +188,9 @@ export function ModalityColumn({
         style={{ gap: GAP }}
       >
         {loading ? (
-          <p className="text-sm text-gray-500 text-center py-2">Načítám…</p>
+          <p className="text-sm text-ui-faint text-center py-2">Načítám…</p>
         ) : inService.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-3">Nikdo nečeká</p>
+          <p className="text-sm text-ui-faint text-center py-3">Nikdo nečeká</p>
         ) : (
           <>
             {waiting.slice(0, showWaiting).map((it) => (
@@ -228,7 +228,7 @@ export function ModalityColumn({
               </Row>
             ))}
             {hiddenWaiting > 0 && (
-              <div className="text-xs text-gray-500 px-1" style={{ height: FOOTER - GAP }}>
+              <div className="text-xs text-ui-faint px-1" style={{ height: FOOTER - GAP }}>
                 + {hiddenWaiting} {hiddenWaiting === 1 ? "další čeká" : hiddenWaiting < 5 ? "další čekají" : "dalších čeká"}
               </div>
             )}
@@ -239,7 +239,7 @@ export function ModalityColumn({
                 {showSection && (
                 <div
                   className={cn(
-                    "mt-auto text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400 flex items-center gap-1 px-1",
+                    "mt-auto text-[11px] font-semibold uppercase tracking-wide text-ui-muted flex items-center gap-1 px-1",
                   )}
                   style={{ height: SECTION }}
                 >
@@ -263,7 +263,7 @@ export function ModalityColumn({
                     )}
                     {size.width >= 360 ? (
                       <>
-                        {wide && <span className="text-xs text-gray-500 self-center px-1">Hotovo →</span>}
+                        {wide && <span className="text-xs text-ui-faint self-center px-1">Hotovo →</span>}
                         {MODALITIES.filter((x) => x !== m).map((x) => (
                           <button
                             key={x}
@@ -303,7 +303,7 @@ export function ModalityColumn({
                         options={[
                           // nejužší okno: „Znovu vyvolat“ je tady v nabídce
                           ...(size.width < 280
-                            ? [{ label: "Znovu vyvolat", cls: "bg-gray-100 dark:bg-neutral-700", run: () => call(it.queueItemId, it.counter!) }]
+                            ? [{ label: "Znovu vyvolat", cls: "bg-ui-raised", run: () => call(it.queueItemId, it.counter!) }]
                             : []),
                           ...MODALITIES.filter((x) => x !== m).map((x) => ({
                             label: `na ${x}`,
@@ -352,7 +352,7 @@ function MenuButton({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border bg-white dark:bg-neutral-900 shadow-lg p-1 space-y-1">
+          <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border bg-ui-sheet shadow-lg p-1 space-y-1">
             {options.map((o) => (
               <button
                 key={o.label}
@@ -394,7 +394,7 @@ function Row({
   return (
     <div
       className={cn(
-        "shrink-0 flex items-center gap-2 rounded-lg border px-2 shadow-sm bg-white dark:bg-neutral-900",
+        "shrink-0 flex items-center gap-2 rounded-lg border px-2 bg-ui-sheet",
         tint
       )}
       style={{ height: ROW }}
@@ -407,7 +407,7 @@ function Row({
               {name}
             </Link>
           ) : (
-            <span className="text-gray-500">Nepřiřazený lístek</span>
+            <span className="text-ui-faint">Nepřiřazený lístek</span>
           )}
         </div>
         <div className="text-[11px] flex gap-1.5 truncate">

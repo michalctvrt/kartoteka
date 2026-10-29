@@ -51,6 +51,21 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Barvy `brand-50…950` v `tailwind.config.js` (z loga, hlavní #126c8b); modalita RTG oranžová,
   UZ sky, MRI fialová (`MODALITY_STYLE` ve `WaitingBoard.tsx`)
 
+## Design (styl „rám a list“, framed-sheet z taste skillu, 2026-10-29)
+- Tokeny v `styles/globals.css` (`--ui-*`), v Tailwindu jako `ui-frame/sheet/raised/active/line/rule/control/ink/muted/faint/primary`.
+  Pro text používat `text-ui-ink|muted|faint` (≥ 4.5:1), ne `text-gray-*`.
+- Shell `app/(dashboard)/layout.tsx` + menu `components/AppNav.tsx`: rám v tónu brand-50, obsah na bílém listu
+  (16px rohy, bez stínu), lišta 48px s frontou. Pod 1024px menu za tlačítkem.
+- Barva brandu jen na logu, jedné primární akci (`Button` default = brand-700) a vybraném stavu. Modality nesou
+  data (RTG/UZ/MRI) – na čekárnách jen 3px horní hrana a světlé štítky, nic neblikat (`animate-pulse` ne).
+- Žádné stíny na klidných kartách, jeden poloměr `rounded-lg`, žádné emoji, každá obrazovka má jeden `h1`.
+
+## Studie
+- `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
+  Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).
+- `reception/studies/search` (vyhledávání), `reception/studies/[sid]` (karta studie, jen čtení; popis = `description`,
+  PDF = `/study/{id}/documentData.pdf`, úpravy zatím ve staré kartotéce). Menu „Karta studie“ = naposledy otevřená.
+
 ## Jak pracovat
 - Michal chce věcné odpovědi a hotové, ověřené výsledky. Po změnách UI ověřit v prohlížeči
   (Playwright je k dispozici přes npx), u plochy kontrolovat skutečné polohy oken v DOM (ne jen uložená data).

@@ -65,7 +65,7 @@ export default function ServicesEditor({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Výkony</label>
+      <label className="text-xs font-medium text-ui-muted">Výkony</label>
 
       {Object.keys(value).length > 0 && (
         <ul className="border rounded-md divide-y dark:divide-neutral-700">
@@ -89,7 +89,7 @@ export default function ServicesEditor({
       )}
 
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-2.5 top-2.5 text-gray-400" />
+        <Search className="w-4 h-4 absolute left-2.5 top-2.5 text-ui-faint" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -97,10 +97,10 @@ export default function ServicesEditor({
           placeholder={
             !category ? "Nejdřív vyberte modalitu" : loading ? "Načítám výkony…" : "Kód nebo název výkonu"
           }
-          className="w-full pl-8 pr-3 py-2 border rounded-md text-sm bg-white dark:bg-neutral-900 disabled:opacity-60"
+          className="w-full pl-8 pr-3 py-2 border rounded-md text-sm bg-ui-sheet disabled:opacity-60"
         />
         {matches.length > 0 && (
-          <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded-md bg-white dark:bg-neutral-900 shadow-lg text-sm">
+          <ul className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded-md bg-ui-sheet shadow-lg text-sm">
             {matches.map((o) => (
               <li key={o.id}>
                 <button
@@ -109,7 +109,7 @@ export default function ServicesEditor({
                     setCount(o.id, 1);
                     setQ("");
                   }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-neutral-800 flex gap-2"
+                  className="w-full text-left px-3 py-1.5 hover:bg-ui-raised flex gap-2"
                 >
                   <code className="text-xs w-14 shrink-0 pt-0.5">{o.id}</code>
                   <span>{o.label}</span>

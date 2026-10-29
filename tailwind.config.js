@@ -27,6 +27,21 @@ module.exports = {
   				900: '#0c364b',
   				950: '#082636',
   			},
+  			// Role z design tokenů (styles/globals.css) – rám, list, linky, text
+  			ui: {
+  				frame: 'var(--ui-frame)',
+  				sheet: 'var(--ui-sheet)',
+  				raised: 'var(--ui-raised)',
+  				active: 'var(--ui-active)',
+  				line: 'var(--ui-line)',
+  				rule: 'var(--ui-rule)',
+  				control: 'var(--ui-control)',
+  				ink: 'var(--ui-ink)',
+  				muted: 'var(--ui-muted)',
+  				faint: 'var(--ui-faint)',
+  				primary: 'var(--ui-primary)',
+  				'primary-hover': 'var(--ui-primary-hover)',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

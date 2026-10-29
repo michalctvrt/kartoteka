@@ -78,14 +78,14 @@ export default function ReceptionQueuePanel({
             <div className="text-3xl font-bold text-brand-700 dark:text-brand-300 leading-none">
               {waiting.length}
             </div>
-            <div className="text-[11px] text-gray-500">čeká</div>
+            <div className="text-[11px] text-ui-faint">čeká</div>
           </div>
           <QueueButton variant="primary" onClick={callNext} disabled={busy || waiting.length === 0}>
             <Megaphone className="w-4 h-4" /> Vyvolat dalšího
           </QueueButton>
         </div>
         {mine.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-ui-muted">
             U {counterLabel(counter)}:
             {mine.map((it) => (
               <TicketNo key={it.queueItemId} no={it.orderNumber} />
@@ -101,7 +101,7 @@ export default function ReceptionQueuePanel({
       <select
         value={counter}
         onChange={(e) => update({ receptionCounter: e.target.value })}
-        className="px-2 py-1 border rounded text-sm bg-white dark:bg-neutral-900"
+        className="px-2 py-1 border rounded text-sm bg-ui-sheet"
       >
         {RECEPTION_COUNTERS.map((c) => (
           <option key={c.id} value={c.id}>
@@ -135,7 +135,7 @@ export default function ReceptionQueuePanel({
         <QueueButton variant="primary" onClick={callNext} disabled={busy || waiting.length === 0}>
           <Megaphone className="w-4 h-4" /> Vyvolat dalšího
         </QueueButton>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-ui-faint">
           {waiting.length === 0 ? "Na recepci nikdo nečeká." : `Čeká: ${waiting.length}`}
         </span>
       </div>
@@ -169,12 +169,12 @@ export default function ReceptionQueuePanel({
           {MODALITIES.map((m) => {
             const n = items.filter((i) => i.serviceId === WAITING_SERVICES[m]).length;
             return (
-              <span key={m} className="px-2 py-1 rounded bg-gray-100 dark:bg-neutral-700">
+              <span key={m} className="px-2 py-1 rounded bg-ui-raised">
                 Čekárna {m}: <b>{n}</b>
               </span>
             );
           })}
-          <span className="px-2 py-1 rounded bg-gray-100 dark:bg-neutral-700">
+          <span className="px-2 py-1 rounded bg-ui-raised">
             Na zprávu: <b>{items.filter((i) => i.serviceId === REPORT_SERVICE).length}</b>
           </span>
         </div>
@@ -250,7 +250,7 @@ function CalledHere({
         <TicketNo no={item.orderNumber} big={!compact} />
         <div className="text-sm">
           <div className="font-semibold">Vyvolán k {counterLabel(item.counter)}</div>
-          <div className="text-gray-600 dark:text-gray-400">{serviceLabel(item.serviceId)}</div>
+          <div className="text-ui-muted">{serviceLabel(item.serviceId)}</div>
         </div>
       </div>
 
@@ -281,7 +281,7 @@ function CalledHere({
               value={rc}
               onChange={(e) => setRc(e.target.value)}
               placeholder="Rodné číslo pacienta"
-              className="flex-1 px-2 py-1.5 border rounded text-sm bg-white dark:bg-neutral-900"
+              className="flex-1 px-2 py-1.5 border rounded text-sm bg-ui-sheet"
             />
             <button
               type="submit"

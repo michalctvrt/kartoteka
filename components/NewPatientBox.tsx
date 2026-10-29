@@ -93,7 +93,7 @@ export default function NewPatientBox() {
 
       {error && <p className="text-xs text-red-500">{error}</p>}
 
-      <p className="text-[11px] text-gray-500">
+      <p className="text-[11px] text-ui-faint">
         Rodné číslo nebo QR kód e-žádanky.
       </p>
     </div>

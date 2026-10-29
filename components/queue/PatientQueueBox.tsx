@@ -54,7 +54,7 @@ export default function PatientQueueBox({
   if (loading) return null;
   if (!linked && !unlinked && !error) {
     return (
-      <p className="text-xs text-gray-500 flex items-center gap-1">
+      <p className="text-xs text-ui-faint flex items-center gap-1">
         <Ticket className="w-3.5 h-3.5" /> Pacient nemá lístek ve vyvolávacím systému.
       </p>
     );
@@ -89,20 +89,20 @@ export default function PatientQueueBox({
                 <div className="font-semibold">
                   {linked ? serviceLabel(item.serviceId) : "Lístek zatím není přiřazený k pacientovi"}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 flex gap-2 items-center">
+                <div className="text-ui-muted flex gap-2 items-center">
                   {item.status === "called"
                     ? `Vyvolán k ${counterLabel(item.counter)}`
                     : "Čeká"}
                   <WaitTime created={item.createdDate} />
                 </div>
                 {kioskChoice && (
-                  <div className="text-xs text-gray-500">Na kiosku zvolil: {kioskChoice}</div>
+                  <div className="text-xs text-ui-faint">Na kiosku zvolil: {kioskChoice}</div>
                 )}
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+              <div className="text-xs text-ui-muted flex items-center gap-1">
                 <ArrowRightLeft className="w-3.5 h-3.5" />
                 {linked
                   ? "Přeřadit do:"
