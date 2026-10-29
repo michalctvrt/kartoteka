@@ -42,3 +42,5 @@ next-env.d.ts
 /backup*
 # starý název env (bez tečky) — pojistka pro případ, že se znovu objeví
 /env.local
+# pracovní soubory skillu design-taste-frontend
+/.taste-skill/

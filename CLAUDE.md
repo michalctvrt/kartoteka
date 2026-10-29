@@ -56,3 +56,6 @@ Podrobně `CALL250V.md`. Shrnutí:
   (Playwright je k dispozici přes npx), u plochy kontrolovat skutečné polohy oken v DOM (ne jen uložená data).
 - Nevymýšlet si chování Call250V ani backendu – označit jako předpoklad a zeptat se.
 - Necommitovat `.env.local` (obsahuje klíče).
+- Skill `design-taste-frontend` (taste skill) používat JEN když o něj Michal výslovně požádá, ne při běžných
+  úpravách UI. I pak držet náš brand (Montserrat, barvy `brand-*`, logo) a stávající plochu – jeho
+  vlastní paleta/písmo/zákazy (stíny, linky, karty) mají přednost až po souhlasu.
