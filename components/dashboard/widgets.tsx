@@ -49,22 +49,22 @@ export const WIDGETS: Record<string, WidgetDef> = {
   "queue-reception": {
     title: "Vyvolávací systém – recepce",
     render: () => <ReceptionQueuePanel embedded />,
-    w: 6, h: 13, minW: 4, minH: 6,
+    w: 6, h: 13, minW: 6, minH: 13,
   },
   "today-orders": {
     title: "Dnešní objednávky",
     render: () => <ReceptionTodayList />,
-    w: 6, h: 18, minW: 3, minH: 6,
+    w: 6, h: 18, minW: 4, minH: 13,
   },
   "new-patient": {
     title: "Nový pacient",
     render: () => <NewPatientBox />,
-    w: 6, h: 4, minW: 3, minH: 3,
+    w: 6, h: 4, minW: 4, minH: 4,
   },
   messages: {
     title: "Aktuality a provozní zprávy",
     render: () => <ReceptionMessagesBlock />,
-    w: 6, h: 9, minW: 3, minH: 6,
+    w: 6, h: 13, minW: 4, minH: 13,
   },
 };
 
@@ -82,7 +82,7 @@ export const DEFAULT_LAYOUTS: Record<DashboardRole, Layout[]> = {
     at("queue-reception", 0, 0, 6, 13),
     at("today-orders", 6, 0, 6, 18),
     at("new-patient", 0, 13, 6, 4),
-    at("messages", 0, 17, 6, 9),
+    at("messages", 0, 17, 6, 13),
   ],
   lab: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
   doctor: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],

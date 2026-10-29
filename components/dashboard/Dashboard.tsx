@@ -66,9 +66,16 @@ function DashboardInner({ role }: { role: DashboardRole }) {
 
   const visible = useMemo(() => new Set(layout.map((l) => l.i)), [layout]);
 
+  // Knihovna si drží vlastní kopii rozložení a převezme naše jen když se
+  // „liší“ — při vrácení okna zpět by na obrazovce zůstal překryv. Proto
+  // po každé změně mřížku znovu sestavíme (rev) z našeho (správného) stavu.
+  const [rev, setRev] = useState(0);
+
   const update = (next: Layout[]) => {
-    const limited = withLimits(next);
+    // pojistka: nic se nesmí překrývat ani mít nepovolenou velikost
+    const limited = withLimits(normalize(next, mins));
     setLayout(limited);
+    setRev((r) => r + 1);
     saveLayout(role, limited);
   };
 
@@ -104,16 +111,18 @@ function DashboardInner({ role }: { role: DashboardRole }) {
     dragStart.current = l.map((o) => ({ ...o }));
   };
   const onDrag = (l: Layout[], oldItem: Layout, item: Layout, ph: Layout) => {
-    const res = resolveDrop(item, oldItem) ?? [
-      ...dragStart.current.filter((o) => o.i !== item.i),
-      { ...item, w: oldItem.w, h: oldItem.h },
-    ];
-    // promítnout do živého rozložení (knihovna ho po callbacku vykreslí)
+    const res = resolveDrop(item, oldItem);
+    // ostatní okna: buď nové pozice (uhýbají), nebo původní
+    const source = res ?? dragStart.current;
     for (const o of l) {
-      const r = res.find((x) => x.i === o.i);
+      if (o.i === item.i) continue;
+      const r = source.find((x) => x.i === o.i);
       if (r) Object.assign(o, { x: r.x, y: r.y, w: r.w, h: r.h });
     }
-    const me = res.find((x) => x.i === item.i)!;
+    // stín ukazuje, kam okno dopadne — když se nevejde, na původní místo
+    const me = (res ?? dragStart.current).find((x) => x.i === item.i)!;
+    if (res) Object.assign(item, { w: me.w, h: me.h });
+    else Object.assign(item, { w: oldItem.w, h: oldItem.h });
     Object.assign(ph, { x: me.x, y: me.y, w: me.w, h: me.h });
   };
   const onDragStop = (_l: Layout[], oldItem: Layout, item: Layout) => {
@@ -121,26 +130,33 @@ function DashboardInner({ role }: { role: DashboardRole }) {
   };
 
   // ── Změna velikosti: skáče po povolených velikostech, ze všech stran ──
-  const onResize = (_l: Layout[], oldItem: Layout, item: Layout, ph: Layout) => {
+  // Do jiného okna se zvětšit nedá: drží se poslední velikost, která se vešla.
+  const lastValid = useRef<Layout | null>(null);
+
+  const onResizeStart = (_l: Layout[], oldItem: Layout) => {
+    lastValid.current = { ...oldItem };
+  };
+  const onResize = (l: Layout[], oldItem: Layout, item: Layout, ph: Layout) => {
     const s = snapSize(item.w, item.h, mins(item.i));
     // tah za levý/horní okraj → pravý/dolní okraj zůstává na místě
     const fromLeft = item.x !== oldItem.x;
     const fromTop = item.y !== oldItem.y;
-    let x = fromLeft ? oldItem.x + oldItem.w - s.w : item.x;
-    let y = fromTop ? oldItem.y + oldItem.h - s.h : item.y;
+    let x = fromLeft ? oldItem.x + oldItem.w - s.w : oldItem.x;
+    let y = fromTop ? oldItem.y + oldItem.h - s.h : oldItem.y;
     x = Math.max(0, Math.min(x, COLS - s.w));
     y = Math.max(0, y);
-    Object.assign(item, { x, y, ...s });
-    Object.assign(ph, { x, y, ...s });
+    const candidate = { ...item, x, y, ...s };
+    const others = l.filter((o) => o.i !== item.i);
+    if (!collides(candidate, others)) lastValid.current = candidate;
+    const v = lastValid.current ?? oldItem;
+    Object.assign(item, { x: v.x, y: v.y, w: v.w, h: v.h });
+    Object.assign(ph, { x: v.x, y: v.y, w: v.w, h: v.h });
   };
   const onResizeStop = (l: Layout[], oldItem: Layout, item: Layout) => {
     const others = l.filter((o) => o.i !== item.i);
-    let final: Layout = { ...item };
-    if (collides(final, others)) {
-      const fit = fitAt(others, item.x, item.y, item.w, item.h, mins(item.i));
-      final = fit ? { ...item, ...fit } : { ...oldItem };
-    }
-    update([...others, final]);
+    const v = lastValid.current ?? oldItem;
+    update([...others, { ...item, x: v.x, y: v.y, w: v.w, h: v.h }]);
+    lastValid.current = null;
   };
 
   return (
@@ -195,6 +211,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
         </p>
       ) : (
         <Grid
+          key={rev}
           className={cn("-mx-2", editing && "dashboard-editing")}
           layout={layout}
           cols={12}
@@ -211,6 +228,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
           onDragStart={onDragStart}
           onDrag={onDrag}
           onDragStop={onDragStop}
+          onResizeStart={onResizeStart}
           onResize={onResize}
           onResizeStop={onResizeStop}
         >
@@ -249,7 +267,7 @@ function DashboardInner({ role }: { role: DashboardRole }) {
                       {editing && <RemoveButton onClick={() => toggle(l.i)} />}
                     </div>
                   )}
-                  <div className={cn("flex-1 min-h-0 overflow-auto", !d.frameless && "p-4")}>
+                  <div className={cn("flex-1 min-h-0 overflow-auto", !d.frameless && "p-3")}>
                     {d.render()}
                   </div>
                 </div>
