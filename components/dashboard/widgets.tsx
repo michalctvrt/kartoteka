@@ -16,6 +16,7 @@ import { ModalityColumn } from "@/components/queue/WaitingBoard";
 import ReceptionTodayList from "@/components/ReceptionTodayList";
 import NewPatientBox from "@/components/NewPatientBox";
 import ReceptionMessagesBlock from "@/components/ReceptionMessagesBlock";
+import ToReportWidget from "@/components/study/ToReportWidget";
 
 import type { Capability } from "@/lib/auth/roles";
 
@@ -67,6 +68,11 @@ export const WIDGETS: Record<string, WidgetDef> = {
     render: () => <NewPatientBox />,
     w: 6, h: 4, minW: 3, minH: 4, cap: "widget.newPatient",
   },
+  "to-report": {
+    title: "K popisu",
+    render: (sz) => <ToReportWidget size={sz} />,
+    w: 12, h: 4, minW: 4, minH: 4, cap: "widget.toReport",
+  },
   messages: {
     title: "Aktuality a provozní zprávy",
     render: (sz) => <ReceptionMessagesBlock size={sz} />,
@@ -91,5 +97,5 @@ export const DEFAULT_LAYOUTS: Record<DashboardRole, Layout[]> = {
     at("messages", 0, 17, 6, 9),
   ],
   lab: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
-  doctor: [at("waiting-RTG", 0, 0), at("waiting-UZ", 4, 0), at("waiting-MRI", 8, 0)],
+  doctor: [at("to-report", 0, 0, 12, 4), at("waiting-RTG", 0, 4), at("waiting-UZ", 4, 4), at("waiting-MRI", 8, 4)],
 };

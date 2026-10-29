@@ -11,6 +11,7 @@ JSF kartotéky. Komunikace s uživatelem (Michal) **česky**; Michal zná JS, ba
 - Větev s rozpracovanou prací: `call250v`
 
 ## Backend (Václav – Java/Payara, NEMĚNÍME, jen voláme)
+- **Vše, na co čekáme, je v `docs/VACLAV.md`** (seřazené podle priority) – nový požadavek na backend zapsat tam.
 - REST `CardFileWebWS` na `http://localhost:8080/CardFileWebWS/rest`, swagger `app/api/openapi-original.json`
   (kopie `openapi-fixed.json` má doplněný `info` blok pro generátor)
 - Klient generovaný `openapi-typescript-codegen` do `lib/api/generated/` – **pozor**: generátor čísluje
@@ -119,6 +120,7 @@ Podrobně `CALL250V.md`. Shrnutí:
   `report-draft:<id>`. Uložení zatím „Zkopírovat a otevřít ve staré kartotéce“. Vedle panel Šablony / Předchozí / Pacient.
 - Pracovní seznam `/doctor/reports` „K popisu“ (`report.write`): nepopsané studie za období (backend filtr „bez popisu“ nemá →
   `lib/reportQueue.ts` filtruje sám), urgentní a nejstarší nahoře; fronta v sessionStorage → „Další na řadě“ v psaní.
+  Na ploše lékaře okno „K popisu“ (`components/study/ToReportWidget.tsx`, `widget.toReport`), filtr sdílí se stránkou (`useReportFilter`).
 - Šablony popisu: backend je přes API nemá (stará kartotéka: tabulka `study_description_template`) → SIMULACE
   `app/api/templates` + `.data/templates.json` (mimo git; na serveru 72 šablon ze staré kartotéky importovaných z Michalova SQL,
   bez souboru se založí vzorové `lib/demo/templates.ts`). Vložení: panel (celá / označená část), „//“ + název, zkratka + Tab.

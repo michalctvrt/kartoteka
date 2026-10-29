@@ -52,6 +52,7 @@ export const CAPABILITIES = {
   "widget.messages": { group: "Plocha", label: "Okno Aktuality a provozní zprávy", roles: ALL },
   "widget.newPatient": { group: "Plocha", label: "Okno Nový pacient", roles: ["admin", "reception"] },
   "widget.todayOrders": { group: "Plocha", label: "Okno Dnešní objednávky", roles: ["admin", "reception"] },
+  "widget.toReport": { group: "Plocha", label: "Okno K popisu", roles: ["admin", "doctor"] },
 
   // Vyvolávací systém
   "queue.reception": {

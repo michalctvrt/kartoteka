@@ -7,6 +7,7 @@
  * Fronta (pořadí id) se drží v sessionStorage, ať karta studie ví, co je další.
  */
 
+import { useSyncExternalStore } from "react";
 import { StudyService } from "@/lib/api/generated/services/StudyService";
 import { BrowseDateFilter } from "@/lib/api/generated/models/BrowseDateFilter";
 import { BrowseStringFilter } from "@/lib/api/generated/models/BrowseStringFilter";
@@ -93,4 +94,45 @@ function isoLocal(d: Date): string {
   const p = (n: number) => String(Math.floor(Math.abs(n))).padStart(2, "0");
   const day = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   return `${day}T${p(d.getHours())}:${p(d.getMinutes())}:00${off >= 0 ? "+" : "-"}${p(off / 60)}:${p(off % 60)}`;
+}
+
+// ─── Filtr pracovního seznamu (období, modalita) – sdílí stránka K popisu i okno na ploše ───
+
+export type Days = "1" | "3" | "7" | "14" | "30";
+const PREF = "kartoteka_reports_filter";
+
+export type Filter = { days: Days; modality: string | null };
+const DEFAULT = '{"days":"7","modality":null}';
+const EVENT = "kartoteka-reports-filter";
+// filtr si pamatuje prohlížeč; useSyncExternalStore = bez nesouladu se serverovým vykreslením
+const subscribe = (cb: () => void) => {
+  window.addEventListener(EVENT, cb);
+  return () => window.removeEventListener(EVENT, cb);
+};
+const readRaw = () => {
+  try {
+    return localStorage.getItem(PREF) ?? DEFAULT;
+  } catch {
+    return DEFAULT;
+  }
+};
+
+function parseFilter(raw: string): Filter {
+  try {
+    const v = { ...JSON.parse(DEFAULT), ...JSON.parse(raw) } as Filter;
+    return ["1", "3", "7", "14", "30"].includes(v.days) ? v : (JSON.parse(DEFAULT) as Filter);
+  } catch {
+    return JSON.parse(DEFAULT) as Filter;
+  }
+}
+
+export function useReportFilter(): [Filter, (p: Partial<Filter>) => void] {
+  const f = parseFilter(useSyncExternalStore(subscribe, readRaw, () => DEFAULT));
+  const set = (p: Partial<Filter>) => {
+    try {
+      localStorage.setItem(PREF, JSON.stringify({ ...f, ...p }));
+    } catch {}
+    window.dispatchEvent(new Event(EVENT));
+  };
+  return [f, set];
 }

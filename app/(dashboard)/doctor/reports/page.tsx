@@ -7,7 +7,7 @@
  * Výběr nepopsaných: lib/reportQueue.ts (backend filtr „bez popisu“ nemá).
  */
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, PenLine, RefreshCw } from "lucide-react";
@@ -18,32 +18,12 @@ import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { ModalityTag } from "@/components/study/StudyBits";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
-import { loadToReport, saveQueue, waitingFor } from "@/lib/reportQueue";
+import { loadToReport, saveQueue, useReportFilter, waitingFor, type Days } from "@/lib/reportQueue";
 import { formatDateTime, formatRc, patientName } from "@/lib/studies";
-
-type Days = "1" | "3" | "7" | "14" | "30";
-const PREF = "kartoteka_reports_filter";
-
-type Filter = { days: Days; modality: string | null };
-const DEFAULT = '{"days":"7","modality":null}';
-const EVENT = "kartoteka-reports-filter";
-// filtr si pamatuje prohlížeč; useSyncExternalStore = bez nesouladu se serverovým vykreslením
-const subscribe = (cb: () => void) => {
-  window.addEventListener(EVENT, cb);
-  return () => window.removeEventListener(EVENT, cb);
-};
-const readRaw = () => {
-  try {
-    return localStorage.getItem(PREF) ?? DEFAULT;
-  } catch {
-    return DEFAULT;
-  }
-};
 
 export default function ReportsWorklistPage() {
   const router = useRouter();
-  const raw = useSyncExternalStore(subscribe, readRaw, () => DEFAULT);
-  const f = parseFilter(raw);
+  const [f, setFilter] = useReportFilter();
   const [data, setData] = useState<{ key: string; rows?: StudyInfo[]; truncated?: boolean; error?: string } | null>(null);
   const [tick, setTick] = useState(0);
   const key = `${f.days}|${f.modality}|${tick}`;
@@ -66,13 +46,6 @@ export default function ReportsWorklistPage() {
     document.addEventListener("visibilitychange", on);
     return () => document.removeEventListener("visibilitychange", on);
   }, []);
-
-  const setFilter = (p: Partial<Filter>) => {
-    try {
-      localStorage.setItem(PREF, JSON.stringify({ ...f, ...p }));
-    } catch {}
-    window.dispatchEvent(new Event(EVENT));
-  };
 
   const open = (s: StudyInfo) => {
     saveQueue(shown.map((x) => x.id));
@@ -210,11 +183,3 @@ export default function ReportsWorklistPage() {
   );
 }
 
-function parseFilter(raw: string): Filter {
-  try {
-    const v = { ...JSON.parse(DEFAULT), ...JSON.parse(raw) } as Filter;
-    return ["1", "3", "7", "14", "30"].includes(v.days) ? v : (JSON.parse(DEFAULT) as Filter);
-  } catch {
-    return JSON.parse(DEFAULT) as Filter;
-  }
-}
