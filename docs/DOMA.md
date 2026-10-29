@@ -37,6 +37,30 @@ npm run dev
 Pak v prohlížeči otevřít **http://localhost:4001** a vybrat zaměstnance (např. Recepce Olomoucká).
 Vypnout: v příkazovém řádku **Ctrl + C**.
 
+### Ukázkoví pacienti
+
+Všichni jsou smyšlení (`lib/demo/data.ts`).
+
+| Pacient | Rodné číslo | Vyšetření |
+|---|---|---|
+| Jan Novák | 680314/1000 | 1 |
+| Marie Svobodová | 756102/1037 | 2 |
+| Petr Dvořák | 820621/1074 | 3 |
+| Eva Černá | 905109/1111 | 4 |
+| Tomáš Procházka | 570930/1148 | 1 |
+| Lucie Kučerová | 885417/1185 | 2 |
+| Martin Veselý | 791205/1222 | 3 |
+| Jana Horáková | 645723/1259 | 4 |
+| Pavel Němec | 010211/1296 | 1 |
+| Kateřina Marková | 955828/1333 | 2 |
+| Josef Pokorný | 490516/1370 | 3 |
+| Tereza Pospíšilová | 126003/1407 | 4 |
+
+- Rodné číslo jde zadat s lomítkem i bez (`6803141000`), jméno i bez diakritiky („novak“, „kuc“).
+- Studie mají čísla **3300000001–3300000030** (3300000001 je nejnovější); ve „Vyhledat studii“
+  stačí nic nezadávat a ukážou se všechny.
+- Nové rodné číslo jde zkusit taky – pacient se založí a vydrží do restartu `npm run dev`.
+
 ### Plynulejší animace (jako v provozu)
 
 Vývojový režim (`npm run dev`) je při prvním otevření stránky pomalejší. Na posouzení animací:
