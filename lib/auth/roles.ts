@@ -87,6 +87,7 @@ export const CAPABILITIES = {
 
   // Objednávky
   "calendar.view": { group: "Objednávky", label: "Kalendář objednávek", roles: ["admin", "reception"] },
+  "calendar.book": { group: "Objednávky", label: "Zapsat a zrušit objednávku v kalendáři", roles: ["admin", "reception"] },
 
   // Administrace
   "staff.manage": { group: "Administrace", label: "Spravovat zaměstnance a jejich oprávnění", roles: ["admin"] },

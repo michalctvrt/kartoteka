@@ -26,6 +26,8 @@ import {
 import { useQueue } from "./useQueue";
 import { useWorkstation } from "./useWorkstation";
 import { useSession } from "@/components/auth/SessionProvider";
+import Link from "next/link";
+import { BOOKABLE } from "@/lib/supersaas/calendars";
 import { QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
 
 const ARRIVALS = Object.values(ARRIVAL_SERVICES);
@@ -47,7 +49,9 @@ export default function PatientQueueBox({
 }) {
   const { ws } = useWorkstation();
   // přiřazovat lístek a rozřazovat do čekáren smí recepce (a admin); ostatní jen vidí, kde pacient je
-  const canRoute = useSession().can("queue.reception");
+  const { can } = useSession();
+  const canRoute = can("queue.reception");
+  const canBook = can("calendar.book") && BOOKABLE.length > 0;
   const { items, error, clearError, busy, run, loading } = useQueue([], 4000);
 
   const linked = items.find((i) => i.externalIdentifier === pid);
@@ -114,6 +118,11 @@ export default function PatientQueueBox({
                 {item.status === "called" ? `Vyvolán k ${counterLabel(item.counter)}` : "Čeká na vyvolání"}
                 {kioskChoice && ` · na kiosku: ${kioskChoice === "booking" ? "chce se objednat" : "přišel na vyšetření"}`}
               </div>
+              {kioskChoice === "booking" && canBook && (
+                <Link href={`/reception/calendar?book=1&pid=${encodeURIComponent(pid)}`} className="mt-1 inline-block text-[13px] text-ui-primary hover:underline">
+                  Objednat termín →
+                </Link>
+              )}
             </div>
           </div>
 

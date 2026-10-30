@@ -26,7 +26,9 @@ import {
   X,
   UserPlus,
   Plus,
+  CalendarPlus,
 } from "lucide-react";
+import { BOOKABLE } from "@/lib/supersaas/calendars";
 import { Button } from "@/components/ui/button";
 import { Bento } from "@/components/ui/bento";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
@@ -101,6 +103,7 @@ function PatientDetailPage({ pid }: { pid: string }) {
   const { can } = useSession();
   const canEdit = can("patient.edit");
   const canCreateStudy = can("study.create");
+  const canBook = can("calendar.book") && BOOKABLE.length > 0;
   const { studies, loading: studiesLoading, error: studiesError } = usePatientStudies(pid);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -355,6 +358,13 @@ function PatientDetailPage({ pid }: { pid: string }) {
               {canEdit && (
                 <Button variant="outline" onClick={() => setIsEditing(true)}>
                   <Pencil /> Upravit
+                </Button>
+              )}
+              {canBook && (
+                <Button variant="outline" asChild>
+                  <Link href={`/reception/calendar?book=1&pid=${encodeURIComponent(pid)}`} title="Nová objednávka do kalendáře s údaji pacienta">
+                    <CalendarPlus /> Objednat termín
+                  </Link>
                 </Button>
               )}
               {!canCreateStudy ? null : STUDY_VIA_API || studyMissing.length > 0 ? (

@@ -112,6 +112,8 @@ Tyhle při výpadku internetu stejně nepůjdou, aplikace pak jen napíše, že 
 | Metoda | Cesta | Co dělá |
 |---|---|---|
 | GET | `supersaas/booking?schedule_id=…` | objednávky z kalendáře SuperSaaS (účet a API klíč v konfiguraci serveru). Pustit jen kalendáře ze seznamu v `lib/supersaas/calendars.ts` (ostatní 403) |
+| POST | `supersaas/booking` | nová objednávka (JSON: `schedule_id`, `start`, `finish` jako „2026-11-02 09:00“, `full_name`, `mobile`, `email`, `field_1`, `field_1_r`, `field_2_r`) → přepošle do SuperSaaS `POST /api/bookings.json?schedule_id=…`, vrátí `{ id }` nebo jeho chybu (např. „Tento slot už je obsazen“). **Jen kalendáře povolené v konfiguraci serveru** (teď jen Testovací zdroj 856112), ostatní 423 |
+| DELETE | `supersaas/booking/{id}?schedule_id=…` | zrušení objednávky (SuperSaaS chce i `schedule_id`, jinak 404); stejné povolení jako zápis |
 | POST | `ops/vzp` | ověření pojištění u VZP – potřebuje certifikát, tělo i odpověď se přeposílají beze změny |
 
 ### 3.5 Provozní aplikace (spotřební materiál, hromadný tisk, online přístup, připojení lékaři) – `ops/*`

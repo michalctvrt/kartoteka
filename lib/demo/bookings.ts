@@ -16,7 +16,53 @@ const local = (d: Date) => {
 import { CALENDARS } from "@/lib/supersaas/calendars";
 
 /** Každý kalendář jiné objednávky (posun podle pořadí); kopie = stejné jako originál, testovací prázdný. */
+// objednávky zapsané v demu (v paměti serveru, po restartu zmizí)
+type DemoEvent = { id: number; title: string; start: string; end: string; allDay: boolean; type: "booked"; details: Record<string, string> };
+const g = globalThis as unknown as { __demoCreated?: Map<number, DemoEvent[]>; __demoNextId?: number };
+const created: Map<number, DemoEvent[]> = (g.__demoCreated ??= new Map());
+
 export function demoBookings(scheduleId: number) {
+  return [...demoGenerated(scheduleId), ...(created.get(scheduleId) ?? [])];
+}
+
+/** Zápis v demu – obsazený čas odmítne jako SuperSaaS. `form` = pole booking[...] z mostu. */
+export function demoCreateBooking(scheduleId: number, form: Record<string, string>): { id: number } | { error: string } {
+  const start = form["booking[start]"].replace(" ", "T") + ":00";
+  const end = form["booking[finish]"].replace(" ", "T") + ":00";
+  const cal = CALENDARS.find((c) => c.id === scheduleId);
+  if (cal?.fields.includes("field_1") && !form["booking[field_1]"]) return { error: "Rok narození nemůže být prázdná" };
+  if (demoBookings(scheduleId).some((b) => b.start < end && start < b.end)) return { error: "Tento slot už je obsazen" };
+  const id = (g.__demoNextId = (g.__demoNextId ?? 990000) + 1);
+  const list = created.get(scheduleId) ?? [];
+  list.push({
+    id,
+    title: form["booking[full_name]"],
+    start,
+    end,
+    allDay: false,
+    type: "booked",
+    details: {
+      Jméno: form["booking[full_name]"],
+      "Datum narození": form["booking[field_1]"] ?? "",
+      Pohlaví: form["booking[field_2_r]"] ?? "",
+      Mobil: form["booking[mobile]"] ?? "",
+      Email: form["booking[email]"] ?? "",
+      Vyšetření: form["booking[field_1_r]"] ?? "",
+      "Typ služby": `${cal?.name ?? ""} (demo)`,
+    },
+  });
+  created.set(scheduleId, list);
+  return { id };
+}
+
+export function demoDeleteBooking(scheduleId: number, id: number): boolean {
+  const list = created.get(scheduleId) ?? [];
+  const next = list.filter((b) => b.id !== id);
+  created.set(scheduleId, next);
+  return next.length !== list.length;
+}
+
+function demoGenerated(scheduleId: number): DemoEvent[] {
   const cal = CALENDARS.find((c) => c.id === scheduleId);
   if (!cal || cal.test) return [];
   const base = cal.mirrorOf ?? scheduleId;

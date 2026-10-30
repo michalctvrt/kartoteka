@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { demoBookings } from "@/lib/demo/bookings";
+import { demoBookings, demoCreateBooking } from "@/lib/demo/bookings";
 import { DEMO_MODE } from "@/lib/demo/mode";
-import { CALENDARS, DEFAULT_CALENDAR } from "@/lib/supersaas/calendars";
+import { CALENDARS, DEFAULT_CALENDAR, calendarById, type NewBooking } from "@/lib/supersaas/calendars";
+import { SS_BASE, ssAuth, ssError, writeBlocked } from "@/lib/supersaas/server";
 
 // 🔐 Credentials se čtou z .env.local (NEVER commit)
 const ACCOUNT_NAME = process.env.SUPERSAAS_USER;
@@ -147,4 +148,49 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * POST – nová objednávka (NewBooking, JSON). Jen povolené kalendáře (lib/supersaas/server.ts writeBlocked).
+ * Do SuperSaaS jdou jen pole, která kalendář má; obsazený čas / chybějící pole vrátí SuperSaaS česky (422).
+ */
+export async function POST(req: Request) {
+  let b: NewBooking;
+  try {
+    b = (await req.json()) as NewBooking;
+  } catch {
+    return NextResponse.json({ error: "Neplatná data" }, { status: 400 });
+  }
+  const scheduleId = Number(b.schedule_id);
+  const blocked = writeBlocked(scheduleId);
+  if (blocked) return NextResponse.json({ error: blocked, locked: true }, { status: 423 });
+  if (!b.full_name?.trim() || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(b.start ?? "") || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(b.finish ?? "")) {
+    return NextResponse.json({ error: "Chybí jméno nebo čas objednávky" }, { status: 400 });
+  }
+  const cal = calendarById(scheduleId)!;
+  const form = new URLSearchParams({ "booking[start]": b.start, "booking[finish]": b.finish, "booking[full_name]": b.full_name.trim() });
+  if (b.mobile?.trim()) form.set("booking[mobile]", b.mobile.trim());
+  if (b.email?.trim()) form.set("booking[email]", b.email.trim());
+  for (const f of cal.fields) {
+    const v = b[f]?.trim();
+    if (v) form.set(`booking[${f}]`, v);
+  }
+
+  if (DEMO_MODE) {
+    const r = demoCreateBooking(scheduleId, Object.fromEntries(form));
+    return "error" in r ? NextResponse.json(r, { status: 422 }) : NextResponse.json(r, { status: 201 });
+  }
+  const auth = ssAuth();
+  if (!auth) return NextResponse.json({ error: "SuperSaaS není nastavený (.env.local)" }, { status: 500 });
+  const r = await fetch(`${SS_BASE}/bookings.json?schedule_id=${scheduleId}`, {
+    method: "POST",
+    headers: { Authorization: auth, Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+    body: form,
+    cache: "no-store",
+  });
+  if (r.status !== 201) return NextResponse.json({ error: await ssError(r) }, { status: r.status === 422 ? 422 : 502 });
+  // SuperSaaS vrací adresu nové objednávky v Location: …/bookings/{id}.json
+  const id = Number(r.headers.get("location")?.match(/bookings\/(\d+)/)?.[1]) || null;
+  console.log(`📅 nová objednávka ${id} v kalendáři ${scheduleId}`);
+  return NextResponse.json({ id }, { status: 201 });
 }

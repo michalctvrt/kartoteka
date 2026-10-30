@@ -102,7 +102,11 @@ Podrobně `CALL250V.md`. Shrnutí:
   ne do „Vše“, Testovací; „spankovka“ ZÁMĚRNĚ ne). Most pustí jen tyto (403). Výběr nahoře, „Vše“: den = kalendáře vedle sebe,
   týden = přehled počtů (kalendář × den). „Dnešní objednávky“ na ploše = kalendář z Nastavení → Toto pracoviště (`ws.calendarId`).
   ZÁPIS objednávek přes API SuperSaaS u našich kalendářů (typ „služby“) NEJDE – 501 „Not yet implemented for service schedule“
-  (ověřeno na Testovací 2026-10-30). Do Testovací smím zapisovat (Michal), do ostatních NE.
+  (ověřeno na Testovací 2026-10-30). U typu „zdroje“ ano → kalendář „Testovací zdroj“ (856112, Michal ho založil).
+  Nová objednávka: `components/calendar/BookingDialog.tsx` (tlačítko, klik do volného místa, karta pacienta „Objednat termín“
+  → `/reception/calendar?book=1&pid=`), zrušení v detailu. Server pustí zápis jen do `bookable` kalendářů uvedených
+  v SUPERSAAS_WRITE_SCHEDULES (.env.local, teď 856112) – OSTRÉ KALENDÁŘE NEPŘIDÁVAT bez souhlasu Michala.
+  Do Testovací / Testovací zdroj smím zapisovat (zkoušet bez telefonu a e-mailu, po testu smazat).
 - Vlastní (react-big-calendar odstraněn): `components/calendar/useBookings.ts` (víc kalendářů najednou, `isBlock` = blokace ≥ 3 h),
   `TimeGrid.tsx` (Den/Týden, souběžné vedle sebe, čára „teď“, blok ≥ 3 h = blokace šrafovaně).
 - Bento: Dnes (2 sl.), Další na řadě, Tento týden; kalendář (3 sl.) + detail (bez výběru = další na řadě),

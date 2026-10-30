@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { bridge } from "@/lib/runtimeConfig";
-import { calendarById } from "@/lib/supersaas/calendars";
+import { calendarById, type NewBooking } from "@/lib/supersaas/calendars";
 
 export type Booking = {
   id: number;
@@ -100,3 +100,30 @@ export const sameDay = (a: Date, b: Date) => startOfDay(a).getTime() === startOf
 /** Pondělí týdne, do kterého den patří. */
 export const startOfWeek = (d: Date) => addDays(startOfDay(d), -((d.getDay() + 6) % 7));
 export const hm = (d: Date) => d.toLocaleTimeString("cs-CZ", { hour: "numeric", minute: "2-digit" });
+
+// ─── zápis (most POST / DELETE supersaas/booking; povolené kalendáře hlídá server) ───
+
+export class BookingError extends Error {
+  constructor(message: string, public locked = false) {
+    super(message);
+  }
+}
+
+async function call(url: string, init: RequestInit) {
+  const r = await fetch(url, { ...init, headers: { "content-type": "application/json", ...init.headers } });
+  if (r.ok) return r.status === 204 ? null : r.json();
+  const j = (await r.json().catch(() => null)) as { error?: string; locked?: boolean } | null;
+  throw new BookingError(j?.error ?? `Chyba ${r.status}`, !!j?.locked);
+}
+
+export const createBooking = (b: NewBooking): Promise<{ id: number | null }> =>
+  call(bridge("supersaas/booking"), { method: "POST", body: JSON.stringify(b) });
+
+export const cancelBooking = (id: number, calendarId: number) =>
+  call(bridge(`supersaas/booking/${id}?schedule_id=${calendarId}`), { method: "DELETE" });
+
+/** Date → „YYYY-MM-DD HH:MM“ (místní čas, jak ho chce SuperSaaS). */
+export const ssTime = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};

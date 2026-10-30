@@ -7,7 +7,7 @@
  * Uplynulé jsou ztlumené, dnes je vidět čára „teď“. `colorOf` = barva proužku (z kterého kalendáře).
  */
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { type Booking, hm, isBlock, sameDay } from "./useBookings";
@@ -39,7 +39,7 @@ function lanes(list: Booking[]) {
   return out;
 }
 
-export type GridColumn = { key: string; date: Date; label?: ReactNode; filter?: (b: Booking) => boolean };
+export type GridColumn = { key: string; date: Date; label?: ReactNode; filter?: (b: Booking) => boolean; calendarId?: number };
 
 export default function TimeGrid({
   days,
@@ -49,6 +49,7 @@ export default function TimeGrid({
   onSelect,
   now,
   colorOf,
+  onEmptyClick,
 }: {
   days?: Date[];
   columns?: GridColumn[];
@@ -57,7 +58,10 @@ export default function TimeGrid({
   onSelect: (b: Booking) => void;
   now: Date;
   colorOf?: (b: Booking) => string | undefined;
+  /** klik do volného místa → nová objednávka (jen sloupce, kam jde zapisovat – vrací null, když ne) */
+  onEmptyClick?: (start: Date, col: GridColumn) => void;
 }) {
+  const [hover, setHover] = useState<{ key: string; min: number } | null>(null);
   const columns: GridColumn[] = given ?? (days ?? []).map((d) => ({ key: d.toISOString(), date: d }));
   const inCol = (b: Booking, c: GridColumn) => sameDay(c.date, b.start) && (c.filter?.(b) ?? true);
   const inRange = bookings.filter((b) => columns.some((c) => inCol(b, c)));
@@ -107,8 +111,35 @@ export default function TimeGrid({
           const lane = lanes(list);
           const today = sameDay(c.date, now);
           const nowTop = top(now);
+          // pozice myši → začátek slotu (po 20 minutách od začátku mřížky)
+          const slotAt = (e: React.MouseEvent<HTMLDivElement>) =>
+            Math.max(0, Math.min(minutes - 20, Math.floor((e.clientY - e.currentTarget.getBoundingClientRect().top) / PPM / 20) * 20));
+          const onFree = (e: React.MouseEvent<HTMLDivElement>) => !(e.target as HTMLElement).closest("button");
           return (
-            <div key={c.key} className={cn("relative border-l border-ui-rule", today && !c.label && "bg-ui-raised")}>
+            <div
+              key={c.key}
+              className={cn("relative border-l border-ui-rule", today && !c.label && "bg-ui-raised", onEmptyClick && "cursor-copy")}
+              onMouseMove={onEmptyClick ? (e) => setHover(onFree(e) ? { key: c.key, min: slotAt(e) } : null) : undefined}
+              onMouseLeave={onEmptyClick ? () => setHover(null) : undefined}
+              onClick={
+                onEmptyClick
+                  ? (e) => {
+                      if (!onFree(e)) return;
+                      const d = new Date(c.date.getFullYear(), c.date.getMonth(), c.date.getDate(), fromH, 0);
+                      onEmptyClick(new Date(d.getTime() + slotAt(e) * 60_000), c);
+                    }
+                  : undefined
+              }
+            >
+              {hover?.key === c.key && (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-1 z-[2] flex items-start rounded-md border border-dashed border-ui-primary px-2 py-1 text-[12px] text-ui-primary"
+                  style={{ top: hover.min * PPM + 1, height: 20 * PPM - 2 }}
+                >
+                  + {String(fromH + Math.floor(hover.min / 60))}:{String(hover.min % 60).padStart(2, "0")}
+                </div>
+              )}
               {hours.map((h) => (
                 <div key={h} aria-hidden className="absolute inset-x-0 border-t border-ui-rule" style={{ top: (h - fromH) * 60 * PPM }} />
               ))}

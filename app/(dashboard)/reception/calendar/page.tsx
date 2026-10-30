@@ -9,19 +9,24 @@
  * vedle sebe, týden je sloučí (barevný proužek = kalendář). Výběr si pamatuje prohlížeč.
  */
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Mail, Phone, RefreshCw, UserSearch } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Loader2, Mail, Phone, RefreshCw, Trash2, UserSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Bento, BentoTile, DataRow, Metric } from "@/components/ui/bento";
 import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import TimeGrid, { type GridColumn } from "@/components/calendar/TimeGrid";
-import { ALL_REAL, CALENDARS, calendarById } from "@/lib/supersaas/calendars";
+import { ALL_REAL, BOOKABLE, CALENDARS, calendarById } from "@/lib/supersaas/calendars";
+import BookingDialog, { type BookingPrefill } from "@/components/calendar/BookingDialog";
+import { useSession } from "@/components/auth/SessionProvider";
+import { PatientService } from "@/lib/api/generated/services/PatientService";
 import {
   addDays,
+  cancelBooking,
   hm,
   isBlock,
   sameDay,
@@ -62,7 +67,23 @@ function useCalendarSel(): [number | "all", (v: number | "all") => void] {
 
 const colorOf = (b: Booking) => calendarById(b.calendarId)?.color;
 
-export default function CalendarPage() {
+/** Adresa ?book=1&pid=… (z karty pacienta) otevře novou objednávku s jeho údaji – proto Suspense. */
+export default function CalendarRoute() {
+  return (
+    <Suspense>
+      <CalendarPage />
+    </Suspense>
+  );
+}
+
+const GENDER: Record<string, "Žena" | "Muž"> = { FEMALE: "Žena", MALE: "Muž" };
+
+function CalendarPage() {
+  const router = useRouter();
+  const query = useSearchParams();
+  const canBook = useSession().can("calendar.book") && BOOKABLE.length > 0;
+  const [booking, setBooking] = useState<BookingPrefill | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
   const [sel, setSel] = useCalendarSel();
   const ids = useMemo(() => (sel === "all" ? ALL_REAL.map((c) => c.id) : [sel]), [sel]);
   const { list, loading, error, reload } = useBookings(ids);
@@ -100,6 +121,30 @@ export default function CalendarPage() {
           ),
         }))
       : undefined;
+
+  // z karty pacienta: ?book=1&pid=… → formulář s údaji pacienta (adresa se hned uklidí, ať se neotvírá znovu)
+  const bookPid = query.get("book") === "1" ? query.get("pid") : null;
+  useEffect(() => {
+    if (!bookPid || !canBook) return;
+    router.replace("/reception/calendar");
+    PatientService.findByPid(bookPid)
+      .then((pt) => {
+        const d = pt.patientDataInfo;
+        setBooking({
+          calendarId: sel === "all" ? undefined : sel,
+          fullName: [d?.firstName, d?.lastName].filter(Boolean).join(" "),
+          birthYear: d?.birthDate?.slice(0, 4) ?? "",
+          gender: GENDER[d?.gender ?? ""] ?? "",
+          mobile: d?.phone ?? "",
+          email: d?.email ?? "",
+        });
+      })
+      .catch(() => setBooking({}));
+  }, [bookPid, canBook, router, sel]);
+
+  // klik do volného místa – jen v kalendáři, kam jde zapisovat
+  const selCal = sel === "all" ? null : calendarById(sel);
+  const onEmptyClick = canBook && selCal?.bookable ? (start: Date) => setBooking({ calendarId: selCal.id, start }) : undefined;
 
   const step = (dir: 1 | -1) => setDate((d) => addDays(d, dir * (view === "day" ? 1 : 7)));
 
@@ -146,10 +191,38 @@ export default function CalendarPage() {
             {sel === "all" ? "Všechny pobočky" : calendarById(sel)?.name} · objednávky ze SuperSaaS
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={reload} disabled={loading}>
-          <RefreshCw className={cn(loading && "animate-spin")} /> Obnovit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={reload} disabled={loading}>
+            <RefreshCw className={cn(loading && "animate-spin")} /> Obnovit
+          </Button>
+          {canBook && (
+            <Button onClick={() => setBooking({ calendarId: selCal?.bookable ? selCal.id : undefined })}>
+              <CalendarPlus /> Nová objednávka
+            </Button>
+          )}
+        </div>
       </header>
+
+      {flash && (
+        <p role="status" className="rounded-lg border border-emerald-200 px-3 py-2 text-[13px] text-emerald-800 dark:border-emerald-900 dark:text-emerald-200">
+          {flash}
+        </p>
+      )}
+      {booking && (
+        <BookingDialog
+          prefill={booking}
+          onClose={() => setBooking(null)}
+          onCreated={({ id, calendarId, start }) => {
+            setBooking(null);
+            setSel(calendarId);
+            setView("day");
+            setDate(startOfDay(start));
+            setSelectedId(id);
+            setFlash(`Objednáno: ${start.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "numeric" })} ${hm(start)} · ${calendarById(calendarId)?.name}`);
+            reload();
+          }}
+        />
+      )}
 
       {/* výběr kalendáře */}
       <div role="radiogroup" aria-label="Kalendář" className="flex flex-wrap gap-1.5">
@@ -301,6 +374,7 @@ export default function CalendarPage() {
                   onSelect={(b) => setSelectedId(b.id)}
                   now={now}
                   colorOf={sel === "all" ? colorOf : undefined}
+                  onEmptyClick={onEmptyClick}
                 />
               </motion.div>
             </AnimatePresence>
@@ -308,7 +382,19 @@ export default function CalendarPage() {
         </BentoTile>
 
         {/* detail */}
-        <BookingDetail booking={selected ?? (loading ? null : next ?? null)} isNext={!selected && !!next} index={4} onClear={selected ? () => setSelectedId(null) : undefined} loading={loading} />
+        <BookingDetail
+          booking={selected ?? (loading ? null : next ?? null)}
+          isNext={!selected && !!next}
+          index={4}
+          onClear={selected ? () => setSelectedId(null) : undefined}
+          loading={loading}
+          canCancel={canBook}
+          onCancelled={(b) => {
+            setSelectedId(null);
+            setFlash(`Zrušeno: ${b.title} ${b.start.toLocaleDateString("cs-CZ")} ${hm(b.start)}`);
+            reload();
+          }}
+        />
       </Bento>
     </div>
   );
@@ -320,14 +406,33 @@ function BookingDetail({
   index,
   onClear,
   loading,
+  canCancel,
+  onCancelled,
 }: {
   booking: Booking | null;
   isNext: boolean;
   index: number;
   onClear?: () => void;
   loading: boolean;
+  canCancel: boolean;
+  onCancelled: (b: Booking) => void;
 }) {
   const d = b?.details ?? {};
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<{ id: number; text: string } | null>(null);
+  const cancellable = !!b && canCancel && !!calendarById(b.calendarId)?.bookable;
+  const cancel = async () => {
+    if (!b || !window.confirm(`Zrušit objednávku ${b.title} (${b.start.toLocaleDateString("cs-CZ")} ${hm(b.start)})?`)) return;
+    setBusy(true);
+    try {
+      await cancelBooking(b.id, b.calendarId);
+      onCancelled(b);
+    } catch (e) {
+      setErr({ id: b.id, text: (e as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <BentoTile
       index={index}
@@ -386,6 +491,12 @@ function BookingDetail({
                 <UserSearch /> Vyhledat v kartotéce
               </Link>
             </Button>
+            {cancellable && (
+              <Button variant="ghost" size="sm" className="mt-2 w-full text-red-700 dark:text-red-300" onClick={cancel} disabled={busy}>
+                {busy ? <Loader2 className="animate-spin" /> : <Trash2 />} Zrušit objednávku
+              </Button>
+            )}
+            {err?.id === b.id && <p className="mt-2 text-[13px] text-red-700 dark:text-red-300">{err.text}</p>}
           </motion.div>
         </AnimatePresence>
       )}
