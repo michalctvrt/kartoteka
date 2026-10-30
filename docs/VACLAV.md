@@ -86,6 +86,12 @@ Zkusili jsme `usernameDescriptionChanged IS_NULL` – na testovacích datech ne�
 **Dnes:** endpointy `/ezadanka/by-rid/{rid}` a `/ezadanka/by-kod/{kod}` máme jen jako simulaci.
 Kontrakt (tvar JSON) je v `lib/ezadanka/types.ts`. Čekáme na Java verzi.
 
+## 8b. Víc poboček – most mezi servery
+
+Lékařky popisují na dálku studie jiných poboček. Nová kartotéka má přepínač pobočky a „K popisu“ ze všech poboček.
+Potřebuje most `/CardFileWebWS/rest/branch/{KÓD}/…` na vlastním serveru, který dotaz předá serveru pobočky
+(servery si věří, přihlášení zůstane jedno, popis se zapíše na lokál té pobočky). Podrobně [PRODUKCE.md](PRODUKCE.md) bod 3.7.
+
 ## 9. Produkční nasazení – rozhodnuto: statický web v EARu
 
 Podrobně v [PRODUKCE.md](PRODUKCE.md): co ode mě dostaneš (složka `out/`), nastavení pobočky (`config.js`)

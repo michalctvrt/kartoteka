@@ -9,6 +9,8 @@
  */
 
 import { Suspense, useEffect, useState } from "react";
+import { activeBranch, branchByCode, setActiveBranch } from "@/lib/branches";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -38,7 +40,7 @@ import {
 import StudyEditForm from "@/components/study/StudyEditForm";
 import ReportEditor from "@/components/study/ReportEditor";
 import { useSession } from "@/components/auth/SessionProvider";
-import { patientHref } from "@/lib/routes";
+import { patientHref, studyHref } from "@/lib/routes";
 
 type Load =
   | { state: "loading" }
@@ -58,7 +60,18 @@ export default function StudyCardRoute() {
 }
 
 function StudyCardByQuery() {
-  const sid = useSearchParams().get("sid") ?? "";
+  const q = useSearchParams();
+  const sid = q.get("sid") ?? "";
+  // studie jiné pobočky (?branch=…) → přepnout kartotéku na ni JEDNOU a parametr z adresy uklidit
+  // (jinak by ruční přepnutí pobočky v liště karta hned vrátila zpátky)
+  const want = q.get("branch");
+  const router = useRouter();
+  useEffect(() => {
+    if (!want) return;
+    if (branchByCode(want) && activeBranch().code !== want) setActiveBranch(want);
+    router.replace(studyHref(sid, { write: q.get("write") === "1" }));
+  }, [want, sid, q, router]);
+  if (want) return null;
   return <StudyCardPage key={sid} sid={sid} />;
 }
 

@@ -127,23 +127,24 @@ export function buildPatients(): PatientInfo[] {
   });
 }
 
-export function buildStudies(patients: PatientInfo[]): StudyInfo[] {
+/** `seed` > 0 = jiná pobočka: jiná čísla studií a jiný výběr nepopsaných. */
+export function buildStudies(patients: PatientInfo[], seed = 0): StudyInfo[] {
   const list: StudyInfo[] = [];
   const day = 864e5;
   let n = 0;
   patients.forEach((p, pi) => {
     const count = 1 + (pi % 4); // 1–4 studie na pacienta
     for (let k = 0; k < count; k++) {
-      const mod = CATEGORIES[(pi + k) % 3].id;
+      const mod = CATEGORIES[(pi + k + seed) % 3].id;
       const forMod = SERVICES.filter((s) => s.idMedicalServiceCategory === mod);
       const svc = forMod[(pi * 2 + k) % forMod.length];
       const diag = DIAGNOSES[(pi * 3 + k) % DIAGNOSES.length];
       const inst = INSTITUTIONS[(pi + k) % INSTITUTIONS.length];
       // nejnovější studie dnes/včera, starší po týdnech; část dnešních ještě bez popisu
       const when = new Date(Date.now() - (k * 9 + (pi % 5)) * day - (pi * 47 + 8) * 60e3);
-      const reported = !(k === 0 && pi % 3 === 1);
-      const id = 50000100 + n * 100;
-      const uid = String(3300000000 + n + 1);
+      const reported = !(k === 0 && (pi + seed) % 3 === 1);
+      const id = 50000100 + seed * 1_000_000 + n * 100;
+      const uid = String(3300000000 + seed * 100000 + n + 1);
       const s = {
         id,
         uid,

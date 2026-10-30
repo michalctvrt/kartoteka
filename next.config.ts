@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// demo režim → frontend dostane smyšlené pobočky (lib/runtimeConfig.ts)
+import { DEMO_MODE } from "./lib/demo/mode";
 
 /**
  * Dva režimy:
@@ -12,7 +14,7 @@ const BASE_PATH = process.env.NEXT_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  env: { NEXT_PUBLIC_BASE_PATH: BASE_PATH },
+  env: { NEXT_PUBLIC_BASE_PATH: BASE_PATH, NEXT_PUBLIC_DEMO_BRANCHES: DEMO_MODE && !STATIC ? "1" : "" },
   ...(STATIC
     ? {
         output: "export",

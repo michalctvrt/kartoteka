@@ -8,8 +8,9 @@ import { usePathname } from "next/navigation";
 export const patientHref = (pid: string, extra?: Record<string, string>) =>
   `/reception/patients/card?${new URLSearchParams({ pid, ...extra })}`;
 
-export const studyHref = (sid: number | string, opts?: { write?: boolean }) =>
-  `/reception/studies/card?sid=${encodeURIComponent(String(sid))}${opts?.write ? "&write=1" : ""}`;
+/** `branch` = studie jiné pobočky (lib/branches.ts) – karta se na ni přepne. */
+export const studyHref = (sid: number | string, opts?: { write?: boolean; branch?: string }) =>
+  `/reception/studies/card?sid=${encodeURIComponent(String(sid))}${opts?.write ? "&write=1" : ""}${opts?.branch ? `&branch=${encodeURIComponent(opts.branch)}` : ""}`;
 
 export const PATIENT_CARD_PATH = "/reception/patients/card";
 export const STUDY_CARD_PATH = "/reception/studies/card";

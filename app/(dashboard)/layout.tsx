@@ -8,6 +8,8 @@
  */
 
 import QueueStatusBar from "@/components/queue/QueueStatusBar";
+import BranchSwitcher from "@/components/BranchSwitcher";
+import { useActiveBranch } from "@/lib/branches";
 import AppNav from "@/components/AppNav";
 import { useSession } from "@/components/auth/SessionProvider";
 import { ROLE_HOME, ROLE_NAME, workspaceOf } from "@/lib/auth/roles";
@@ -28,6 +30,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const fromPath = workspaceOf(pathname);
   const ws = fromPath && canVisit(ROLE_HOME[fromPath]) ? fromPath : roles[0];
   const [menuOpen, setMenuOpen] = useState(false);
+  const branch = useActiveBranch(); // jiná pobočka → obsah se načte znovu (key níže)
 
   // nepřihlášený → přihlášení
   useEffect(() => {
@@ -86,6 +89,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
           <span className="text-sm font-medium text-ui-ink lg:hidden">{ws ? ROLE_NAME[ws] : ""}</span>
+          <BranchSwitcher />
           {/* Vyvolávací systém: kolik kde čeká — vidět na každé stránce */}
           <div className="ml-auto">
             <QueueStatusBar boardHref={boardHref} />
@@ -100,7 +104,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Skeleton className="h-40 w-full" />
             </div>
           ) : allowed ? (
-            children
+            <div key={branch.code} className="contents">
+              {children}
+            </div>
           ) : (
             <Forbidden home={home} />
           )}

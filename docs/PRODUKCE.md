@@ -136,6 +136,57 @@ Ať to tak zůstane, dokud to neodsouhlasím. Seznam je v `app/api/ops/[...path]
 GET `status` → jestli odpovídá backend, vyvolávací systém a objednávky (Nastavení → Stav systému).
 Když to nebude, ukáže se tam jen „nedostupné“.
 
+## 3.7 Víc poboček v jedné kartotéce (popisování na dálku)
+
+Doktorky často po zavírací době popisují studie z jiných poboček. Dneska mají na ploše ikonu kartotéky
+každé pobočky, a když chtějí popsat něco z jiné pobočky, musí zavřít jednu, otevřít druhou a znovu se přihlásit.
+
+V nové kartotéce je proto **přepínač pobočky** nahoře a seznam **„K popisu“ ukazuje studie ze všech poboček**
+najednou (u každé je napsané, odkud je). Když doktorka otevře studii z jiné pobočky, kartotéka se na tu pobočku
+přepne – načítá i popisuje se tam. Vyvolávací systém, objednávky apod. zůstávají na vlastní pobočce.
+Když nějaká pobočka neodpovídá, ukáže se jen „nedostupné“ a zbytek jede dál.
+
+Co vím a z čeho vycházím:
+- servery poboček na sebe vidí (MPLS),
+- centrál sbírá data jen z poboček (ne zpátky) – proto ho na tohle nepoužívám,
+- **popis musí zůstat na lokálním serveru té pobočky, kam studie patří** (kvůli výpadkům),
+- doktoři mají jedno jméno, ale účet dnes zakládáme v každé kartotéce zvlášť.
+
+**Co bych potřeboval od tebe – most na jiné pobočky.** Prohlížeč by se ptal jen svého serveru a ten by dotaz
+předal serveru pobočky. Kdyby prohlížeč volal servery jiných poboček napřímo, chtěla by každá pobočka vlastní
+přihlášení a prohlížeč by ho mezi adresami nepředal. Navrhuju:
+
+```
+<vlastní server>/CardFileWebWS/rest/branch/{KÓD}/<cokoli>   →   <server pobočky KÓD>/CardFileWebWS/rest/<cokoli>
+```
+
+- servery si „věří“ (účet pro server / klíč mezi servery – jak uznáš za vhodné), doktorka se přihlašuje jen u sebe,
+- most pošle s dotazem i to, **kdo** ho dělá (kvůli podpisu popisu) – tím by snad odpadlo zakládat účty na každé
+  pobočce zvlášť,
+- stačí to, co kartotéka už volá: hledání a detail studie, pacient, číselníky, PDF zprávy a (až bude) uložení popisu.
+
+**V `config.js` se pak pobočky jen vyjmenují** (adresy jsou cesty na vlastním serveru, žádné IP):
+
+```js
+window.__KARTOTEKA__ = {
+  // … ostatní nastavení …
+  localBranch: "LESNA",
+  branches: [
+    { code: "LESNA", name: "Lesná", apiBase: "/CardFileWebWS/rest" },
+    { code: "DOBR", name: "Dobrovského", apiBase: "/CardFileWebWS/rest/branch/DOBR", legacyBaseUrl: "http://<server Dobrovského>:8080" },
+    { code: "VIDE", name: "Vídeňská", apiBase: "/CardFileWebWS/rest/branch/VIDE", legacyBaseUrl: "http://<server Vídeňské>:8080" },
+  ],
+};
+```
+
+`legacyBaseUrl` je tam proto, že popis se zatím pořád vkládá do staré kartotéky (dokud nepůjde uložit přes API),
+a to do kartotéky té pobočky, kam studie patří. Doma se dá všechno vyzkoušet v demu (čtyři smyšlené pobočky).
+
+Otázky k tomu:
+1. Jde most mezi servery udělat takhle, nebo to vidíš jinak?
+2. Jak se servery navzájem ověří a jak předat, kdo popisuje?
+3. Šlo by pak přestat zakládat účty doktorům na každé pobočce?
+
 ## 4. Jak jsem to vyzkoušel
 
 Statické sestavení jsem pustil za malým testovacím serverem, který dělal „Payaru“: podával jen soubory
@@ -151,5 +202,6 @@ z internetu.
 3. Jestli chceš sestavení frontendu v Mavenu, nebo ti budu posílat hotovou složku.
 4. Jestli lokální servery poboček vidí na provozní aplikaci (bod 3.5).
 5. Nastavení pobočky – stačí `config.js`, nebo radši z tvého API?
+6. Most na jiné pobočky (bod 3.7) – jestli to tak jde a jak se servery ověří.
 
 Michal

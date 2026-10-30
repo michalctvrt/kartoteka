@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModalityTag } from "@/components/study/StudyBits";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
-import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
-import { loadToReport, saveQueue, useReportFilter, waitingFor } from "@/lib/reportQueue";
+import { loadToReport, saveQueue, useReportFilter, waitingFor, type BranchStudy } from "@/lib/reportQueue";
+import { MULTI_BRANCH, branchByCode } from "@/lib/branches";
 import { patientName } from "@/lib/studies";
 import { studyHref } from "@/lib/routes";
 
@@ -29,7 +29,7 @@ const PERIOD: Record<string, string> = { "1": "dnes", "3": "3 dny", "7": "týden
 export default function ToReportWidget({ size = FULL }: { size?: WidgetSize }) {
   const router = useRouter();
   const [f] = useReportFilter();
-  const [rows, setRows] = useState<StudyInfo[] | null>(null);
+  const [rows, setRows] = useState<BranchStudy[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -57,10 +57,10 @@ export default function ToReportWidget({ size = FULL }: { size?: WidgetSize }) {
     };
   }, []);
 
-  const open = (s: StudyInfo) => {
+  const open = (s: BranchStudy) => {
     if (!rows) return;
-    saveQueue(rows.map((x) => x.id));
-    router.push(studyHref(s.id, { write: true }));
+    saveQueue(rows);
+    router.push(studyHref(s.id, { write: true, branch: s.branchCode }));
   };
 
   if (error) return <p className="text-[13px] text-red-700 dark:text-red-300">Nepodařilo se načíst: {error}</p>;
@@ -73,7 +73,7 @@ export default function ToReportWidget({ size = FULL }: { size?: WidgetSize }) {
     );
 
   const urgent = rows.filter((s) => s.flagUrgent).length;
-  const oldest = rows.reduce<StudyInfo | null>((o, s) => (!o || (s.studyDate ?? "") < (o.studyDate ?? "") ? s : o), null);
+  const oldest = rows.reduce<BranchStudy | null>((o, s) => (!o || (s.studyDate ?? "") < (o.studyDate ?? "") ? s : o), null);
 
   // kolik řádků se vejde (S = žádný)
   const room = size.size === "S" ? 0 : Math.max(0, Math.floor((size.height - SUMMARY) / ROW));
@@ -118,6 +118,7 @@ export default function ToReportWidget({ size = FULL }: { size?: WidgetSize }) {
                 </span>
                 <ModalityTag modality={s.idMedicalServiceCategory} />
                 <span className="min-w-0 flex-1 truncate font-medium">{patientName(s)}</span>
+                {MULTI_BRANCH && <span className="shrink-0 text-[12px] text-ui-muted">{branchByCode(s.branchCode)?.name}</span>}
                 {size.wide && (
                   <span className="min-w-0 max-w-[45%] truncate text-ui-muted">
                     {s.idMedicalDiagnosisRequested} {s.medicalDiagnosisRequestedInfo?.description}

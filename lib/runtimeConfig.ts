@@ -11,7 +11,16 @@
  *   legacyBaseUrl – kde běží stará kartotéka (prázdné = stejný server)
  *   workingplace  – pracoviště pro nová vyšetření (kód z /workingplace)
  *   studyViaApi / studyEditViaApi – přepínače nových formulářů (čekají na backend)
+ *   branches / localBranch – pobočky, mezi kterými jde v kartotéce přepínat (lib/branches.ts, docs/POBOCKY.md);
+ *                 adresy jen v config.js na serveru, NIKDY do gitu
  */
+
+export type BranchConfig = {
+  code: string; // krátký kód (DOBR, LESNA…)
+  name: string; // „Dobrovského“
+  apiBase: string; // REST té pobočky – na vlastním serveru (most), např. /CardFileWebWS/rest/branch/DOBR
+  legacyBaseUrl?: string; // stará kartotéka té pobočky (kam vložit popis)
+};
 
 export type RuntimeConfig = {
   apiBase: string;
@@ -20,6 +29,8 @@ export type RuntimeConfig = {
   workingplace: string;
   studyViaApi: boolean;
   studyEditViaApi: boolean;
+  branches?: BranchConfig[];
+  localBranch?: string;
 };
 
 declare global {
@@ -27,6 +38,13 @@ declare global {
     __KARTOTEKA__?: Partial<RuntimeConfig>;
   }
 }
+
+const DEMO_BRANCHES: BranchConfig[] = [
+  { code: "OLOM", name: "Olomoucká", apiBase: "/api/cardfile/rest" },
+  { code: "LESNA", name: "Lesná", apiBase: "/api/cardfile/b/LESNA/rest" },
+  { code: "DOBR", name: "Dobrovského", apiBase: "/api/cardfile/b/DOBR/rest" },
+  { code: "VIDE", name: "Vídeňská", apiBase: "/api/cardfile/b/VIDE/rest" },
+];
 
 const fromFile: Partial<RuntimeConfig> = (typeof window !== "undefined" && window.__KARTOTEKA__) || {};
 const env = process.env;
@@ -39,6 +57,9 @@ export const runtimeConfig: RuntimeConfig = {
   workingplace: fromFile.workingplace ?? env.NEXT_PUBLIC_WORKINGPLACE ?? "",
   studyViaApi: fromFile.studyViaApi ?? env.NEXT_PUBLIC_STUDY_VIA_API === "1",
   studyEditViaApi: fromFile.studyEditViaApi ?? env.NEXT_PUBLIC_STUDY_EDIT_VIA_API === "1",
+  // demo (DEMO_MODE=1): čtyři smyšlené pobočky, ať jde přepínání vyzkoušet i doma
+  branches: fromFile.branches ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? DEMO_BRANCHES : undefined),
+  localBranch: fromFile.localBranch ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? "OLOM" : undefined),
 };
 
 /** Adresa „mostu“: bridge("queue/add") → /api/queue/add (vývoj) nebo <bridgeBase>/queue/add (produkce). */

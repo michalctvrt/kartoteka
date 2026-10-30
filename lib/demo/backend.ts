@@ -21,12 +21,22 @@ import {
 
 type Db = { patients: PatientInfo[]; studies: StudyInfo[]; nextId: number };
 // jeden stav pro celý proces dev serveru (přežije i hot reload)
-const g = globalThis as unknown as { __kartotekaDemo?: Db };
+const g = globalThis as unknown as { __kartotekaDemo?: Db; __kartotekaDemoBranches?: Map<string, Db> };
 /** Sdílený stav demo dat (používá i lib/demo/ops.ts). */
 export function demoDb(): Db {
   return db();
 }
-function db(): Db {
+/** Jiná pobočka (lib/branches.ts) = stejní pacienti, jiné studie (jiná čísla, jiné nepopsané). */
+function db(branch?: string): Db {
+  if (branch) {
+    const m = (g.__kartotekaDemoBranches ??= new Map());
+    if (!m.has(branch)) {
+      const patients = buildPatients();
+      const seed = ["LESNA", "DOBR", "VIDE"].indexOf(branch) + 1 || 9;
+      m.set(branch, { patients, studies: buildStudies(patients, seed), nextId: 59000000 + seed * 100000 });
+    }
+    return m.get(branch)!;
+  }
   if (!g.__kartotekaDemo) {
     const patients = buildPatients();
     g.__kartotekaDemo = { patients, studies: buildStudies(patients), nextId: 59000000 };
@@ -98,8 +108,8 @@ function search<T>(rows: T[], body: SearchBody, exact: (row: T, key: string, val
 
 const norm = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-export async function demoBackend(method: string, path: string[], body: unknown): Promise<Response> {
-  const d = db();
+export async function demoBackend(method: string, path: string[], body: unknown, branch?: string): Promise<Response> {
+  const d = db(branch);
   const [res, a, b] = path[0] === "rest" ? path.slice(1) : path;
   const B = (body ?? {}) as SearchBody;
 

@@ -17,25 +17,27 @@ import { Bento, BentoTile, Metric } from "@/components/ui/bento";
 import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { ModalityTag } from "@/components/study/StudyBits";
-import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
-import { loadToReport, saveQueue, useReportFilter, waitingFor, type Days } from "@/lib/reportQueue";
+import { loadToReport, saveQueue, useReportFilter, waitingFor, type BranchStudy, type Days } from "@/lib/reportQueue";
+import { BRANCHES, LOCAL_BRANCH, MULTI_BRANCH, branchByCode } from "@/lib/branches";
 import { formatDateTime, formatRc, patientName } from "@/lib/studies";
 import { studyHref } from "@/lib/routes";
 
 export default function ReportsWorklistPage() {
   const router = useRouter();
   const [f, setFilter] = useReportFilter();
-  const [data, setData] = useState<{ key: string; rows?: StudyInfo[]; truncated?: boolean; error?: string } | null>(null);
+  const [data, setData] = useState<{ key: string; rows?: BranchStudy[]; truncated?: boolean; failed?: string[]; error?: string } | null>(null);
   const [tick, setTick] = useState(0);
+  const [branch, setBranch] = useState<string | null>(null); // filtr pobočky (null = všechny)
   const key = `${f.days}|${f.modality}|${tick}`;
   const rows = data?.key === key ? data.rows : undefined;
   const loading = data?.key !== key;
-  const shown = rows ?? (data?.rows || []); // při obnově nechat staré řádky (ztlumené)
+  const all = rows ?? (data?.rows || []); // při obnově nechat staré řádky (ztlumené)
+  const shown = branch ? all.filter((s) => s.branchCode === branch) : all;
 
   useEffect(() => {
     let off = false;
     loadToReport(Number(f.days), f.modality)
-      .then((r) => !off && setData({ key, rows: r.rows, truncated: r.truncated }))
+      .then((r) => !off && setData({ key, rows: r.rows, truncated: r.truncated, failed: r.failed }))
       .catch((e: Error) => !off && setData({ key, error: e.message }));
     return () => {
       off = true;
@@ -48,13 +50,13 @@ export default function ReportsWorklistPage() {
     return () => document.removeEventListener("visibilitychange", on);
   }, []);
 
-  const open = (s: StudyInfo) => {
-    saveQueue(shown.map((x) => x.id));
-    router.push(studyHref(s.id, { write: true }));
+  const open = (s: BranchStudy) => {
+    saveQueue(shown);
+    router.push(studyHref(s.id, { write: true, branch: s.branchCode }));
   };
 
   const urgent = shown.filter((s) => s.flagUrgent).length;
-  const oldest = shown.reduce<StudyInfo | null>((o, s) => (!o || (s.studyDate ?? "") < (o.studyDate ?? "") ? s : o), null);
+  const oldest = shown.reduce<BranchStudy | null>((o, s) => (!o || (s.studyDate ?? "") < (o.studyDate ?? "") ? s : o), null);
   const byMod = (m: string) => shown.filter((s) => s.idMedicalServiceCategory === m).length;
 
   return (
@@ -86,6 +88,20 @@ export default function ReportsWorklistPage() {
             { value: "MRI", label: "MRI" },
           ]}
         />
+        {MULTI_BRANCH && (
+          <Segmented<string | null>
+            label="Pobočka"
+            value={branch}
+            onChange={setBranch}
+            options={[
+              { value: null, label: "Všechny pobočky" },
+              ...BRANCHES.map((b) => ({
+                value: b.code,
+                label: `${b.name}${all.length ? ` ${all.filter((s) => s.branchCode === b.code).length}` : ""}`,
+              })),
+            ]}
+          />
+        )}
         <Segmented<Days>
           label="Období"
           value={f.days}
@@ -101,6 +117,11 @@ export default function ReportsWorklistPage() {
       </div>
 
       {data?.error && data.key === key && <div className="ui-tile p-4 text-sm">Studie se nepodařilo načíst: {data.error}</div>}
+      {!!data?.failed?.length && (
+        <p role="status" className="rounded-lg border border-amber-200 px-3 py-2 text-[13px] text-amber-800 dark:border-amber-900 dark:text-amber-200">
+          Nedostupné: {data.failed.join(", ")} – studie odtud teď nejsou v seznamu. Ostatní pobočky fungují.
+        </p>
+      )}
 
       <Bento>
         <BentoTile span={2} index={0} title="K popisu">
@@ -161,7 +182,15 @@ export default function ReportsWorklistPage() {
                     <span className="hidden whitespace-nowrap text-sm md:block">{formatDateTime(s.studyDate)}</span>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium">{patientName(s)}</span>
-                      <span className="block text-[12px] text-ui-muted">{formatRc(s.pid)}</span>
+                      <span className="block text-[12px] text-ui-muted">
+                        {formatRc(s.pid)}
+                        {/* odkud studie je – jen když se popisuje víc poboček */}
+                        {MULTI_BRANCH && (
+                          <span className={cn("ml-1.5", s.branchCode !== LOCAL_BRANCH.code && "font-medium text-ui-ink")}>
+                            · {branchByCode(s.branchCode)?.name}
+                          </span>
+                        )}
+                      </span>
                     </span>
                     <span className="hidden md:block">
                       <ModalityTag modality={s.idMedicalServiceCategory} />

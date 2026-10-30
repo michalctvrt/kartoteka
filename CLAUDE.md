@@ -123,6 +123,18 @@ Podrobně `CALL250V.md`. Shrnutí:
   na ostrých datech JEN ČTENÍ – zápis i GET /order (zakládá objednávku) blokuje brána (423), dokud není SPOTREBA_WRITE=1.
   NIKDY nezapínat bez souhlasu Michala (konec měsíce = potvrzování objednávek poboček).
 
+## Víc poboček (popisování na dálku) – `lib/branches.ts`
+- Pobočky v `config.js` (`branches`, `localBranch`); bez nich = jedna pobočka jako dřív. Demo: 4 smyšlené
+  (`/api/cardfile/b/{KÓD}/…` → vlastní demo data). Adresy serverů NIKDY do gitu (MPLS, interní IP).
+- Přepínač v horní liště (`components/BranchSwitcher.tsx`) mění OpenAPI.BASE + layout má key = pobočka (obsah se načte znovu).
+  Přepíná se JEN kartotéka (pacienti, studie, popis, stará kartotéka – `legacyBaseUrl` pobočky); mosty (Call250V,
+  SuperSaaS, šablony…) zůstávají lokální.
+- „K popisu“ + okno plochy načítají všechny pobočky souběžně (`loadToReport`, `searchAt` – ne přes globální BASE),
+  nedostupná pobočka = jen upozornění. Fronta „Další na řadě“ = „KÓD:id“. Odkaz `studyHref(id, {branch})` →
+  karta se přepne jednou a parametr z adresy uklidí; ruční přepnutí na kartě studie → zpět na seznam.
+- Produkce: Václavův most `/CardFileWebWS/rest/branch/{KÓD}/…` (server–server), popis zůstává na lokálu pobočky,
+  centrál (sync jen lokál → centrál) se nepoužívá. Zadání: `docs/PRODUKCE.md` bod 3.7.
+
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).

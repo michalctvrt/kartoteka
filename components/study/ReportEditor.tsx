@@ -31,6 +31,7 @@ import { ageYears } from "@/lib/study/card-check";
 import { formatDateTime, formatRc, patientName } from "@/lib/studies";
 import { REPORT_TEXT, usePrefs, type ReportSize } from "@/lib/prefs";
 import { dropFromQueue, nextInQueue } from "@/lib/reportQueue";
+import { LOCAL_BRANCH, MULTI_BRANCH, useActiveBranch } from "@/lib/branches";
 import { fold, matchTemplate, useTemplates } from "@/lib/templates/useTemplates";
 import type { ReportTemplate } from "@/lib/templates/types";
 import { studyHref } from "@/lib/routes";
@@ -158,6 +159,10 @@ export default function ReportEditor({
     window.open(legacyStudyEditUrl(s.id, s.pid), "_blank", "noreferrer");
   };
 
+  // studie jiné pobočky (lib/branches.ts) – popis se vkládá do staré kartotéky TÉ pobočky
+  const branch = useActiveBranch();
+  const away = MULTI_BRANCH && branch.code !== LOCAL_BRANCH.code;
+
   const confirmLeave = () => !changed || copied || window.confirm("Popis je zatím jen v konceptu tohoto prohlížeče (koncept zůstane uložený). Pokračovat?");
 
   return (
@@ -265,10 +270,10 @@ export default function ReportEditor({
               </Button>
             )}
             <Button onClick={copyAndOpen} disabled={!text.trim()} variant={copied && queue?.next ? "outline" : "default"}>
-              <ClipboardCopy /> Zkopírovat a otevřít ve staré kartotéce
+              <ClipboardCopy /> Zkopírovat a otevřít ve staré kartotéce{away ? ` – ${branch.name}` : ""}
             </Button>
             {queue?.next && (
-              <Button variant={copied ? "default" : "outline"} onClick={() => confirmLeave() && queue.next && router.push(studyHref(queue.next, { write: true }))}>
+              <Button variant={copied ? "default" : "outline"} onClick={() => confirmLeave() && queue.next && router.push(studyHref(queue.next.id, { write: true, branch: queue.next.branch }))}>
                 Další na řadě <ArrowRight />
               </Button>
             )}

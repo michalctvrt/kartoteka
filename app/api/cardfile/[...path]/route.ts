@@ -52,6 +52,8 @@ async function forward(req: NextRequest, ctx: Ctx) {
     } catch {
       /* ne-JSON tělo demo neřeší */
     }
+    // /b/{POBOČKA}/rest/… = jiná pobočka (lib/branches.ts) – v demu vlastní smyšlená data
+    if (path[0] === "b" && path[1]) return demoBackend(req.method, path.slice(2), body, path[1]);
     return demoBackend(req.method, path, body);
   }
   if (!DEV_COOKIE) {
@@ -63,6 +65,8 @@ async function forward(req: NextRequest, ctx: Ctx) {
   }
 
   const { path } = await ctx.params;
+  // jiná pobočka přes test server nejde (máme jen jeden backend) – v produkci ji předá Václavův most
+  if (path[0] === "b") return jsonError(501, `Pobočka ${path[1]}: na testovacím serveru je jen jeden backend (víc poboček jen v demu).`);
   const url = new URL(req.url);
   const target = `${BACKEND_BASE}${BACKEND_PREFIX}/${path.join("/")}${
     url.search
