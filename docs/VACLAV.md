@@ -12,7 +12,8 @@ Podrobnosti k rolím jsou v [ROLE-BACKEND.md](ROLE-BACKEND.md), k vyvolávacímu
 
 **Dnes (ověřeno 2026-10-30 z testovacího serveru, bez přihlášení):** servery všech čtyř poboček jsou po síti dosažitelné
 a běží na nich stará kartotéka (`/CFLocalSyncWeb`), ale **`/CardFileWebWS` tam není nasazené** (404 = aplikace
-neexistuje). REST běží jen na centrálu a na testovacím serveru.
+neexistuje). **Ani na centrálu** není – po přihlášení je tam podle seznamu nasazených služeb jen `CardFileWS`,
+`livecomws`, `CFPublicWeb` apod. CardFileWebWS běží jen na testovacím serveru.
 
 **Proč je to potřeba:**
 - nová kartotéka má v produkci běžet na lokálním serveru každé pobočky (statický web v EARu, [PRODUKCE.md](PRODUKCE.md))
@@ -21,7 +22,8 @@ neexistuje). REST běží jen na centrálu a na testovacím serveru.
   na pobočce, kam studie patří (popis musí zůstat na lokálu).
 
 **Prosba:** nasadit CardFileWebWS na servery poboček (stačí nejdřív jedna – hned na ní vyzkoušíme čtení
-z jiné pobočky; frontend je na to připravený, je to jen nastavení).
+z jiné pobočky; frontend je na to připravený, je to jen nastavení: `BACKEND_BRANCHES` v `.env.local` testovacího
+serveru, i s pojistkou „jen ke čtení“).
 
 ## 1. Uložení popisu studie (description) – NEJDŮLEŽITĚJŠÍ
 
