@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
+import { bridge } from "@/lib/runtimeConfig";
+import { patientHref } from "@/lib/routes";
 
 export default function NewPatientBox() {
   const [value, setValue] = useState("");
@@ -33,7 +35,7 @@ export default function NewPatientBox() {
       if (isRc(input)) {
         try {
           await PatientService.findByPid(input);
-          router.push(`/reception/patients/${input}`);
+          router.push(patientHref(input));
         } catch {
           router.push(`/reception/patients/new?rc=${input}`);
         }
@@ -43,7 +45,7 @@ export default function NewPatientBox() {
       // ==========================
       // 📄 E-ŽÁDANKA
       // ==========================
-      const res = await fetch(`/api/ezadanka/${input}`);
+      const res = await fetch(bridge(`ezadanka/${input}`));
 
       if (!res.ok) {
         throw new Error("E-žádanka nenalezena.");
@@ -58,7 +60,7 @@ export default function NewPatientBox() {
 
       try {
         await PatientService.findByPid(rc);
-        router.push(`/reception/patients/${rc}?ezadanka=${input}`);
+        router.push(patientHref(rc, { ezadanka: input }));
       } catch {
         router.push(
           `/reception/patients/new?rc=${rc}&ezadanka=${input}`

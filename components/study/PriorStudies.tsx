@@ -18,6 +18,7 @@ import { ModalityTag } from "@/components/study/StudyBits";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { loadPriorStudies } from "@/lib/reportQueue";
 import { formatDate, hasReport } from "@/lib/studies";
+import { studyHref } from "@/lib/routes";
 
 export default function PriorStudies({
   study,
@@ -112,7 +113,7 @@ export default function PriorStudies({
                         </Button>
                       )}
                       <Button size="sm" variant="ghost" asChild>
-                        <Link href={`/reception/studies/${s.id}`} target="_blank">
+                        <Link href={studyHref(s.id)} target="_blank">
                           <ExternalLink /> Karta
                         </Link>
                       </Button>

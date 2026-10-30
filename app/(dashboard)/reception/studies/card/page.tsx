@@ -8,7 +8,7 @@
  * Úpravy: StudyEditForm (PUT /study) – zatím vypnuto, viz lib/legacy.ts.
  */
 
-import { use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -38,14 +38,31 @@ import {
 import StudyEditForm from "@/components/study/StudyEditForm";
 import ReportEditor from "@/components/study/ReportEditor";
 import { useSession } from "@/components/auth/SessionProvider";
+import { patientHref } from "@/lib/routes";
 
 type Load =
   | { state: "loading" }
   | { state: "error"; message: string; notFound?: boolean }
   | { state: "ok"; study: StudyInfo };
 
-export default function StudyCardPage({ params }: { params: Promise<{ sid: string }> }) {
-  const { sid } = use(params);
+/**
+ * Adresa /reception/studies/card?sid=…[&write=1] (statický web – lib/routes.ts).
+ * key = sid → „Další na řadě“ načte další studii od nuly.
+ */
+export default function StudyCardRoute() {
+  return (
+    <Suspense>
+      <StudyCardByQuery />
+    </Suspense>
+  );
+}
+
+function StudyCardByQuery() {
+  const sid = useSearchParams().get("sid") ?? "";
+  return <StudyCardPage key={sid} sid={sid} />;
+}
+
+function StudyCardPage({ sid }: { sid: string }) {
   // výsledek si pamatuje, ke kterému načtení patří → jiný klíč = zase „načítám“
   const [result, setResult] = useState<{ key: string; load: Load } | null>(null);
   const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
@@ -148,7 +165,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
           <p className="mt-1 text-sm text-ui-muted">
             {MODALITY_NAME[s.idMedicalServiceCategory] ?? s.idMedicalServiceCategory ?? "Vyšetření"}{" "}
             {formatDateTime(s.studyDate)} ·{" "}
-            <Link href={`/reception/patients/${encodeURIComponent(s.pid)}`} className="text-ui-ink hover:text-ui-primary">
+            <Link href={patientHref(s.pid)} className="text-ui-ink hover:text-ui-primary">
               {patientName(s)}
             </Link>
           </p>
@@ -161,7 +178,7 @@ export default function StudyCardPage({ params }: { params: Promise<{ sid: strin
               </span>
             )}
             <Button variant="ghost" asChild>
-              <Link href={`/reception/patients/${encodeURIComponent(s.pid)}`}>
+              <Link href={patientHref(s.pid)}>
                 <UserRound /> Karta pacienta
               </Link>
             </Button>

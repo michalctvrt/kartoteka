@@ -1,5 +1,6 @@
 /** Klient šablon popisu (dnes simulace /api/templates, později backend). */
 import type { ReportTemplate, TemplateInput } from "./types";
+import { bridge } from "@/lib/runtimeConfig";
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, { ...init, headers: { "content-type": "application/json", ...init?.headers } });
@@ -8,8 +9,8 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const templatesApi = {
-  list: () => call<ReportTemplate[]>("/api/templates"),
-  create: (t: TemplateInput) => call<ReportTemplate>("/api/templates", { method: "POST", body: JSON.stringify(t) }),
-  update: (id: string, t: Partial<TemplateInput>) => call<ReportTemplate>(`/api/templates/${id}`, { method: "PUT", body: JSON.stringify(t) }),
-  remove: (id: string) => call<null>(`/api/templates/${id}`, { method: "DELETE" }),
+  list: () => call<ReportTemplate[]>(bridge("templates")),
+  create: (t: TemplateInput) => call<ReportTemplate>(bridge("templates"), { method: "POST", body: JSON.stringify(t) }),
+  update: (id: string, t: Partial<TemplateInput>) => call<ReportTemplate>(bridge(`templates/${id}`), { method: "PUT", body: JSON.stringify(t) }),
+  remove: (id: string) => call<null>(bridge(`templates/${id}`), { method: "DELETE" }),
 };

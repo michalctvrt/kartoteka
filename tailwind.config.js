@@ -10,7 +10,7 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		fontFamily: {
-  			sans: ['Montserrat', 'system-ui', 'sans-serif'],
+  			sans: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
   		},
   		colors: {
   			// DC Flipper brand (barvy z loga)

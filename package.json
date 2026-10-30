@@ -6,7 +6,8 @@
     "dev": "next dev -p 4001",
     "build": "next build",
     "start": "next start -p 4001",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:static": "STATIC_EXPORT=1 next build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

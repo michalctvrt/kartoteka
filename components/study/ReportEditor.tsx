@@ -33,6 +33,7 @@ import { REPORT_TEXT, usePrefs, type ReportSize } from "@/lib/prefs";
 import { dropFromQueue, nextInQueue } from "@/lib/reportQueue";
 import { fold, matchTemplate, useTemplates } from "@/lib/templates/useTemplates";
 import type { ReportTemplate } from "@/lib/templates/types";
+import { studyHref } from "@/lib/routes";
 
 const draftKey = (id: number) => `report-draft:${id}`;
 type Panel = "templates" | "prior" | "patient";
@@ -267,7 +268,7 @@ export default function ReportEditor({
               <ClipboardCopy /> Zkopírovat a otevřít ve staré kartotéce
             </Button>
             {queue?.next && (
-              <Button variant={copied ? "default" : "outline"} onClick={() => confirmLeave() && router.push(`/reception/studies/${queue.next}?write=1`)}>
+              <Button variant={copied ? "default" : "outline"} onClick={() => confirmLeave() && queue.next && router.push(studyHref(queue.next, { write: true }))}>
                 Další na řadě <ArrowRight />
               </Button>
             )}

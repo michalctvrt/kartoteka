@@ -13,7 +13,7 @@
  *   - Save volá storeNewPatientData (slouží jako upsert) a vyčistí draft.
  */
 
-import { use, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -62,12 +62,24 @@ import {
   STUDY_VIA_API,
 } from "@/lib/legacy";
 
-export default function PatientDetailPage({
-  params,
-}: {
-  params: Promise<{ pid: string }>;
-}) {
-  const { pid } = use(params);
+/**
+ * Adresa /reception/patients/card?pid=… (statický web nemůže mít stránku pro každého pacienta – lib/routes.ts).
+ * key = pid → při přechodu na jiného pacienta se karta načte znovu od nuly.
+ */
+export default function PatientCardRoute() {
+  return (
+    <Suspense>
+      <PatientCardByQuery />
+    </Suspense>
+  );
+}
+
+function PatientCardByQuery() {
+  const pid = useSearchParams().get("pid") ?? "";
+  return <PatientDetailPage key={pid} pid={pid} />;
+}
+
+function PatientDetailPage({ pid }: { pid: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ezadankaId = searchParams.get("ezadanka");

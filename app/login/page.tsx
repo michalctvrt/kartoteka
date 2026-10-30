@@ -15,6 +15,7 @@ import { staffApi } from "@/lib/auth/staffApi";
 import { ROLE_HOME, ROLE_NAME } from "@/lib/auth/roles";
 import { employeeName, type Employee } from "@/lib/auth/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BASE_PATH } from "@/lib/runtimeConfig";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,9 +44,9 @@ export default function LoginPage() {
         className="ui-tile w-full max-w-md p-6"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="DC Flipper Radiodiagnostika" className="h-auto w-44 dark:hidden" />
+        <img src={`${BASE_PATH}/logo.svg`} alt="DC Flipper Radiodiagnostika" className="h-auto w-44 dark:hidden" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-dark.svg" alt="DC Flipper Radiodiagnostika" className="hidden h-auto w-44 dark:block" />
+        <img src={`${BASE_PATH}/logo-dark.svg`} alt="DC Flipper Radiodiagnostika" className="hidden h-auto w-44 dark:block" />
         <h1 className="mt-5 text-xl font-semibold tracking-tight">Přihlášení do Kartotéky</h1>
         <p className="mt-1 text-[13px] text-ui-muted">
           Zkušební režim: vyberte zaměstnance. Skutečné přihlášení heslem připraví backend.

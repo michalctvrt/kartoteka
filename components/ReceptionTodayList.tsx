@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePathname } from "next/navigation";
 import { format, isToday, differenceInMinutes } from "date-fns";
 import { Clock, User, Check, X, RotateCcw } from "lucide-react";
 import React from "react";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
+import { bridge } from "@/lib/runtimeConfig";
+import { usePath } from "@/lib/routes";
 
 interface SuperSaaSBooking {
   id: string | number;
@@ -39,7 +40,7 @@ const LS_KEY = "rt_statuses_v9";
  *  M – jen aktivní objednávky, L – vše (aktivní, vyřízeno, zrušeno).
  */
 export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize } = {}) {
-  const pathname = usePathname();
+  const pathname = usePath();
 
   // Inicializace stavu z localStorage
   const [localState, setLocalState] = useState<LocalState>(() => {
@@ -88,7 +89,7 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
     let mounted = true;
     const fetchToday = async () => {
       try {
-        const res = await fetch("/api/supersaas/booking?schedule_id=268518", {
+        const res = await fetch(bridge("supersaas/booking?schedule_id=268518"), {
           cache: "no-store",
         });
         const data: SuperSaaSBooking[] = await res.json();

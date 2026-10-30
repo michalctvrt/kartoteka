@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import { runtimeConfig } from '@/lib/runtimeConfig';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -20,11 +21,10 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-    // Volá se přes Next.js proxy v /api/cardfile/* (app/api/cardfile/[...path]/route.ts).
-    // Proxy přidává JSESSIONID(SSO) cookie z .env.local pro dev běh.
-    // V produkci přejdeme na same-origin /CardFileWebWS/michalovo/ (Václavův plán)
-    // — pak se BASE přepíše zpět na '/CardFileWebWS/rest'.
-    BASE: '/api/cardfile/rest',
+    // RUČNĚ UPRAVENO (zachovat po přegenerování): adresa podle lib/runtimeConfig.ts –
+    // vývoj = Next proxy /api/cardfile/rest (přidává SSO cookie z .env.local),
+    // produkce (statický web v EARu) = config.js apiBase, např. '/CardFileWebWS/rest'.
+    BASE: runtimeConfig.apiBase,
 
     VERSION: '1.0.0',
     WITH_CREDENTIALS: false,

@@ -1,8 +1,9 @@
 /** Volání správy zaměstnanců z prohlížeče. Až bude backend, změnit STAFF_BASE. */
 
 import type { Employee, EmployeeInput } from "./types";
+import { bridge } from "@/lib/runtimeConfig";
 
-const STAFF_BASE = "/api/staff";
+const STAFF_BASE = bridge("staff");
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } });

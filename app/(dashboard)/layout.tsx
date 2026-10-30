@@ -15,13 +15,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { ShieldOff } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig } from "framer-motion";
 import { usePrefs } from "@/lib/prefs";
+import { usePath } from "@/lib/routes";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePath();
   const router = useRouter();
   const { ready, user, roles, canVisit, home } = useSession();
   const fromPath = workspaceOf(pathname);

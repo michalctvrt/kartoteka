@@ -21,6 +21,7 @@ import type {
   EzadankaErrorResponse,
   ZadankaDetail as ZadankaDetailT,
 } from "@/lib/ezadanka/types";
+import { bridge } from "@/lib/runtimeConfig";
 
 interface Props {
   kod: string;
@@ -38,7 +39,7 @@ export default function EzadankaDetail({ kod, onClose, onImport }: Props) {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/ezadanka/by-kod/${encodeURIComponent(kod)}`)
+    fetch(bridge(`ezadanka/by-kod/${encodeURIComponent(kod)}`))
       .then(async (res) => {
         if (!res.ok) {
           const err = (await res.json()) as EzadankaErrorResponse;

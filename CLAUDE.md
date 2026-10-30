@@ -24,8 +24,15 @@ JSF kartotéky. Komunikace s uživatelem (Michal) **česky**; Michal zná JS, ba
 - Známé limity backendu: `POST /study` vyžaduje `ezadankaId` i bez e-žádanky (čeká na Václava) →
   „Nové vyšetření“ zatím otevírá starý formulář; nový formulář (`components/study/`) se zapne
   `NEXT_PUBLIC_STUDY_VIA_API=1`. `idWorkingplace` z `NEXT_PUBLIC_WORKINGPLACE`.
-- Produkce: rozcestník `cftest.dc-flipper.cz`, Apache; nové UI má být pod `/CFLocalSyncWeb/m` nebo v EARu.
-  Václav preferuje statické HTML+JS → Next API routes by v produkci nebyly. Nerozhodnuto.
+- **Produkce = STATICKÝ WEB v Václavově EARu** (rozhodnuto 2026-10-30; kartotéka běží na lokálních serverech poboček,
+  musí jet i bez internetu). Návod a seznam „mostů“ pro Václava: `docs/PRODUKCE.md` (psáno Michalovým hlasem – tak to i
+  udržovat). `npm run build:static` (STATIC_EXPORT=1, NEXT_BASE_PATH) → `out/`; app/api se do něj nesestaví (pageExtensions tsx).
+  Pravidla, aby statický web fungoval:
+  - adresy mostů jen přes `bridge("…")` a REST přes `runtimeConfig.apiBase` (`lib/runtimeConfig.ts`), nikdy natvrdo `/api/…`;
+  - nastavení pobočky za běhu z `config.js` (`window.__KARTOTEKA__`), ne `NEXT_PUBLIC_*`;
+  - žádné stránky s `[param]` – karty jsou `/reception/patients/card?pid=`, `/reception/studies/card?sid=` (`lib/routes.ts`);
+  - porovnávat adresy přes `usePath()` (bez koncového lomítka), obrázky z public s `BASE_PATH`;
+  - nic z internetu (písmo přes next/font, přibalené).
 
 ## Demo režim (doma, bez firemní sítě)
 - `DEMO_MODE=1` v `.env.local` → `app/api/cardfile/[...path]` odpovídá z `lib/demo/backend.ts` (smyšlení pacienti
@@ -109,7 +116,7 @@ Podrobně `CALL250V.md`. Shrnutí:
 ## Studie
 - `lib/studies.ts` – hledání (číslo studie / RČ / příjmení → pacienti → `pid IN`), formátování.
   Datum do `browseFilter.studyDate` posílat jako ISO s časovou zónou (backend jinak porovnává v UTC).
-- `reception/studies/search` (vyhledávání), `reception/studies/[sid]` (karta studie, jen čtení; popis = `description`,
+- `reception/studies/search` (vyhledávání), `reception/studies/card?sid=` (karta studie, jen čtení; popis = `description`,
   PDF = `/study/{id}/documentData.pdf`, úpravy zatím ve staré kartotéce). Menu „Karta studie“ = naposledy otevřená.
 - Úprava studie: `components/study/StudyEditForm.tsx` (PUT /study/{id}), zapíná se `NEXT_PUBLIC_STUDY_EDIT_VIA_API=1`.
   Zatím vypnuto: backend vrací 422 „Error deserializing object from entity stream“ na jakékoli tělo (i `{}`).

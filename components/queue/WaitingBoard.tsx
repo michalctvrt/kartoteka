@@ -32,6 +32,7 @@ import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import { useElementSize } from "@/components/dashboard/useElementSize";
 import { OperatorInput, QueueButton, QueueError, TicketNo, WaitTime } from "./QueueUi";
 import { useSession } from "@/components/auth/SessionProvider";
+import { patientHref } from "@/lib/routes";
 
 /** Barvy modalit — stejné jako u vyšetření na kartě pacienta. */
 export const MODALITY_STYLE: Record<
@@ -406,7 +407,7 @@ function Row({
       <div className="min-w-0 flex-1 leading-tight">
         <div className="text-sm font-medium truncate">
           {pid ? (
-            <Link href={`/reception/patients/${encodeURIComponent(pid)}`} className="hover:underline" title={name}>
+            <Link href={patientHref(pid)} className="hover:underline" title={name}>
               {name}
             </Link>
           ) : (

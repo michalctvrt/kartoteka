@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { bridge } from "@/lib/runtimeConfig";
 
 export type Booking = {
   id: number;
@@ -29,7 +30,7 @@ export function useBookings() {
   });
 
   const load = useCallback(() => {
-    fetch(`/api/supersaas/booking?schedule_id=${SCHEDULE_ID}`, { cache: "no-store" })
+    fetch(bridge(`supersaas/booking?schedule_id=${SCHEDULE_ID}`), { cache: "no-store" })
       .then(async (r) => {
         const data = await r.json();
         if (!r.ok || !Array.isArray(data)) throw new Error((data as { error?: string })?.error ?? `Chyba ${r.status}`);

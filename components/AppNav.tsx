@@ -7,7 +7,7 @@
  */
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   CalendarDays,
@@ -37,6 +37,8 @@ import { readLastStudyId } from "@/lib/lastStudy";
 import { useSession } from "@/components/auth/SessionProvider";
 import { ROLES, ROLE_HOME, ROLE_NAME, workspaceOf, type Role } from "@/lib/auth/roles";
 import { employeeName } from "@/lib/auth/types";
+import { patientHref, studyHref, usePath } from "@/lib/routes";
+import { BASE_PATH } from "@/lib/runtimeConfig";
 
 export default function AppNav({
   theme,
@@ -48,7 +50,7 @@ export default function AppNav({
   /** zavře mobilní menu po kliknutí */
   onNavigate?: () => void;
 }) {
-  const pathname = usePathname();
+  const pathname = usePath();
   const router = useRouter();
   const { user, roles, can, canVisit, signOut } = useSession();
   const { latestId } = useDrafts();
@@ -69,14 +71,14 @@ export default function AppNav({
   const openPatientCard = () =>
     go(
       latestId
-        ? `/reception/patients/${encodeURIComponent(latestId)}`
+        ? patientHref(latestId)
         : "/reception/patients"
     );
 
   // Karta studie = naposledy otevřená studie, jinak vyhledávání
   const openStudyCard = () => {
     const sid = readLastStudyId();
-    go(sid ? `/reception/studies/${encodeURIComponent(sid)}` : "/reception/studies/search");
+    go(sid ? studyHref(sid) : "/reception/studies/search");
   };
 
   // vlastní skupina pro každou instanci menu (desktop / mobil), aby si zvýraznění nepřeskakovalo
@@ -95,9 +97,9 @@ export default function AppNav({
       <div className="px-5 pt-5 pb-3">
         <Link href={home} onClick={onNavigate} className="block w-[168px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="DC Flipper Radiodiagnostika" className="h-auto w-full dark:hidden" />
+          <img src={`${BASE_PATH}/logo.svg`} alt="DC Flipper Radiodiagnostika" className="h-auto w-full dark:hidden" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-dark.svg" alt="DC Flipper Radiodiagnostika" className="hidden h-auto w-full dark:block" />
+          <img src={`${BASE_PATH}/logo-dark.svg`} alt="DC Flipper Radiodiagnostika" className="hidden h-auto w-full dark:block" />
         </Link>
         {user && (
           <div className="mt-4 flex items-center gap-2.5">

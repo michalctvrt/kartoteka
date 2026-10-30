@@ -4,6 +4,7 @@
  */
 import type { PatchQueueItemRequest, QueueItem } from "./types";
 import { ARRIVAL_SERVICES, CATEGORY_TO_MODALITY, WAITING_SERVICES } from "./config";
+import { bridge } from "@/lib/runtimeConfig";
 
 let operatorId = "";
 /** Nastaví ID operátora, které se posílá s každou akcí (z nastavení pracoviště). */
@@ -16,7 +17,7 @@ async function api<T>(method: string, path: string, body?: unknown): Promise<T> 
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (operatorId) headers["x-operator-id"] = operatorId;
 
-  const res = await fetch(`/api/queue${path}`, {
+  const res = await fetch(bridge(`queue${path}`), {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,

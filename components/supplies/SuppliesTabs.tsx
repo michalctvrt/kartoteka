@@ -3,10 +3,10 @@
 /** Záložky spotřebního materiálu (Objednávka · Souhrn · Katalog) podle oprávnění + upozornění na vypnutý zápis. */
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { LayoutGroup, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/components/auth/SessionProvider";
+import { usePath } from "@/lib/routes";
 
 const TABS = [
   { href: "/supplies", label: "Objednávka", cap: "supplies.order" },
@@ -15,7 +15,7 @@ const TABS = [
 ] as const;
 
 export default function SuppliesTabs() {
-  const pathname = usePathname();
+  const pathname = usePath();
   const { can } = useSession();
   const tabs = TABS.filter((t) => can(t.cap));
   if (tabs.length < 2) return null;

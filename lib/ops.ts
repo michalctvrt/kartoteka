@@ -2,6 +2,8 @@
  * Volání provozních funkcí (převzatých z /opt/testapp) z prohlížeče – přes bránu /api/ops.
  */
 
+import { bridge } from "@/lib/runtimeConfig";
+
 export type InsuranceResult =
   | { status: "insured"; code: string; name: string }
   | { status: "uninsured" }
@@ -10,7 +12,7 @@ export type InsuranceResult =
 /** Stav pojištění k datu (registr pojištěnců, stejná služba jako v testappu). */
 export async function checkInsurance(pid: string, date: string): Promise<InsuranceResult> {
   try {
-    const res = await fetch("/api/ops/vzp", {
+    const res = await fetch(bridge("ops/vzp"), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ cisloPojistence: pid, datum: date }),
@@ -26,7 +28,7 @@ export async function checkInsurance(pid: string, date: string): Promise<Insuran
 
 /** Prodlouží online přístup ke zprávě o `days` dní od dneška. ZÁPIS do databáze kartotéky. */
 export async function extendRemoteAccess(uid: string, days = 3): Promise<{ until: string }> {
-  const res = await fetch("/api/ops/extend-validity", {
+  const res = await fetch(bridge("ops/extend-validity"), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ uid, days }),

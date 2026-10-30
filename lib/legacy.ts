@@ -6,9 +6,9 @@
  * jinde — nastav v .env.local NEXT_PUBLIC_LEGACY_BASE_URL, výchozí je
  * http://localhost:8080 (Payara na test serveru).
  */
-const LEGACY_HOST =
-  process.env.NEXT_PUBLIC_LEGACY_BASE_URL ??
-  (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "");
+import { runtimeConfig } from "@/lib/runtimeConfig";
+
+const LEGACY_HOST = runtimeConfig.legacyBaseUrl; // config.js / .env (lib/runtimeConfig.ts)
 
 export const legacyBase = `${LEGACY_HOST}/CFLocalSyncWeb`;
 
@@ -34,7 +34,7 @@ export const legacyNewStudyUrl = (pid: string) =>
  * Zatím vypnuto: backend vyžaduje ezadankaId i u vyšetření bez e-žádanky.
  * Až to Václav uvolní, stačí v .env.local NEXT_PUBLIC_STUDY_VIA_API=1.
  */
-export const STUDY_VIA_API = process.env.NEXT_PUBLIC_STUDY_VIA_API === "1";
+export const STUDY_VIA_API = runtimeConfig.studyViaApi;
 
 /**
  * Upravovat studii přes náš formulář (PUT /study/{id})?
@@ -42,4 +42,4 @@ export const STUDY_VIA_API = process.env.NEXT_PUBLIC_STUDY_VIA_API === "1";
  * object from entity stream“ na jakékoli tělo (i na {}), ověřeno 2026-10-29.
  * Až to Václav opraví: NEXT_PUBLIC_STUDY_EDIT_VIA_API=1 v .env.local.
  */
-export const STUDY_EDIT_VIA_API = process.env.NEXT_PUBLIC_STUDY_EDIT_VIA_API === "1";
+export const STUDY_EDIT_VIA_API = runtimeConfig.studyEditViaApi;

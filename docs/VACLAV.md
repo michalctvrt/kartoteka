@@ -86,16 +86,10 @@ Zkusili jsme `usernameDescriptionChanged IS_NULL` – na testovacích datech ne�
 **Dnes:** endpointy `/ezadanka/by-rid/{rid}` a `/ezadanka/by-kod/{kod}` máme jen jako simulaci.
 Kontrakt (tvar JSON) je v `lib/ezadanka/types.ts`. Čekáme na Java verzi.
 
-## 9. Produkční nasazení – rozhodnout
+## 9. Produkční nasazení – rozhodnuto: statický web v EARu
 
-Nová kartotéka dnes používá serverové API routes v Next.js (proxy na backend, Call250V s Api-Key, VZP, brána do provozní
-aplikace). Pokud má v produkci běžet jako **statické HTML+JS** (tvoje preference), musí tyto věci převzít backend:
-- volání Call250V (Api-Key nesmí do prohlížeče),
-- ověření pojištění VZP (certifikát),
-- šablony a zaměstnanci (body 4 a 6).
-
-Druhá možnost: Next.js poběží jako samostatná služba za Apache (pod `/CFLocalSyncWeb/m`). **Potřebujeme rozhodnout,
-než začneme další serverové věci** – čím později, tím víc přepisování.
+Podrobně v [PRODUKCE.md](PRODUKCE.md): co ode mě dostaneš (složka `out/`), nastavení pobočky (`config.js`)
+a seznam „mostů“, které musí udělat Java (vyvolávací systém, zaměstnanci, šablony, SuperSaaS, VZP, provozní aplikace).
 
 ---
 

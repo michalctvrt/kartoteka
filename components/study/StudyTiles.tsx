@@ -20,6 +20,7 @@ import { useSession } from "@/components/auth/SessionProvider";
 import { REPORT_TEXT, usePrefs } from "@/lib/prefs";
 import { ageYears } from "@/lib/study/card-check";
 import { formatDate, formatDateTime, formatRc, hasReport, patientName } from "@/lib/studies";
+import { patientHref } from "@/lib/routes";
 
 /** Seznam řádků, ze kterého se vynechají prázdné hodnoty. */
 function Rows({ rows, empty }: { rows: [string, React.ReactNode][]; empty: string | null }) {
@@ -104,7 +105,7 @@ export function PatientTile({ study: s, index }: { study: StudyInfo; index: numb
       index={index}
       title="Pacient"
       action={
-        <Link href={`/reception/patients/${encodeURIComponent(s.pid)}`} className="text-[13px] text-ui-primary hover:underline">
+        <Link href={patientHref(s.pid)} className="text-[13px] text-ui-primary hover:underline">
           Karta
         </Link>
       }

@@ -20,6 +20,7 @@ import { ModalityTag } from "@/components/study/StudyBits";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { loadToReport, saveQueue, useReportFilter, waitingFor, type Days } from "@/lib/reportQueue";
 import { formatDateTime, formatRc, patientName } from "@/lib/studies";
+import { studyHref } from "@/lib/routes";
 
 export default function ReportsWorklistPage() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function ReportsWorklistPage() {
 
   const open = (s: StudyInfo) => {
     saveQueue(shown.map((x) => x.id));
-    router.push(`/reception/studies/${s.id}?write=1`);
+    router.push(studyHref(s.id, { write: true }));
   };
 
   const urgent = shown.filter((s) => s.flagUrgent).length;

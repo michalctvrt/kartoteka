@@ -23,6 +23,7 @@ const BAR: Record<string, string> = { RTG: "bg-orange-400", UZ: "bg-sky-500", MR
 import { GENDER_LABEL, type FormProps } from "./form";
 import InlineField from "./InlineField";
 import InsuranceCheck from "./InsuranceCheck";
+import { studyHref } from "@/lib/routes";
 
 // ─── Identita ───
 
@@ -272,7 +273,7 @@ export function LastStudyTile({ study, loading, index }: { study?: StudyInfo; lo
       action={
         study && (
           <Link
-            href={`/reception/studies/${study.id}`}
+            href={studyHref(study.id)}
             className="group inline-flex items-center gap-1 text-[13px] text-ui-primary hover:underline"
           >
             Karta studie <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -289,7 +290,7 @@ export function LastStudyTile({ study, loading, index }: { study?: StudyInfo; lo
       ) : !study ? (
         <Ghost label="Pacient zatím nemá žádné vyšetření" />
       ) : (
-        <Link href={`/reception/studies/${study.id}`} className="block">
+        <Link href={studyHref(study.id)} className="block">
           <div className="flex flex-wrap items-center gap-2">
             <ModalityTag modality={study.idMedicalServiceCategory} />
             <span className="text-lg font-semibold leading-tight">{formatDateTime(study.studyDate)}</span>

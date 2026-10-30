@@ -18,6 +18,7 @@ import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { loadToReport, saveQueue, useReportFilter, waitingFor } from "@/lib/reportQueue";
 import { patientName } from "@/lib/studies";
+import { studyHref } from "@/lib/routes";
 
 const SUMMARY = 76; // řádek s čísly + tlačítko
 const ROW = 40;
@@ -59,7 +60,7 @@ export default function ToReportWidget({ size = FULL }: { size?: WidgetSize }) {
   const open = (s: StudyInfo) => {
     if (!rows) return;
     saveQueue(rows.map((x) => x.id));
-    router.push(`/reception/studies/${s.id}?write=1`);
+    router.push(studyHref(s.id, { write: true }));
   };
 
   if (error) return <p className="text-[13px] text-red-700 dark:text-red-300">Nepodařilo se načíst: {error}</p>;

@@ -25,8 +25,10 @@ import { listWorkingplaces, type Option } from "@/lib/study/lookups";
 import { usePrefs, type MotionPref, type ReportSize, type ThemePref } from "@/lib/prefs";
 import { CAPABILITIES, CAPABILITY_GROUPS, ROLE_HOME, ROLE_NAME, type Role } from "@/lib/auth/roles";
 import { employeeName } from "@/lib/auth/types";
+import { runtimeConfig } from "@/lib/runtimeConfig";
+import { bridge } from "@/lib/runtimeConfig";
 
-const CONFIG_WORKINGPLACE = process.env.NEXT_PUBLIC_WORKINGPLACE ?? "";
+const CONFIG_WORKINGPLACE = runtimeConfig.workingplace;
 const WP_KEY = "kartoteka_workingplace_v1"; // stejný klíč jako NewStudyDialog
 const DASHBOARD_ROLES: Role[] = ["reception", "lab", "doctor"];
 
@@ -136,7 +138,7 @@ function WorkstationTile({ index }: { index: number }) {
             {CONFIG_WORKINGPLACE ? (
               <p className="flex h-10 items-center text-sm">
                 {CONFIG_WORKINGPLACE}
-                <span className="ml-2 text-[12px] text-ui-faint">nastavené pro pobočku (NEXT_PUBLIC_WORKINGPLACE)</span>
+                <span className="ml-2 text-[12px] text-ui-faint">nastavené pro pobočku (config.js)</span>
               </p>
             ) : places === null ? (
               <Skeleton className="h-10 w-72" />
@@ -278,7 +280,7 @@ function StatusTile({ index }: { index: number }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(true);
   const load = useCallback(() => {
-    fetch("/api/status", { cache: "no-store" })
+    fetch(bridge("status"), { cache: "no-store" })
       .then((r) => r.json())
       .then(setStatus)
       .catch(() => setStatus(null))

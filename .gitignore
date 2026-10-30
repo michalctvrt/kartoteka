@@ -46,3 +46,6 @@ next-env.d.ts
 /.taste-skill/
 # simulace dat (zaměstnanci apod.) – jen vývoj
 /.data/
+
+# statický web pro EAR (npm run build:static)
+/out/

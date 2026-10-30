@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Bento, BentoTile, Metric } from "@/components/ui/bento";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
+import { bridge } from "@/lib/runtimeConfig";
 
 type System = "CGM" | "E-zpráva" | "LIVEcom";
 const SYSTEMS: System[] = ["CGM", "E-zpráva", "LIVEcom"];
@@ -35,7 +36,7 @@ export default function DoctorsPage() {
   const [system, setSystem] = useState<System | null>(null);
 
   useEffect(() => {
-    fetch("/api/ops/medical_institution?limit=10000", { cache: "no-store" })
+    fetch(bridge("ops/medical_institution?limit=10000"), { cache: "no-store" })
       .then(async (r) => {
         const d = await r.json();
         if (!r.ok || !Array.isArray(d)) throw new Error(d?.error ?? `Chyba ${r.status}`);

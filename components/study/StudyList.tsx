@@ -15,6 +15,7 @@ import type { StudyInfo } from "@/lib/api/generated/models/StudyInfo";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { ModalityTag, ReportStatus } from "@/components/study/StudyBits";
 import { formatDateTime, formatRc, patientName, reportPreview } from "@/lib/studies";
+import { studyHref } from "@/lib/routes";
 
 export default function StudyList({
   studies,
@@ -31,7 +32,7 @@ export default function StudyList({
   dimmed?: boolean;
 }) {
   const router = useRouter();
-  const open = (s: StudyInfo) => router.push(`/reception/studies/${s.id}`);
+  const open = (s: StudyInfo) => router.push(studyHref(s.id));
   const cols = withPatient
     ? "md:grid-cols-[8.5rem_minmax(0,12rem)_3.5rem_minmax(0,1fr)_minmax(0,13rem)_auto]"
     : "md:grid-cols-[9.5rem_3.5rem_minmax(0,1fr)_minmax(0,14rem)_auto]";

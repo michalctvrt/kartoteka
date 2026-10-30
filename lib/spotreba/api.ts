@@ -5,8 +5,9 @@
  */
 
 import type { Branch, Category, Item, LineInput, Order, OrderLine, Summary } from "./types";
+import { bridge } from "@/lib/runtimeConfig";
 
-const BASE = "/api/ops/spotreba";
+const BASE = bridge("ops/spotreba");
 
 export class SpotrebaError extends Error {
   constructor(message: string, public status: number, public locked = false) {

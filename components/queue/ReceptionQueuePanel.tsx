@@ -35,6 +35,7 @@ import {
   TicketNo,
   WaitTime,
 } from "./QueueUi";
+import { patientHref } from "@/lib/routes";
 
 /**
  * `embedded` = bez vlastního rámečku a nadpisu (okno na ploše má svůj).
@@ -65,7 +66,7 @@ export default function ReceptionQueuePanel({
 
   const openCard = (it: QueueItem, pid: string) =>
     router.push(
-      `/reception/patients/${encodeURIComponent(pid)}?ticket=${encodeURIComponent(it.queueItemId)}`
+      patientHref(pid, { ticket: it.queueItemId })
     );
 
   // ── S: souhrn ──

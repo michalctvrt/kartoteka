@@ -30,6 +30,8 @@ import {
   insuranceOptions,
   useInsuranceCompanies,
 } from "@/components/hooks/useInsuranceCompanies";
+import { bridge } from "@/lib/runtimeConfig";
+import { patientHref } from "@/lib/routes";
 
 interface FormState {
   firstName: string;
@@ -90,7 +92,7 @@ export default function NewPatientPage() {
     let cancelled = false;
     setLoadingEzadanka(true);
 
-    fetch(`/api/ezadanka/${encodeURIComponent(ezadankaId)}`)
+    fetch(bridge(`ezadanka/${encodeURIComponent(ezadankaId)}`))
       .then((res) => {
         if (!res.ok) throw new Error("E-žádanka nenalezena.");
         return res.json();
@@ -172,7 +174,7 @@ export default function NewPatientPage() {
     try {
       await PatientService.storeNewPatientData(rcInfo.normalized, request);
       // Po založení redirect na detail karty pacienta
-      router.push(`/reception/patients/${rcInfo.normalized}`);
+      router.push(patientHref(rcInfo.normalized));
     } catch (e) {
       const msg =
         e instanceof ApiError

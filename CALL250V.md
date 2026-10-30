@@ -20,7 +20,7 @@ Lístek se ukončuje JEN na konci návštěvy, jinak by pacientovi přestal fung
 - `app/api/queue/*` – API routes, které volá frontend
 - `components/queue/*` – panel recepce, box na kartě pacienta, přehled čekáren (WaitingBoard), lišta s počty (QueueStatusBar)
 
-Upravené stránky: `reception/page.tsx` (panel), `reception/patients/[pid]/page.tsx` (box nad Identifikací),
+Upravené stránky: `reception/page.tsx` (panel), `reception/patients/card/page.tsx` (box nad Identifikací),
 `lab/page.tsx` a `doctor/worklist/page.tsx` (worklist).
 
 ## Spuštění

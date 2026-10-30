@@ -39,14 +39,15 @@ import { sendTicketAfterStudy } from "@/lib/call250v/browser";
 import { useWorkstation } from "@/components/queue/useWorkstation";
 import Lookup from "./Lookup";
 import ServicesEditor from "./ServicesEditor";
+import { runtimeConfig } from "@/lib/runtimeConfig";
 
 /**
  * Pracoviště (idWorkingplace) = kód ordinace v kartotéce (např. BRLE = Lesná).
  * Backend ho u POST /study vyžaduje. Nastavuje se jednou pro pobočku v
- * .env.local (NEXT_PUBLIC_WORKINGPLACE) — recepční ho nevybírá. Výběr ve
+ * config.js / .env.local (lib/runtimeConfig.ts) — recepční ho nevybírá. Výběr ve
  * formuláři se ukáže jen když chybí v konfiguraci.
  */
-const CONFIG_WORKINGPLACE = process.env.NEXT_PUBLIC_WORKINGPLACE ?? "";
+const CONFIG_WORKINGPLACE = runtimeConfig.workingplace;
 const WP_KEY = "kartoteka_workingplace_v1";
 const today = () => new Date().toISOString().slice(0, 10);
 

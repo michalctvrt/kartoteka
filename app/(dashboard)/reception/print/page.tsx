@@ -17,6 +17,8 @@ import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import { ModalityTag } from "@/components/study/StudyBits";
 import { formatRc } from "@/lib/studies";
+import { bridge } from "@/lib/runtimeConfig";
+import { studyHref } from "@/lib/routes";
 
 type Workplace = "BRDO" | "BRLE";
 const WORKPLACES: { value: Workplace; label: string }[] = [
@@ -65,7 +67,7 @@ function previousWorkday(from = new Date()) {
   return iso(d);
 }
 const plural = (n: number) => (n === 1 ? "zpráva" : n >= 2 && n <= 4 ? "zprávy" : "zpráv");
-const pdfUrl = (ids: number[]) => `/api/ops/tisk-pdf?ids=${ids.join(",")}`;
+const pdfUrl = (ids: number[]) => bridge(`ops/tisk-pdf?ids=${ids.join(",")}`);
 
 export default function PrintPage() {
   const [workplace, setWorkplace] = useState<Workplace>(() => {
@@ -83,7 +85,7 @@ export default function PrintPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/ops/tisk-studies?workplace=${workplace}&date=${date}`, { cache: "no-store" })
+    fetch(bridge(`ops/tisk-studies?workplace=${workplace}&date=${date}`), { cache: "no-store" })
       .then(async (r) => {
         const body = await r.json();
         if (!r.ok) throw new Error(body?.error ?? `Chyba ${r.status}`);
@@ -214,7 +216,7 @@ export default function PrintPage() {
                           key={s.id}
                           className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-2 text-sm md:grid-cols-[minmax(0,14rem)_7rem_4rem_3.5rem_minmax(0,1fr)_auto]"
                         >
-                          <Link href={`/reception/studies/${s.id}`} className="truncate font-medium hover:text-ui-primary">
+                          <Link href={studyHref(s.id)} className="truncate font-medium hover:text-ui-primary">
                             {s.patient_name}
                           </Link>
                           <span className="hidden text-ui-muted md:block">{formatRc(s.pid)}</span>
@@ -226,7 +228,7 @@ export default function PrintPage() {
                           </span>
                           <span className="col-span-2 truncate text-[13px] text-ui-muted md:col-span-1">{s.description}</span>
                           <a
-                            href={`/api/ops/study-pdf/${s.id}`}
+                            href={bridge(`ops/study-pdf/${s.id}`)}
                             target="_blank"
                             rel="noreferrer"
                             className="hidden items-center gap-1 text-[13px] text-ui-primary hover:underline md:inline-flex"

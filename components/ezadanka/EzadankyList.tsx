@@ -25,6 +25,7 @@ import type {
   ZadankaDetail as ZadankaDetailT,
   ZadankaListItem,
 } from "@/lib/ezadanka/types";
+import { bridge } from "@/lib/runtimeConfig";
 
 interface Props {
   rid: string;
@@ -62,7 +63,7 @@ export default function EzadankyList({ rid, onImport, hideEmpty }: Props) {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/ezadanka/by-rid/${encodeURIComponent(rid)}`)
+    fetch(bridge(`ezadanka/by-rid/${encodeURIComponent(rid)}`))
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const body = (await res.json()) as SearchByRidResponse;

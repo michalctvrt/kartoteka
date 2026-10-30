@@ -26,6 +26,7 @@ import type { PatientInfo } from "@/lib/api/generated/models/PatientInfo";
 import { ApiError } from "@/lib/api/generated/core/ApiError";
 import { apiErrorText } from "@/lib/study/lookups";
 import useDrafts from "@/components/hooks/useDrafts";
+import { patientHref } from "@/lib/routes";
 
 export default function PatientsListPage() {
   const router = useRouter();
@@ -94,7 +95,7 @@ export default function PatientsListPage() {
   );
 
   const draftIds = Object.keys(drafts).sort((x, y) => drafts[y].ts - drafts[x].ts);
-  const open = (pid: string) => router.push(`/reception/patients/${encodeURIComponent(pid)}`);
+  const open = (pid: string) => router.push(patientHref(pid));
 
   return (
     <div className="space-y-5">
@@ -200,7 +201,7 @@ export default function PatientsListPage() {
                 {draftIds.map((id) => (
                   <li key={id}>
                     <Link
-                      href={`/reception/patients/${encodeURIComponent(id)}`}
+                      href={patientHref(id)}
                       className="group flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-ui-raised"
                     >
                       <span className="flex items-center gap-2">
