@@ -1,12 +1,27 @@
 # Co potřebujeme od backendu (CardFileWebWS) – souhrn pro Václava
 
-Stav k 2026-10-29. Nová kartotéka (Next.js) volá jen REST `CardFileWebWS`, backend neměníme.
+Stav k 2026-10-30. Nová kartotéka (Next.js) volá jen REST `CardFileWebWS`, backend neměníme.
 Níže je všechno, na čem nová kartotéka čeká, **seřazené podle toho, kolik práce to odblokuje**.
 U každého bodu: co dnes nejde, co navrhujeme, jak to máme na frontendu obejité.
 
 Podrobnosti k rolím jsou v [ROLE-BACKEND.md](ROLE-BACKEND.md), k vyvolávacímu systému v [../CALL250V.md](../CALL250V.md).
 
 ---
+
+## 0. CardFileWebWS na serverech poboček – PŘEDPOKLAD VŠEHO OSTATNÍHO
+
+**Dnes (ověřeno 2026-10-30 z testovacího serveru, bez přihlášení):** servery všech čtyř poboček jsou po síti dosažitelné
+a běží na nich stará kartotéka (`/CFLocalSyncWeb`), ale **`/CardFileWebWS` tam není nasazené** (404 = aplikace
+neexistuje). REST běží jen na centrálu a na testovacím serveru.
+
+**Proč je to potřeba:**
+- nová kartotéka má v produkci běžet na lokálním serveru každé pobočky (statický web v EARu, [PRODUKCE.md](PRODUKCE.md))
+  a data čte jen přes CardFileWebWS – bez něj na pobočce nepoběží vůbec,
+- popisování na dálku mezi pobočkami ([PRODUKCE.md](PRODUKCE.md) bod 3.7) stojí na tom, že CardFileWebWS běží
+  na pobočce, kam studie patří (popis musí zůstat na lokálu).
+
+**Prosba:** nasadit CardFileWebWS na servery poboček (stačí nejdřív jedna – hned na ní vyzkoušíme čtení
+z jiné pobočky; frontend je na to připravený, je to jen nastavení).
 
 ## 1. Uložení popisu studie (description) – NEJDŮLEŽITĚJŠÍ
 
