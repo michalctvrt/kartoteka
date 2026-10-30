@@ -38,9 +38,9 @@ function Rows({ rows, empty }: { rows: [string, React.ReactNode][]; empty: strin
 }
 
 /** onWrite = otevřít psací plochu (ReportEditor); bez něj odkaz do staré kartotéky. */
-export function ReportTile({ study: s, index, onWrite }: { study: StudyInfo; index: number; onWrite?: () => void }) {
+export function ReportTile({ study: s, index, onWrite, readOnly }: { study: StudyInfo; index: number; onWrite?: () => void; readOnly?: boolean }) {
   const done = hasReport(s);
-  const canWrite = useSession().can("report.write"); // popisuje lékař (a admin)
+  const canWrite = useSession().can("report.write") && !readOnly; // popisuje lékař (a admin); centrál jen čte
   const { prefs } = usePrefs();
   return (
     <BentoTile

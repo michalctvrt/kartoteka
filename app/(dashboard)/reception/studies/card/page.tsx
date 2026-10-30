@@ -83,9 +83,11 @@ function StudyCardPage({ sid }: { sid: string }) {
   const [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(false);
   // psací plocha popisu (?write=1 = rovnou psát – z pracovního seznamu „K popisu“)
-  const [writing, setWriting] = useState(useSearchParams().get("write") === "1");
+  // pobočka jen ke čtení (centrál) → žádné psaní popisu ani úpravy
+  const readOnly = !!activeBranch().readOnly;
+  const [writing, setWriting] = useState(useSearchParams().get("write") === "1" && !readOnly);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const canEditStudy = useSession().can("study.edit");
+  const canEditStudy = useSession().can("study.edit") && !readOnly;
 
   const id = Number(sid);
   const valid = /^\d+$/.test(sid);
@@ -222,7 +224,7 @@ function StudyCardPage({ sid }: { sid: string }) {
         <StudyEditForm study={s} onCancel={() => setEditing(false)} onSaved={onSaved} />
       ) : (
         <Bento className="xl:grid-flow-row-dense">
-          <ReportTile study={s} index={0} onWrite={() => setWriting(true)} />
+          <ReportTile study={s} index={0} onWrite={() => setWriting(true)} readOnly={readOnly} />
           <PatientTile study={s} index={1} />
           <RequestTile study={s} index={2} />
           <ServicesTile study={s} names={serviceNames} index={3} />

@@ -98,6 +98,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* LIST */}
         <main className="mx-2 mb-2 min-w-0 flex-1 rounded-2xl border border-ui-line bg-ui-sheet p-4 sm:p-6 lg:ml-0">
+          {branch.readOnly && (
+            <p role="status" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[13px] text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+              {branch.name}: jen ke čtení. Popisy a úpravy se dělají v kartotéce pobočky, kam studie patří.
+            </p>
+          )}
           {!ready || !user ? (
             <div className="space-y-3" aria-busy="true">
               <Skeleton className="h-7 w-56" />

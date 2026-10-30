@@ -26,6 +26,21 @@ const DEV_COOKIE = process.env.BACKEND_DEV_COOKIE;
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
+/**
+ * Další backendy pro test víc poboček – jen v .env.local (adresy a cookie NIKDY do gitu):
+ *   BACKEND_BRANCHES={"CENTRAL":{"url":"http://<server>:8080","cookie":"JSESSIONIDSSO=…; JSESSIONID=…","readOnly":true}}
+ */
+type BranchBackend = { url: string; cookie: string; readOnly?: boolean };
+function branchBackend(code?: string): BranchBackend | null {
+  try {
+    const all = JSON.parse(process.env.BACKEND_BRANCHES ?? "{}") as Record<string, BranchBackend>;
+    const b = code ? all[code] : undefined;
+    return b?.url && b.cookie ? { ...b, url: b.url.replace(/\/+$/, "") } : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest, ctx: Ctx) {
   return forward(req, ctx);
 }
@@ -65,10 +80,23 @@ async function forward(req: NextRequest, ctx: Ctx) {
   }
 
   const { path } = await ctx.params;
-  // jiná pobočka přes test server nejde (máme jen jeden backend) – v produkci ji předá Václavův most
-  if (path[0] === "b") return jsonError(501, `Pobočka ${path[1]}: na testovacím serveru je jen jeden backend (víc poboček jen v demu).`);
+  // jiná pobočka: /b/{KÓD}/… → backend z BACKEND_BRANCHES (.env.local); v produkci ji předá Václavův most
+  let base = BACKEND_BASE;
+  let cookie = DEV_COOKIE;
+  let rest = path;
+  if (path[0] === "b") {
+    const br = branchBackend(path[1]);
+    if (!br) return jsonError(501, `Pobočka ${path[1]} není na testovacím serveru nastavená (BACKEND_BRANCHES).`);
+    // jen ke čtení (centrál): GET a vyhledávání (POST …/:search), nic jiného nepustit
+    if (br.readOnly && !(req.method === "GET" || (req.method === "POST" && /\/:search$/.test(path.join("/"))))) {
+      return jsonError(423, `Pobočka ${path[1]} je v Kartotéce jen ke čtení – zápis je zablokovaný.`);
+    }
+    base = br.url;
+    cookie = br.cookie;
+    rest = path.slice(2);
+  }
   const url = new URL(req.url);
-  const target = `${BACKEND_BASE}${BACKEND_PREFIX}/${path.join("/")}${
+  const target = `${base}${BACKEND_PREFIX}/${rest.join("/")}${
     url.search
   }`;
 
@@ -78,7 +106,7 @@ async function forward(req: NextRequest, ctx: Ctx) {
   copyHeader(req, headers, "accept", "application/json");
   copyHeader(req, headers, "accept-language");
   // Auth cookie pro Václavův backend
-  headers.set("cookie", DEV_COOKIE);
+  headers.set("cookie", cookie);
 
   const hasBody = !["GET", "HEAD", "DELETE"].includes(req.method);
   const body = hasBody ? await req.arrayBuffer() : undefined;

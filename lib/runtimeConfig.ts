@@ -20,6 +20,7 @@ export type BranchConfig = {
   name: string; // „Dobrovského“
   apiBase: string; // REST té pobočky – na vlastním serveru (most), např. /CardFileWebWS/rest/branch/DOBR
   legacyBaseUrl?: string; // stará kartotéka té pobočky (kam vložit popis)
+  readOnly?: boolean; // jen ke čtení (např. centrál – sync jen lokál → centrál, popisy se tam NEZAPISUJÍ)
 };
 
 export type RuntimeConfig = {
@@ -46,6 +47,16 @@ const DEMO_BRANCHES: BranchConfig[] = [
   { code: "VIDE", name: "Vídeňská", apiBase: "/api/cardfile/b/VIDE/rest" },
 ];
 
+function parseBranches(raw?: string): BranchConfig[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const v = JSON.parse(raw) as BranchConfig[];
+    return Array.isArray(v) && v.length ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 const fromFile: Partial<RuntimeConfig> = (typeof window !== "undefined" && window.__KARTOTEKA__) || {};
 const env = process.env;
 
@@ -58,8 +69,9 @@ export const runtimeConfig: RuntimeConfig = {
   studyViaApi: fromFile.studyViaApi ?? env.NEXT_PUBLIC_STUDY_VIA_API === "1",
   studyEditViaApi: fromFile.studyEditViaApi ?? env.NEXT_PUBLIC_STUDY_EDIT_VIA_API === "1",
   // demo (DEMO_MODE=1): čtyři smyšlené pobočky, ať jde přepínání vyzkoušet i doma
-  branches: fromFile.branches ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? DEMO_BRANCHES : undefined),
-  localBranch: fromFile.localBranch ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? "OLOM" : undefined),
+  // pořadí: config.js → NEXT_PUBLIC_BRANCHES (JSON v .env.local, test server) → demo
+  branches: fromFile.branches ?? parseBranches(env.NEXT_PUBLIC_BRANCHES) ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? DEMO_BRANCHES : undefined),
+  localBranch: fromFile.localBranch ?? env.NEXT_PUBLIC_LOCAL_BRANCH ?? (env.NEXT_PUBLIC_DEMO_BRANCHES === "1" ? "OLOM" : undefined),
 };
 
 /** Adresa „mostu“: bridge("queue/add") → /api/queue/add (vývoj) nebo <bridgeBase>/queue/add (produkce). */
