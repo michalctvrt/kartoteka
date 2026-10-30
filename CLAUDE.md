@@ -100,7 +100,9 @@ Podrobně `CALL250V.md`. Shrnutí:
 ## Kalendář objednávek (`/reception/calendar`)
 - Kalendáře SuperSaaS v `lib/supersaas/calendars.ts` (Vídeňská 1+2, Lesná 1+2, Dobrovského, UZLESNA20 = přesná KOPIE Lesné →
   ne do „Vše“, Testovací; „spankovka“ ZÁMĚRNĚ ne). Most pustí jen tyto (403). Výběr nahoře, „Vše“: den = kalendáře vedle sebe,
-  týden = přehled počtů (kalendář × den). „Dnešní objednávky“ na ploše = kalendář z Nastavení → Toto pracoviště (`ws.calendarId`).
+  týden = přehled počtů (kalendář × den). „Dnešní objednávky“ na ploše = kalendář z Nastavení → Toto pracoviště (`ws.calendarId`);
+  stav přišel/odebrán SDÍLENÝ mezi recepcemi (`components/hooks/useSharedBookingStatus.ts`, most `booking-status`,
+  simulace `.data/booking-status.json`, obnova 15 s, při výpadku drží prohlížeč a dopošle).
   ZÁPIS objednávek přes API SuperSaaS u našich kalendářů (typ „služby“) NEJDE – 501 „Not yet implemented for service schedule“
   (ověřeno na Testovací 2026-10-30). U typu „zdroje“ ano → kalendář „Testovací zdroj“ (856112, Michal ho založil).
   Nová objednávka: PANEL vedle kalendáře `components/calendar/BookingPanel.tsx` (NE vyskakovací okno – recepce musí vidět

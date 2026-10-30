@@ -92,6 +92,8 @@ serveru, v produkci to musí být v databázi.
 | PATCH | `staff/{id}` | úprava (role, oprávnění, aktivní) |
 | GET / POST | `templates` | šablony popisu / nová |
 | PUT / DELETE | `templates/{id}` | úprava / smazání |
+| GET | `booking-status?date=YYYY-MM-DD` | „Dnešní objednávky“ – kdo už přišel / byl odebrán (sdílené mezi recepcemi pobočky) |
+| POST | `booking-status` | uložit stav (`{ date, id, status: "checked_in" \| "removed" \| null, by }`), vrátí stav dne |
 
 Tvar dat: `lib/auth/types.ts` (zaměstnanec) a `lib/templates/types.ts` (šablona). Šablony jsou ve staré
 kartotéce v tabulce `study_description_template`, takže by to mohlo číst přímo odtamtud

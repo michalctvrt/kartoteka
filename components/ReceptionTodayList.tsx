@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { format, isToday, differenceInMinutes } from "date-fns";
 import { Clock, User, Check, X, RotateCcw } from "lucide-react";
 import React from "react";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import { bridge } from "@/lib/runtimeConfig";
-import { usePath } from "@/lib/routes";
 import { useWorkstation } from "@/components/queue/useWorkstation";
+import { useSharedBookingStatus } from "@/components/hooks/useSharedBookingStatus";
 
 interface SuperSaaSBooking {
   id: string | number;
@@ -30,10 +30,8 @@ interface ApiEvent {
   details: Record<string, string>;
 }
 
-type LocalState = Record<string, "scheduled" | "checked_in" | "removed">;
 type DerivedStatus = "scheduled" | "late" | "absent" | "checked_in" | "removed";
 
-const LS_KEY = "rt_statuses_v9";
 
 /**
  * `size` = podoba podle velikosti okna na ploše:
@@ -41,39 +39,16 @@ const LS_KEY = "rt_statuses_v9";
  *  M – jen aktivní objednávky, L – vše (aktivní, vyřízeno, zrušeno).
  */
 export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize } = {}) {
-  const pathname = usePath();
 
   // Inicializace stavu z localStorage
-  const [localState, setLocalState] = useState<LocalState>(() => {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return {};
-  });
+  // stav přišel / odebrán SDÍLENÝ mezi recepcemi (dřív jen v tomto prohlížeči)
+  const shared = useSharedBookingStatus();
+  const [, setTick] = useState(0); // přepočet „zpoždění“ každou minutu
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
   // kalendář podle nastavení tohoto počítače (Nastavení → Toto pracoviště)
   const calendarId = useWorkstation().ws.calendarId;
   const [loading, setLoading] = useState(true);
-
-  // 💾 Ulož stav do localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(localState));
-    } catch {}
-  }, [localState]);
-
-  // 🔁 Znovunačtení při návratu z jiné stránky
-  useEffect(() => {
-    const loadState = () => {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (raw) setLocalState(JSON.parse(raw));
-      } catch {}
-    };
-    loadState();
-  }, [pathname]);
 
   // 🆔 Stabilní ID
   const makeStableId = (title: string, start: string) => {
@@ -142,15 +117,14 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
 
   // 🔄 Automatická aktualizace zpoždění
   useEffect(() => {
-    const t = setInterval(() => setLocalState((s) => ({ ...s })), 60_000);
+    const t = setInterval(() => setTick((n) => n + 1), 60_000);
     return () => clearInterval(t);
   }, []);
 
-  const deriveStatus = useCallback(
-    (ev: ApiEvent): DerivedStatus => {
-      const id = ev.id;
-      if (localState[id] === "checked_in") return "checked_in";
-      if (localState[id] === "removed") return "removed";
+  const deriveStatus = (ev: ApiEvent): DerivedStatus => {
+      const st = shared.status(ev.id);
+      if (st === "checked_in") return "checked_in";
+      if (st === "removed") return "removed";
 
       const now = new Date();
       const start = new Date(ev.start);
@@ -159,22 +133,11 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
       if (minutesLate >= 20) return "absent";
       if (minutesLate >= 0) return "late";
       return "scheduled";
-    },
-    [localState]
-  );
+  };
 
-  const markCheckedIn = (id: string) =>
-    setLocalState((prev) => ({ ...prev, [id]: "checked_in" }));
-
-  const uncheck = (id: string) =>
-    setLocalState((prev) => {
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
-
-  const markRemoved = (id: string) =>
-    setLocalState((prev) => ({ ...prev, [id]: "removed" }));
+  const markCheckedIn = (id: string) => shared.set(id, "checked_in");
+  const uncheck = (id: string) => shared.set(id, null);
+  const markRemoved = (id: string) => shared.set(id, "removed");
 
   const truncate = (text: string | undefined, max: number) =>
     !text ? "—" : text.length > max ? text.substring(0, max) + "…" : text;
@@ -191,11 +154,9 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
   }
 
   // 🧩 Rozdělení do sekcí
-  const activeEvents = events.filter(
-    (e) => localState[e.id] !== "checked_in" && localState[e.id] !== "removed"
-  );
-  const doneEvents = events.filter((e) => localState[e.id] === "checked_in");
-  const removedEvents = events.filter((e) => localState[e.id] === "removed");
+  const activeEvents = events.filter((e) => !shared.status(e.id));
+  const doneEvents = events.filter((e) => shared.status(e.id) === "checked_in");
+  const removedEvents = events.filter((e) => shared.status(e.id) === "removed");
 
   // 🧩 Pomocná funkce pro vykreslení seznamu
   const renderList = (
@@ -228,6 +189,8 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
                   <span className="hidden sm:inline">
                     {truncate(ev.details["Vyšetření"], 30)}
                   </span>
+                  {/* kdo odškrtl – při víc recepcích */}
+                  {shared.by(ev.id) && <span className="hidden text-ui-faint md:inline">· {shared.by(ev.id)}</span>}
                 </div>
               </div>
             </div>
@@ -306,6 +269,11 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
 
   return (
     <div className="flex flex-col gap-6">
+      {shared.offline && (
+        <p role="status" className="rounded-md border border-amber-200 px-3 py-2 text-[12px] text-amber-800 dark:border-amber-900 dark:text-amber-200">
+          Stav se teď nedaří uložit pro ostatní recepce – drží se v tomto počítači a pošle se, až server odpoví.
+        </p>
+      )}
       {/* 🔵 Aktivní objednávky */}
       <section>
                   <h3 className="mb-1 text-sm font-semibold">Aktivní objednávky</h3>
