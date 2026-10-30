@@ -21,7 +21,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
 import TimeGrid, { type GridColumn } from "@/components/calendar/TimeGrid";
 import { ALL_REAL, BOOKABLE, CALENDARS, calendarById } from "@/lib/supersaas/calendars";
-import BookingDialog, { type BookingPrefill } from "@/components/calendar/BookingDialog";
+import BookingPanel, { draftEnd, emptyDraft, type Draft } from "@/components/calendar/BookingPanel";
 import { useSession } from "@/components/auth/SessionProvider";
 import { PatientService } from "@/lib/api/generated/services/PatientService";
 import {
@@ -82,7 +82,7 @@ function CalendarPage() {
   const router = useRouter();
   const query = useSearchParams();
   const canBook = useSession().can("calendar.book") && BOOKABLE.length > 0;
-  const [booking, setBooking] = useState<BookingPrefill | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null); // rozepsaná nová objednávka (panel vpravo)
   const [flash, setFlash] = useState<string | null>(null);
   const [sel, setSel] = useCalendarSel();
   const ids = useMemo(() => (sel === "all" ? ALL_REAL.map((c) => c.id) : [sel]), [sel]);
@@ -122,7 +122,22 @@ function CalendarPage() {
         }))
       : undefined;
 
-  // z karty pacienta: ?book=1&pid=… → formulář s údaji pacienta (adresa se hned uklidí, ať se neotvírá znovu)
+  const selCal = sel === "all" ? null : calendarById(sel);
+
+  /**
+   * Začít novou objednávku: panel vpravo + kalendář přepnout na ten, do kterého se objednává
+   * (ve dni), aby šlo hledat volné místo. Termín pak kliknutím do mřížky.
+   */
+  const startBooking = (p: Partial<Draft> = {}) => {
+    const calendarId = selCal?.bookable ? selCal.id : (p.calendarId ?? emptyDraft().calendarId);
+    setSel(calendarId);
+    setView("day");
+    setSelectedId(null);
+    setFlash(null);
+    setDraft(emptyDraft({ ...p, calendarId }));
+  };
+
+  // z karty pacienta: ?book=1&pid=… → panel s údaji pacienta (adresa se hned uklidí, ať se neotvírá znovu)
   const bookPid = query.get("book") === "1" ? query.get("pid") : null;
   useEffect(() => {
     if (!bookPid || !canBook) return;
@@ -130,8 +145,7 @@ function CalendarPage() {
     PatientService.findByPid(bookPid)
       .then((pt) => {
         const d = pt.patientDataInfo;
-        setBooking({
-          calendarId: sel === "all" ? undefined : sel,
+        startBooking({
           fullName: [d?.firstName, d?.lastName].filter(Boolean).join(" "),
           birthYear: d?.birthDate?.slice(0, 4) ?? "",
           gender: GENDER[d?.gender ?? ""] ?? "",
@@ -139,12 +153,20 @@ function CalendarPage() {
           email: d?.email ?? "",
         });
       })
-      .catch(() => setBooking({}));
-  }, [bookPid, canBook, router, sel]);
+      .catch(() => startBooking());
+    // startBooking se mění s každým vykreslením – spustit jen jednou pro danou adresu
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookPid, canBook, router]);
 
-  // klik do volného místa – jen v kalendáři, kam jde zapisovat
-  const selCal = sel === "all" ? null : calendarById(sel);
-  const onEmptyClick = canBook && selCal?.bookable ? (start: Date) => setBooking({ calendarId: selCal.id, start }) : undefined;
+  // klik do volného místa – jen v kalendáři, kam jde zapisovat; vyplněné údaje zůstanou, změní se jen termín
+  const onEmptyClick =
+    canBook && selCal?.bookable
+      ? (start: Date) => {
+          setSelectedId(null);
+          setDraft((d) => (d ? { ...d, start, calendarId: selCal.id } : emptyDraft({ calendarId: selCal.id, start })));
+        }
+      : undefined;
+  const draftSlot = draft?.start && draft.calendarId === selCal?.id ? { start: draft.start, end: draftEnd(draft)! } : undefined;
 
   const step = (dir: 1 | -1) => setDate((d) => addDays(d, dir * (view === "day" ? 1 : 7)));
 
@@ -196,7 +218,7 @@ function CalendarPage() {
             <RefreshCw className={cn(loading && "animate-spin")} /> Obnovit
           </Button>
           {canBook && (
-            <Button onClick={() => setBooking({ calendarId: selCal?.bookable ? selCal.id : undefined })}>
+            <Button onClick={() => startBooking()} disabled={!!draft}>
               <CalendarPlus /> Nová objednávka
             </Button>
           )}
@@ -207,21 +229,6 @@ function CalendarPage() {
         <p role="status" className="rounded-lg border border-emerald-200 px-3 py-2 text-[13px] text-emerald-800 dark:border-emerald-900 dark:text-emerald-200">
           {flash}
         </p>
-      )}
-      {booking && (
-        <BookingDialog
-          prefill={booking}
-          onClose={() => setBooking(null)}
-          onCreated={({ id, calendarId, start }) => {
-            setBooking(null);
-            setSel(calendarId);
-            setView("day");
-            setDate(startOfDay(start));
-            setSelectedId(id);
-            setFlash(`Objednáno: ${start.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "numeric" })} ${hm(start)} · ${calendarById(calendarId)?.name}`);
-            reload();
-          }}
-        />
       )}
 
       {/* výběr kalendáře */}
@@ -375,13 +382,34 @@ function CalendarPage() {
                   now={now}
                   colorOf={sel === "all" ? colorOf : undefined}
                   onEmptyClick={onEmptyClick}
+                  pending={draftSlot}
                 />
               </motion.div>
             </AnimatePresence>
           )}
         </BentoTile>
 
-        {/* detail */}
+        {/* vpravo: rozepsaná nová objednávka, jinak detail */}
+        {draft ? (
+          <BookingPanel
+            index={4}
+            draft={draft}
+            onChange={(p) => {
+              setDraft((d) => (d ? { ...d, ...p } : d));
+              if (p.start) setDate(startOfDay(p.start)); // ručně změněný den → ukázat ho v kalendáři
+            }}
+            onCalendar={(id) => setSel(id)}
+            onClose={() => setDraft(null)}
+            onCreated={({ id, calendarId, start }) => {
+              setDraft(null);
+              setSel(calendarId);
+              setDate(startOfDay(start));
+              setSelectedId(id);
+              setFlash(`Objednáno: ${start.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "numeric" })} ${hm(start)} · ${calendarById(calendarId)?.name}`);
+              reload();
+            }}
+          />
+        ) : (
         <BookingDetail
           booking={selected ?? (loading ? null : next ?? null)}
           isNext={!selected && !!next}
@@ -395,6 +423,7 @@ function CalendarPage() {
             reload();
           }}
         />
+        )}
       </Bento>
     </div>
   );

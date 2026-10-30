@@ -103,7 +103,8 @@ Podrobně `CALL250V.md`. Shrnutí:
   týden = přehled počtů (kalendář × den). „Dnešní objednávky“ na ploše = kalendář z Nastavení → Toto pracoviště (`ws.calendarId`).
   ZÁPIS objednávek přes API SuperSaaS u našich kalendářů (typ „služby“) NEJDE – 501 „Not yet implemented for service schedule“
   (ověřeno na Testovací 2026-10-30). U typu „zdroje“ ano → kalendář „Testovací zdroj“ (856112, Michal ho založil).
-  Nová objednávka: `components/calendar/BookingDialog.tsx` (tlačítko, klik do volného místa, karta pacienta „Objednat termín“
+  Nová objednávka: PANEL vedle kalendáře `components/calendar/BookingPanel.tsx` (NE vyskakovací okno – recepce musí vidět
+  kalendář a hledat volné místo; termín = klik do mřížky, údaje zůstanou), „Na jaké vyšetření“ povinné → field_1_r (tlačítko, karta pacienta „Objednat termín“
   → `/reception/calendar?book=1&pid=`), zrušení v detailu. Server pustí zápis jen do `bookable` kalendářů uvedených
   v SUPERSAAS_WRITE_SCHEDULES (.env.local, teď 856112) – OSTRÉ KALENDÁŘE NEPŘIDÁVAT bez souhlasu Michala.
   Do Testovací / Testovací zdroj smím zapisovat (zkoušet bez telefonu a e-mailu, po testu smazat).

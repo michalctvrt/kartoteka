@@ -50,6 +50,7 @@ export default function TimeGrid({
   now,
   colorOf,
   onEmptyClick,
+  pending,
 }: {
   days?: Date[];
   columns?: GridColumn[];
@@ -60,6 +61,8 @@ export default function TimeGrid({
   colorOf?: (b: Booking) => string | undefined;
   /** klik do volného místa → nová objednávka (jen sloupce, kam jde zapisovat – vrací null, když ne) */
   onEmptyClick?: (start: Date, col: GridColumn) => void;
+  /** vybraný termín rozepsané nové objednávky – ukáže se jako čárkovaný blok */
+  pending?: { start: Date; end: Date };
 }) {
   const [hover, setHover] = useState<{ key: string; min: number } | null>(null);
   const columns: GridColumn[] = given ?? (days ?? []).map((d) => ({ key: d.toISOString(), date: d }));
@@ -131,7 +134,16 @@ export default function TimeGrid({
                   : undefined
               }
             >
-              {hover?.key === c.key && (
+              {pending && sameDay(pending.start, c.date) && (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-1 z-[4] rounded-md border-2 border-dashed border-ui-primary bg-ui-sheet/80 px-2 py-1 text-[12px] font-medium text-ui-primary"
+                  style={{ top: top(pending.start) + 1, height: Math.max(22, ((pending.end.getTime() - pending.start.getTime()) / 60000) * PPM - 2) }}
+                >
+                  {hm(pending.start)} nová objednávka
+                </div>
+              )}
+              {hover?.key === c.key && !(pending && sameDay(pending.start, c.date) && top(pending.start) === hover.min * PPM) && (
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-x-1 z-[2] flex items-start rounded-md border border-dashed border-ui-primary px-2 py-1 text-[12px] text-ui-primary"

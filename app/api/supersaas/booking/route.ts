@@ -175,6 +175,8 @@ export async function POST(req: Request) {
     const v = b[f]?.trim();
     if (v) form.set(`booking[${f}]`, v);
   }
+  // na jaké vyšetření – vždy (ostré kalendáře pole „Požadované vyšetření“ mají; kde chybí, SuperSaaS ho zahodí)
+  if (b.field_1_r?.trim()) form.set("booking[field_1_r]", b.field_1_r.trim());
 
   if (DEMO_MODE) {
     const r = demoCreateBooking(scheduleId, Object.fromEntries(form));
