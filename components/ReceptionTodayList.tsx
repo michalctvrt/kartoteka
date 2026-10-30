@@ -7,6 +7,7 @@ import React from "react";
 import { FULL, type WidgetSize } from "@/components/dashboard/size";
 import { bridge } from "@/lib/runtimeConfig";
 import { usePath } from "@/lib/routes";
+import { useWorkstation } from "@/components/queue/useWorkstation";
 
 interface SuperSaaSBooking {
   id: string | number;
@@ -52,6 +53,8 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
   });
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
+  // kalendář podle nastavení tohoto počítače (Nastavení → Toto pracoviště)
+  const calendarId = useWorkstation().ws.calendarId;
   const [loading, setLoading] = useState(true);
 
   // 💾 Ulož stav do localStorage
@@ -89,7 +92,7 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
     let mounted = true;
     const fetchToday = async () => {
       try {
-        const res = await fetch(bridge("supersaas/booking?schedule_id=268518"), {
+        const res = await fetch(bridge(`supersaas/booking?schedule_id=${calendarId}`), {
           cache: "no-store",
         });
         const data: SuperSaaSBooking[] = await res.json();
@@ -135,7 +138,7 @@ export default function ReceptionTodayList({ size = FULL }: { size?: WidgetSize 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [calendarId]);
 
   // 🔄 Automatická aktualizace zpoždění
   useEffect(() => {

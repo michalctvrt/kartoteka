@@ -15,10 +15,12 @@ export interface Workstation {
   receptionCounter: string;
   modality: Modality;
   operatorId: string;
+  /** kalendář SuperSaaS pro „Dnešní objednávky“ na ploše (lib/supersaas/calendars.ts) */
+  calendarId: number;
 }
 
 const KEY = "call250v_workstation_v1";
-const DEFAULTS: Workstation = { receptionCounter: "P1", modality: "RTG", operatorId: "" };
+const DEFAULTS: Workstation = { receptionCounter: "P1", modality: "RTG", operatorId: "", calendarId: 268518 };
 
 const EVENT = "call250v-workstation";
 

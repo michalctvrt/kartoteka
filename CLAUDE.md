@@ -98,7 +98,12 @@ Podrobně `CALL250V.md`. Shrnutí:
 - Sekce podle oprávnění; ukládá se hned, bez tlačítka Uložit.
 
 ## Kalendář objednávek (`/reception/calendar`)
-- Vlastní (react-big-calendar odstraněn): `components/calendar/useBookings.ts` (SuperSaaS, rozvrh UZ Vídeňská),
+- Kalendáře SuperSaaS v `lib/supersaas/calendars.ts` (Vídeňská 1+2, Lesná 1+2, Dobrovského, UZLESNA20 = přesná KOPIE Lesné →
+  ne do „Vše“, Testovací; „spankovka“ ZÁMĚRNĚ ne). Most pustí jen tyto (403). Výběr nahoře, „Vše“: den = kalendáře vedle sebe,
+  týden = přehled počtů (kalendář × den). „Dnešní objednávky“ na ploše = kalendář z Nastavení → Toto pracoviště (`ws.calendarId`).
+  ZÁPIS objednávek přes API SuperSaaS u našich kalendářů (typ „služby“) NEJDE – 501 „Not yet implemented for service schedule“
+  (ověřeno na Testovací 2026-10-30). Do Testovací smím zapisovat (Michal), do ostatních NE.
+- Vlastní (react-big-calendar odstraněn): `components/calendar/useBookings.ts` (víc kalendářů najednou, `isBlock` = blokace ≥ 3 h),
   `TimeGrid.tsx` (Den/Týden, souběžné vedle sebe, čára „teď“, blok ≥ 3 h = blokace šrafovaně).
 - Bento: Dnes (2 sl.), Další na řadě, Tento týden; kalendář (3 sl.) + detail (bez výběru = další na řadě),
   „Vyhledat v kartotéce“ → `/reception/patients?q=jméno`. Šipky ← → posouvají den/týden.

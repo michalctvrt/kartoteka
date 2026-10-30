@@ -111,7 +111,7 @@ Tyhle při výpadku internetu stejně nepůjdou, aplikace pak jen napíše, že 
 
 | Metoda | Cesta | Co dělá |
 |---|---|---|
-| GET | `supersaas/booking?schedule_id=…` | objednávky z kalendáře SuperSaaS (účet a API klíč v konfiguraci serveru) |
+| GET | `supersaas/booking?schedule_id=…` | objednávky z kalendáře SuperSaaS (účet a API klíč v konfiguraci serveru). Pustit jen kalendáře ze seznamu v `lib/supersaas/calendars.ts` (ostatní 403) |
 | POST | `ops/vzp` | ověření pojištění u VZP – potřebuje certifikát, tělo i odpověď se přeposílají beze změny |
 
 ### 3.5 Provozní aplikace (spotřební materiál, hromadný tisk, online přístup, připojení lékaři) – `ops/*`

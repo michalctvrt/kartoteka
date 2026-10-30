@@ -11,7 +11,7 @@
 export type Modality = "RTG" | "UZ" | "MRI";
 
 /**
- * Výběr na kiosku u vstupu – modalitu pacient NEVOLÍ (rozhodnutí Michala 2026-10-29), jen proč přišel:
+ * Výběr na kiosku u vstupu – modalitu pacient NEVOLÍ , jen proč přišel:
  *   exam    = přišel na vyšetření (objednaný / se žádankou na teď)
  *   booking = chce se jen objednat (často přijde se žádankou a chce termín např. na UZ)
  * Modalitu určí recepce založením vyšetření (→ čekárna RTG/UZ/MRI).

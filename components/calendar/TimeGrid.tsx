@@ -1,14 +1,16 @@
 "use client";
 
 /**
- * Časová mřížka kalendáře (den = 1 sloupec, týden = pracovní dny).
+ * Časová mřížka kalendáře. Sloupce = dny (den / týden), nebo `columns` = cokoli jiného
+ * (pohled „Vše“ ve dni: jeden sloupec na kalendář pobočky).
  * Objednávky jsou bloky podle času; souběžné se rozdělí vedle sebe.
- * Uplynulé jsou ztlumené, dnes je vidět čára „teď“.
+ * Uplynulé jsou ztlumené, dnes je vidět čára „teď“. `colorOf` = barva proužku (z kterého kalendáře).
  */
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { type Booking, hm, sameDay } from "./useBookings";
+import { type Booking, hm, isBlock, sameDay } from "./useBookings";
 
 const PPM = 2.3; // pixelů na minutu → 20 min = 46 px (vejde se jméno + popis vyšetření)
 
@@ -37,39 +39,48 @@ function lanes(list: Booking[]) {
   return out;
 }
 
+export type GridColumn = { key: string; date: Date; label?: ReactNode; filter?: (b: Booking) => boolean };
+
 export default function TimeGrid({
   days,
+  columns: given,
   bookings,
   selectedId,
   onSelect,
   now,
+  colorOf,
 }: {
-  days: Date[];
+  days?: Date[];
+  columns?: GridColumn[];
   bookings: Booking[];
   selectedId: number | null;
   onSelect: (b: Booking) => void;
   now: Date;
+  colorOf?: (b: Booking) => string | undefined;
 }) {
-  const inRange = bookings.filter((b) => days.some((d) => sameDay(d, b.start)));
+  const columns: GridColumn[] = given ?? (days ?? []).map((d) => ({ key: d.toISOString(), date: d }));
+  const inCol = (b: Booking, c: GridColumn) => sameDay(c.date, b.start) && (c.filter?.(b) ?? true);
+  const inRange = bookings.filter((b) => columns.some((c) => inCol(b, c)));
   const fromH = Math.min(7, ...inRange.map((b) => b.start.getHours()));
   const toH = Math.max(17, ...inRange.map((b) => b.end.getHours() + (b.end.getMinutes() ? 1 : 0)));
   const minutes = (toH - fromH) * 60;
   const top = (d: Date) => ((d.getHours() - fromH) * 60 + d.getMinutes()) * PPM;
   const hours = Array.from({ length: toH - fromH + 1 }, (_, i) => fromH + i);
-  const cols = `3.25rem repeat(${days.length}, minmax(0, 1fr))`;
+  const cols = `3.25rem repeat(${columns.length}, minmax(0, 1fr))`;
 
   return (
     <div>
       {/* záhlaví dnů */}
       <div className="sticky top-0 z-10 grid border-b border-ui-line bg-ui-sheet" style={{ gridTemplateColumns: cols }}>
         <span />
-        {days.map((d) => {
+        {columns.map((c) => {
+          const d = c.date;
           const today = sameDay(d, now);
-          const count = inRange.filter((b) => sameDay(b.start, d)).length;
+          const count = inRange.filter((b) => inCol(b, c)).length;
           return (
-            <div key={d.toISOString()} className="px-2 py-2 text-[13px]">
-              <span className={cn("font-medium", today ? "text-ui-primary" : "text-ui-ink")}>
-                {d.toLocaleDateString("cs-CZ", { weekday: days.length > 1 ? "short" : "long", day: "numeric", month: "numeric" })}
+            <div key={c.key} className="min-w-0 truncate px-2 py-2 text-[13px]">
+              <span className={cn("font-medium", today && !c.label ? "text-ui-primary" : "text-ui-ink")}>
+                {c.label ?? d.toLocaleDateString("cs-CZ", { weekday: columns.length > 1 ? "short" : "long", day: "numeric", month: "numeric" })}
               </span>
               <span className="ml-1.5 text-ui-faint">{count || ""}</span>
             </div>
@@ -91,13 +102,13 @@ export default function TimeGrid({
             </span>
           ))}
         </div>
-        {days.map((d, di) => {
-          const list = inRange.filter((b) => sameDay(b.start, d));
+        {columns.map((c, di) => {
+          const list = inRange.filter((b) => inCol(b, c));
           const lane = lanes(list);
-          const today = sameDay(d, now);
+          const today = sameDay(c.date, now);
           const nowTop = top(now);
           return (
-            <div key={d.toISOString()} className={cn("relative border-l border-ui-rule", today && "bg-ui-raised")}>
+            <div key={c.key} className={cn("relative border-l border-ui-rule", today && !c.label && "bg-ui-raised")}>
               {hours.map((h) => (
                 <div key={h} aria-hidden className="absolute inset-x-0 border-t border-ui-rule" style={{ top: (h - fromH) * 60 * PPM }} />
               ))}
@@ -106,8 +117,7 @@ export default function TimeGrid({
                 const h = Math.max(22, (b.end.getTime() - b.start.getTime()) / 60000 * PPM - 2);
                 const past = b.end < now;
                 const selected = b.id === selectedId;
-                // dlouhý blok (≥ 3 h) = blokace rozvrhu, ne objednávka pacienta
-                const block = b.end.getTime() - b.start.getTime() >= 3 * 3600_000;
+                const block = isBlock(b); // blokace rozvrhu, ne objednávka pacienta
                 return (
                   <motion.button
                     key={b.id}
@@ -125,6 +135,7 @@ export default function TimeGrid({
                       selected && "z-[5] ring-2 ring-ui-primary"
                     )}
                     style={{
+                      ...(colorOf && !block ? { borderLeftColor: colorOf(b) } : null),
                       top: top(b.start) + 1,
                       height: h,
                       left: `calc(${(l.lane / l.of) * 100}% + 2px)`,

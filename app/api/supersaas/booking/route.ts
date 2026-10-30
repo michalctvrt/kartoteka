@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { demoBookings } from "@/lib/demo/bookings";
 import { DEMO_MODE } from "@/lib/demo/mode";
+import { CALENDARS, DEFAULT_CALENDAR } from "@/lib/supersaas/calendars";
 
 // 🔐 Credentials se čtou z .env.local (NEVER commit)
 const ACCOUNT_NAME = process.env.SUPERSAAS_USER;
 const API_KEY = process.env.SUPERSAAS_API_KEY;
 const BASE_URL = "https://www.supersaas.com/api";
-const SCHEDULE_ID = 268518; // UZ Vídeňská — TODO: vytáhnout do config (multi-pobočka)
 
 interface SuperSaaSBooking {
   id: number;
@@ -56,8 +56,14 @@ function toCzechISO(dateStr?: string): string {
 }
 
 export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const scheduleId = Number(searchParams.get("schedule_id") ?? DEFAULT_CALENDAR);
+  // jen kalendáře z lib/supersaas/calendars.ts (ne všechno, co na účtu je)
+  if (!CALENDARS.some((c) => c.id === scheduleId)) {
+    return NextResponse.json({ error: "Tento kalendář Kartotéka nezobrazuje" }, { status: 403 });
+  }
   // Demo režim (doma / bez klíčů): smyšlené objednávky, SuperSaaS se nevolá
-  if (DEMO_MODE) return NextResponse.json(demoBookings());
+  if (DEMO_MODE) return NextResponse.json(demoBookings(scheduleId));
   if (!ACCOUNT_NAME || !API_KEY) {
     console.error(
       "❌ Chybí SUPERSAAS_USER nebo SUPERSAAS_API_KEY v .env.local"
@@ -67,9 +73,6 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
-
-  const { searchParams } = new URL(req.url);
-  const scheduleId = searchParams.get("schedule_id") ?? String(SCHEDULE_ID);
 
   const authHeader = `Basic ${Buffer.from(
     `${ACCOUNT_NAME}:${API_KEY}`
@@ -97,7 +100,8 @@ export async function GET(req: Request) {
 
     if (!rangeRes.ok) {
       console.error("❌ Range API error:", rangeRes.status);
-      return NextResponse.json([], { status: 200 });
+      // chybu ukázat (dřív se vracel prázdný seznam = vypadalo to jako „nikdo objednaný“)
+      return NextResponse.json({ error: `SuperSaaS odpověděl ${rangeRes.status}` }, { status: 502 });
     }
 
     const data = (await rangeRes.json()) as

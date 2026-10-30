@@ -5,9 +5,11 @@
  *   Dnes (2 sl.) · Další na řadě · Tento týden
  *   Kalendář Den / Týden (3 sl.) + detail objednávky (1 sl.; bez výběru = další na řadě)
  * Data ze SuperSaaS (components/calendar/useBookings). Šipky ← → posouvají den/týden.
+ * Nahoře výběr kalendáře (lib/supersaas/calendars.ts): „Vše“ = všechny pobočky – den ukáže kalendáře
+ * vedle sebe, týden je sloučí (barevný proužek = kalendář). Výběr si pamatuje prohlížeč.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Mail, Phone, RefreshCw, UserSearch } from "lucide-react";
@@ -16,11 +18,12 @@ import { Button } from "@/components/ui/button";
 import { Bento, BentoTile, DataRow, Metric } from "@/components/ui/bento";
 import { Segmented } from "@/components/ui/segmented";
 import { Ghost, Skeleton } from "@/components/ui/skeleton";
-import TimeGrid from "@/components/calendar/TimeGrid";
+import TimeGrid, { type GridColumn } from "@/components/calendar/TimeGrid";
+import { ALL_REAL, CALENDARS, calendarById } from "@/lib/supersaas/calendars";
 import {
-  SCHEDULE_NAME,
   addDays,
   hm,
+  isBlock,
   sameDay,
   startOfDay,
   startOfWeek,
@@ -31,8 +34,38 @@ import {
 type View = "day" | "week";
 const plural = (n: number) => (n === 1 ? "objednávka" : n >= 2 && n <= 4 ? "objednávky" : "objednávek");
 
+// výběr kalendáře: "all" nebo číslo kalendáře; v prohlížeči (useSyncExternalStore = bez nesouladu se serverem)
+const SEL_KEY = "kartoteka_calendar_sel";
+const SEL_EVENT = "kartoteka-calendar-sel";
+const subscribeSel = (cb: () => void) => {
+  window.addEventListener(SEL_EVENT, cb);
+  return () => window.removeEventListener(SEL_EVENT, cb);
+};
+const readSel = () => {
+  try {
+    return localStorage.getItem(SEL_KEY) ?? "all";
+  } catch {
+    return "all";
+  }
+};
+function useCalendarSel(): [number | "all", (v: number | "all") => void] {
+  const raw = useSyncExternalStore(subscribeSel, readSel, () => "all");
+  const sel = raw !== "all" && calendarById(Number(raw)) ? Number(raw) : "all";
+  const set = (v: number | "all") => {
+    try {
+      localStorage.setItem(SEL_KEY, String(v));
+    } catch {}
+    window.dispatchEvent(new Event(SEL_EVENT));
+  };
+  return [sel, set];
+}
+
+const colorOf = (b: Booking) => calendarById(b.calendarId)?.color;
+
 export default function CalendarPage() {
-  const { list, loading, error, reload } = useBookings();
+  const [sel, setSel] = useCalendarSel();
+  const ids = useMemo(() => (sel === "all" ? ALL_REAL.map((c) => c.id) : [sel]), [sel]);
+  const { list, loading, error, reload } = useBookings(ids);
   const [view, setView] = useState<View>("day");
   const [date, setDate] = useState(() => startOfDay(new Date()));
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -52,6 +85,22 @@ export default function CalendarPage() {
     return week.filter((d, i) => i < 5 || list.some((b) => sameDay(b.start, d)));
   }, [view, date, list]);
 
+  // „Vše“ ve dni = jeden sloupec na kalendář pobočky
+  const columns: GridColumn[] | undefined =
+    sel === "all" && view === "day"
+      ? ALL_REAL.map((c) => ({
+          key: String(c.id),
+          date,
+          filter: (b: Booking) => b.calendarId === c.id,
+          label: (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
+              {c.short}
+            </span>
+          ),
+        }))
+      : undefined;
+
   const step = (dir: 1 | -1) => setDate((d) => addDays(d, dir * (view === "day" ? 1 : 7)));
 
   // klávesy ← → (mimo pole formulářů)
@@ -65,11 +114,13 @@ export default function CalendarPage() {
     return () => window.removeEventListener("keydown", h);
   });
 
-  const today = list.filter((b) => sameDay(b.start, now));
+  // počty a „další na řadě“ jen z objednávek pacientů (blokace rozvrhu ne)
+  const patients = list.filter((b) => !isBlock(b));
+  const today = patients.filter((b) => sameDay(b.start, now));
   const doneToday = today.filter((b) => b.end <= now).length;
-  const next = list.find((b) => b.end > now);
+  const next = patients.find((b) => b.end > now);
   const weekStart = startOfWeek(now);
-  const thisWeek = list.filter((b) => b.start >= weekStart && b.start < addDays(weekStart, 7));
+  const thisWeek = patients.filter((b) => b.start >= weekStart && b.start < addDays(weekStart, 7));
   const selected = list.find((b) => b.id === selectedId) ?? null;
   const isToday = view === "day" ? sameDay(date, now) : sameDay(startOfWeek(date), weekStart);
 
@@ -91,12 +142,40 @@ export default function CalendarPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Kalendář objednávek</h1>
-          <p className="mt-1 text-sm text-ui-muted">{SCHEDULE_NAME} · objednávky ze SuperSaaS</p>
+          <p className="mt-1 text-sm text-ui-muted">
+            {sel === "all" ? "Všechny pobočky" : calendarById(sel)?.name} · objednávky ze SuperSaaS
+          </p>
         </div>
         <Button variant="ghost" size="sm" onClick={reload} disabled={loading}>
           <RefreshCw className={cn(loading && "animate-spin")} /> Obnovit
         </Button>
       </header>
+
+      {/* výběr kalendáře */}
+      <div role="radiogroup" aria-label="Kalendář" className="flex flex-wrap gap-1.5">
+        {[{ id: "all" as const, short: "Vše", color: "" }, ...CALENDARS].map((c) => {
+          const on = sel === c.id;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => {
+                setSel(c.id);
+                setSelectedId(null);
+              }}
+              className={cn(
+                "ui-press inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[13px] transition-colors",
+                on ? "border-ui-primary bg-ui-active font-medium text-ui-ink" : "border-ui-line text-ui-muted hover:bg-ui-raised hover:text-ui-ink"
+              )}
+            >
+              {c.color && <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: c.color }} />}
+              {c.short}
+            </button>
+          );
+        })}
+      </div>
 
       {error && (
         <div className="ui-tile flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
@@ -193,17 +272,36 @@ export default function CalendarPage() {
                 <Skeleton key={i} className="h-8" style={{ width: `${60 + ((i * 13) % 35)}%` }} />
               ))}
             </div>
+          ) : sel === "all" && view === "week" ? (
+            // všechny kalendáře × týden = přehled počtů (bloky by byly nečitelně úzké)
+            <WeekOverview
+              days={days}
+              list={patients}
+              now={now}
+              onPick={(d) => {
+                setDate(startOfDay(d));
+                setView("day");
+              }}
+            />
           ) : (
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={`${view}-${days[0].toISOString()}`}
+                key={`${view}-${sel}-${days[0].toISOString()}`}
                 initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.15 }}
                 className="px-2 pb-3"
               >
-                <TimeGrid days={days} bookings={list} selectedId={selectedId} onSelect={(b) => setSelectedId(b.id)} now={now} />
+                <TimeGrid
+                  days={days}
+                  columns={columns}
+                  bookings={list}
+                  selectedId={selectedId}
+                  onSelect={(b) => setSelectedId(b.id)}
+                  now={now}
+                  colorOf={sel === "all" ? colorOf : undefined}
+                />
               </motion.div>
             </AnimatePresence>
           )}
@@ -276,7 +374,12 @@ function BookingDetail({
                   </a>
                 )}
               </DataRow>
-              <DataRow label="Služba">{d["Typ služby"]}</DataRow>
+              <DataRow label="Kalendář">
+                <span className="inline-flex items-center gap-1.5">
+                  <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: calendarById(b.calendarId)?.color }} />
+                  {calendarById(b.calendarId)?.name}
+                </span>
+              </DataRow>
             </dl>
             <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
               <Link href={`/reception/patients?q=${encodeURIComponent(b.title)}`}>
@@ -289,3 +392,66 @@ function BookingDetail({
     </BentoTile>
   );
 }
+
+/** Týden pro všechny kalendáře: řádek = kalendář, sloupec = den, číslo = objednávky. Klik → ten den. */
+function WeekOverview({ days, list, now, onPick }: { days: Date[]; list: Booking[]; now: Date; onPick: (d: Date) => void }) {
+  const count = (calId: number, d: Date) => list.filter((b) => b.calendarId === calId && sameDay(b.start, d)).length;
+  const max = Math.max(1, ...ALL_REAL.flatMap((c) => days.map((d) => count(c.id, d))));
+  return (
+    <div className="overflow-x-auto px-4 pb-4">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-[12px] text-ui-muted">
+            <th className="py-2 pr-3 font-normal">Kalendář</th>
+            {days.map((d) => (
+              <th key={d.toISOString()} className={cn("px-2 py-2 text-center font-normal", sameDay(d, now) && "font-medium text-ui-primary")}>
+                {d.toLocaleDateString("cs-CZ", { weekday: "short", day: "numeric", month: "numeric" })}
+              </th>
+            ))}
+            <th className="py-2 pl-3 text-right font-medium text-ui-ink">Týden</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ALL_REAL.map((c, i) => {
+            const total = days.reduce((n, d) => n + count(c.id, d), 0);
+            return (
+              <motion.tr
+                key={c.id}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 + i * 0.04 }}
+                className="border-t border-ui-rule"
+              >
+                <td className="whitespace-nowrap py-2 pr-3">
+                  <span className="inline-flex items-center gap-1.5 font-medium">
+                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: c.color }} />
+                    {c.short}
+                  </span>
+                </td>
+                {days.map((d) => {
+                  const n = count(c.id, d);
+                  return (
+                    <td key={d.toISOString()} className="px-1 py-1 text-center">
+                      <button
+                        type="button"
+                        onClick={() => onPick(d)}
+                        title={`${c.name} · ${d.toLocaleDateString("cs-CZ")} – otevřít den`}
+                        className={cn("h-9 w-full rounded-md tabular-nums transition-colors hover:ring-1 hover:ring-ui-primary", n ? "text-ui-ink" : "text-ui-faint")}
+                        // sytost podkladu podle obsazenosti – na první pohled vidět, kde je místo
+                        style={n ? { background: `color-mix(in srgb, ${c.color} ${Math.round(8 + (n / max) * 22)}%, transparent)` } : undefined}
+                      >
+                        {n || "–"}
+                      </button>
+                    </td>
+                  );
+                })}
+                <td className="py-2 pl-3 text-right font-semibold tabular-nums">{total}</td>
+              </motion.tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+

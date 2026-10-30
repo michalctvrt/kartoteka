@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/components/auth/SessionProvider";
 import { useWorkstation } from "@/components/queue/useWorkstation";
 import { RECEPTION_COUNTERS } from "@/lib/call250v/config";
+import { CALENDARS } from "@/lib/supersaas/calendars";
 import { listWorkingplaces, type Option } from "@/lib/study/lookups";
 import { usePrefs, type MotionPref, type ReportSize, type ThemePref } from "@/lib/prefs";
 import { CAPABILITIES, CAPABILITY_GROUPS, ROLE_HOME, ROLE_NAME, type Role } from "@/lib/auth/roles";
@@ -128,6 +129,26 @@ function WorkstationTile({ index }: { index: number }) {
               onChange={(e) => set({ operatorId: e.target.value.trim() })}
             />
             <p id="st-op-hint" className="mt-1.5 text-[12px] text-ui-faint">Přidělí Kadlec; zatím se posílá k vyvolání.</p>
+          </div>
+        )}
+        {can("calendar.view") && (
+          <div>
+            <label htmlFor="st-cal" className="mb-1.5 block text-[13px] text-ui-muted">
+              Kalendář objednávek na ploše
+            </label>
+            <select
+              id="st-cal"
+              className="ui-input max-w-[260px]"
+              value={ws.calendarId}
+              onChange={(e) => set({ calendarId: Number(e.target.value) })}
+            >
+              {CALENDARS.filter((c) => !c.mirrorOf).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1.5 text-[12px] text-ui-faint">Okno „Dnešní objednávky“ ukáže tento kalendář.</p>
           </div>
         )}
         {can("study.create") && (
