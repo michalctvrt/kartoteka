@@ -39,7 +39,7 @@ export const CALENDARS: SsCalendar[] = [
   // typ „zdroje“ – PŘEDPOKLAD (neověřeno): zdroj pod UZLesna, zápis sem by se ukázal i v Lesné → NEzapisovat bez souhlasu
   { id: 375563, name: "UZ Lesná (UZLESNA20 – kopie)", short: "Lesná – kopie", color: "#059669", mirrorOf: 375564, fields: REAL_FIELDS },
   { id: 829050, name: "Testovací", short: "Testovací", color: "#64748b", test: true, fields: REAL_FIELDS },
-  { id: 856112, name: "Testovací zdroj", short: "Test – zdroj", color: "#94a3b8", test: true, bookable: true, fields: ["field_1"] },
+  { id: 856112, name: "Testovací zdroj", short: "Test – zdroj", color: "#94a3b8", test: true, bookable: true, fields: ["field_1", "field_1_r"] },
 ];
 
 /** Kalendáře v pohledu „Vše“ (bez kopií a testovacího). */
